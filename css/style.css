@@ -4,11 +4,11 @@
    ============================================================ */
 
 :root {
-    --paper:      #f4f2ec;
+    --paper:      #ffffff;
     --ink:        #1a1a18;
     --mid:        #6f6d65;
     --rule:       #1a1a18;
-    --rule-faint: #d8d4c8;
+    --rule-faint: #e4e3df;
     --oxblood:    #8a2f2b;
     --serif: "EB Garamond", Georgia, serif;
     --sans:  "Montserrat", sans-serif;
@@ -386,7 +386,7 @@ nav a:hover { opacity: 0.45; }
 .lightbox {
     visibility: hidden; pointer-events: none;
     position: fixed; z-index: 9999; inset: 0;
-    background: rgba(244,242,236,0.97);
+    background: rgba(255,255,255,0.97);
     backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transition: opacity 0.4s ease, visibility 0.4s ease;
