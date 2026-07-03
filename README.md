@@ -57,13 +57,23 @@ git push origin refactor:main    # promote to kubachojnacki.com when happy
 (`dev-pages` = `refactor` + one commit that removes CNAME; the custom domain
 must exist only in the production repo.)
 
-## Analytics & newsletter
+## Analytics
 
-Both are off until configured in the `SITE` block of `js/data.js`:
+[GoatCounter](https://www.goatcounter.com) is configured (`goatcounter: "kubachojnacki"`
+in `js/data.js`). It loads **only on kubachojnacki.com**, so local previews and the
+staging site never pollute the numbers. Dashboard: https://kubachojnacki.goatcounter.com
 
-- **Analytics — [GoatCounter](https://www.goatcounter.com)** (free, privacy-friendly,
-  no cookie banner needed). Create an account, pick a code (e.g. `kubachojnacki`),
-  paste it into `goatcounter: ""`. Dashboard: `https://<code>.goatcounter.com`.
-- **Newsletter — [Buttondown](https://buttondown.com)** (free up to 100 subscribers).
-  Create an account, paste your username into `buttondown: ""`. The signup form
-  then appears automatically in the contact section.
+## Newsletter
+
+The signup form appears in the contact section once `SITE.newsletter.action` in
+`js/data.js` is filled in. It is provider-agnostic — any service that accepts a
+plain form POST works. Set `action` and `field`:
+
+| Provider   | action                                                        | field           |
+|------------|---------------------------------------------------------------|-----------------|
+| Buttondown | `https://buttondown.com/api/emails/embed-subscribe/<username>`| `email`         |
+| MailerLite | the `<form action>` URL from their *HTML embed* form code     | `fields[email]` |
+| Kit        | `https://app.kit.com/forms/<form-id>/subscriptions`           | `email_address` |
+| Mailchimp  | the `<form action>` URL from their embedded form code         | `EMAIL`         |
+
+Switching providers later = changing these two values.

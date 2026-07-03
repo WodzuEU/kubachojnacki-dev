@@ -278,15 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
     openFromHash();
 
     // ── newsletter signup (renders only when configured) ─────
-    if (SITE.buttondown) {
+    if (SITE.newsletter && SITE.newsletter.action) {
         const nl = document.createElement('div');
         nl.className = 'newsletter-block fade-up';
         nl.innerHTML =
             `<h4>Newsletter</h4>
              <p class="newsletter-note">occasional updates about new works and exhibitions. no spam.</p>
-             <form action="https://buttondown.com/api/emails/embed-subscribe/${SITE.buttondown}"
-                   method="post" target="_blank" class="newsletter-form">
-                 <input type="email" name="email" required placeholder="your email" aria-label="Email address">
+             <form action="${SITE.newsletter.action}" method="post" target="_blank" class="newsletter-form">
+                 <input type="email" name="${SITE.newsletter.field || 'email'}" required placeholder="your email" aria-label="Email address">
                  <button type="submit" class="lb-submit">subscribe</button>
              </form>`;
         document.querySelector('#contact .contact-inner').after(nl);
@@ -329,8 +328,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ldEl.textContent = JSON.stringify(ld);
     document.head.appendChild(ldEl);
 
-    // ── analytics (loads only when configured) ───────────────
-    if (SITE.goatcounter) {
+    // ── analytics (live domain only, so staging/local visits
+    //    never pollute the statistics) ───────────────────────
+    if (SITE.goatcounter && location.hostname === 'kubachojnacki.com') {
         const s = document.createElement('script');
         s.async = true;
         s.dataset.goatcounter = `https://${SITE.goatcounter}.goatcounter.com/count`;

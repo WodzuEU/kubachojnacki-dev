@@ -31,9 +31,12 @@ const SITE = {
   instagram: "https://instagram.com/chojnacki.studio",
   instagramHandle: "@chojnacki.studio",
 
-  // optional integrations — paste your account name to activate (see README)
-  goatcounter: "",   // analytics: your code from goatcounter.com, e.g. "kubachojnacki"
-  buttondown:  "",   // newsletter: your username from buttondown.com
+  // optional integrations — fill in to activate (see README)
+  goatcounter: "kubachojnacki",   // analytics code from goatcounter.com (loads on the live domain only)
+  newsletter: {
+    action: "",       // form POST URL from your email provider (see README for per-provider values)
+    field:  "email",  // name of the email field (Buttondown: "email", Mailchimp: "EMAIL", MailerLite: "fields[email]", Kit: "email_address")
+  },
 };
 
 const COLLECTIONS = [
