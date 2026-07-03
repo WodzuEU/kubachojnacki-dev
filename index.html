@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuba Chojnacki | Paintings</title>
-    <meta name="description" content="Abstract paintings by Polish artist Kuba Chojnacki. Large gradient works on raw canvas exploring gravity, diffusion and color flow.">
+    <meta name="description" content="Catalogue of paintings by Polish artist Kuba Chojnacki. Gradient works on raw canvas exploring gravity, diffusion and color flow.">
     <link rel="canonical" href="https://kubachojnacki.com/">
     <meta property="og:title" content="Kuba Chojnacki | Paintings">
-    <meta property="og:description" content="Abstract paintings by Polish artist Kuba Chojnacki. Large gradient works on raw canvas exploring gravity, diffusion and color flow.">
+    <meta property="og:description" content="Catalogue of paintings by Polish artist Kuba Chojnacki. Gradient works on raw canvas exploring gravity, diffusion and color flow.">
     <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kubachojnacki.com/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#f5f4f0">
+    <meta name="theme-color" content="#f4f2ec">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,74 +22,78 @@
 <body>
 
     <header id="site-header">
-        <h1 class="logo"><a href="#">Kuba Chojnacki</a></h1>
+        <a href="#" class="logo">Kuba Chojnacki</a>
         <nav>
-            <a href="#works">Works</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="#contents">works</a>
+            <a href="#about">about</a>
+            <a href="#contact">contact</a>
         </nav>
     </header>
 
-    <div class="hero-section">
-        <div class="slides-container" id="slides-container"></div>
+    <section id="cover">
+        <h1 class="cover-title">kuba chojnacki</h1>
+        <p class="cover-sub"><span>paintings · catalogue of works <span id="cover-years"></span> · cracow</span></p>
+        <figure class="frontispiece" id="frontispiece"></figure>
+    </section>
 
-        <button class="slider-btn prev-btn" aria-label="Previous slide">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button class="slider-btn next-btn" aria-label="Next slide">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+    <nav id="contents" aria-label="Contents">
+        <span class="toc-label">contents</span>
+        <div id="toc-rows"></div>
+    </nav>
 
-        <div class="hero-progress" id="hero-progress"></div>
-        <div class="hero-counter" id="hero-counter"></div>
-        <div class="slide-dots" id="slide-dots"></div>
-    </div>
+    <main id="works"><!-- chapters are rendered here from js/data.js --></main>
 
-    <section id="works"><!-- collections are rendered here from js/data.js --></section>
-
-    <section id="about">
-        <div class="about-grid">
-            <div class="about-photo fade-up">
+    <section id="about" class="chapter">
+        <div class="chapter-head">
+            <h3>the artist</h3>
+            <span class="chapter-meta">cracow, poland</span>
+        </div>
+        <div class="chapter-inner">
+            <figure class="about-photo fade-up">
                 <img src="IMAGES/about/studio.jpg" alt="Kuba Chojnacki working in his studio, Cracow" loading="lazy" width="1512" height="2016" decoding="async">
-            </div>
-            <div class="about-text-col fade-up">
-                <span class="about-label">about</span>
-                <p><span class="artist-name">Kuba Chojnacki</span> is a Polish painter working with gradients, gravity and diffusion on raw canvas.</p>
-                <p>With a background in architecture, his work explores spatial tension, structural balance, and the delicate intersection between rigorous control and fluid chance.</p>
-            </div>
-            <div class="about-portrait-col fade-up">
-                <img src="IMAGES/about/portrait.jpg" alt="Kuba Chojnacki portrait in studio" loading="lazy" width="1512" height="2016" decoding="async">
-                <p class="photo-caption">studio view, 2026<br>cracow, poland</p>
+                <figcaption>studio view, 2026 · cracow</figcaption>
+            </figure>
+            <div class="about-text fade-up">
+                <p><span class="artist-name">Kuba Chojnacki</span> is a polish painter working with gradients, gravity and diffusion on raw canvas.</p>
+                <p>with a background in architecture, his work explores spatial tension, structural balance, and the delicate intersection between rigorous control and fluid chance.</p>
+                <figure class="about-portrait">
+                    <img src="IMAGES/about/portrait.jpg" alt="Kuba Chojnacki portrait in studio" loading="lazy" width="1512" height="2016" decoding="async">
+                    <figcaption class="photo-caption">the artist in the studio</figcaption>
+                </figure>
             </div>
         </div>
     </section>
 
-    <section id="contact">
+    <section id="contact" class="chapter">
+        <div class="chapter-head">
+            <h3>contact</h3>
+            <span class="chapter-meta">inquiries welcome</span>
+        </div>
         <div class="contact-inner">
             <div class="fade-up">
-                <p class="contact-headline">Collectors and galleries<br>are welcome to inquire<br>about available works.</p>
+                <p class="contact-headline">collectors and galleries<br>are welcome to inquire<br>about available works.</p>
             </div>
             <div class="contact-col fade-up">
-                <h4>Inquiries</h4>
-                <p>For artwork inquiries, commissions or additional images:</p>
+                <h4>inquiries</h4>
+                <p>for artwork inquiries, commissions or additional images:</p>
                 <a href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
                 <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
             </div>
             <div class="contact-col fade-up">
-                <h4>Studio</h4>
-                <p>Cracow, Poland</p>
-                <p>Visits by appointment only.</p>
+                <h4>studio</h4>
+                <p>cracow, poland</p>
+                <p>visits by appointment only.</p>
             </div>
             <div class="contact-col fade-up">
-                <h4>Purchase &amp; Shipping</h4>
-                <p>Worldwide shipping.</p>
+                <h4>purchase &amp; shipping</h4>
+                <p>worldwide shipping.</p>
                 <p>80&ndash;200&euro; typical cost.</p>
-                <p>Certificate of authenticity included.</p>
+                <p>certificate of authenticity included.</p>
             </div>
         </div>
         <div class="footer-note fade-up">
-            <span>&copy; Kuba Chojnacki, 2026</span>
-            <span>Cracow, Poland</span>
+            <span>&copy; kuba chojnacki · cracow 2026</span>
+            <span>catalogue set in eb garamond &amp; montserrat</span>
         </div>
     </section>
 
@@ -104,18 +108,18 @@
             <img id="lightbox-img" src="" alt="Fullscreen artwork">
             <div class="lightbox-info">
                 <div>
+                    <div id="lb-plate-no" class="lb-plate-no"></div>
                     <h3 id="lb-title" class="lb-title"></h3>
-                    <div id="lb-price" class="lb-price"></div>
-                    <div id="lb-status" class="lb-status hidden"></div>
                     <div id="lb-specs" class="lb-specs"></div>
+                    <div id="lb-price" class="lb-price"></div>
                 </div>
                 <div class="lb-inquiry-section" id="lb-inquiry-section">
-                    <p class="purchase-info">For inquiries please use email or instagram direct message.</p>
-                    <a id="lb-inquire-mail" href="mailto:chojnacki.studio@gmail.com" class="lb-submit">Inquire via email</a>
-                    <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener" class="lb-submit">Inquire via instagram</a>
+                    <p class="purchase-info">for inquiries please use email or instagram direct message.</p>
+                    <a id="lb-inquire-mail" href="mailto:chojnacki.studio@gmail.com" class="lb-submit">inquire via email</a>
+                    <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener" class="lb-submit">inquire via instagram</a>
                     <div class="lb-extra">
-                        <p>Certificate of authenticity included.</p>
-                        <p>Shipping worldwide.</p>
+                        <p>certificate of authenticity included.</p>
+                        <p>shipping worldwide.</p>
                     </div>
                 </div>
             </div>

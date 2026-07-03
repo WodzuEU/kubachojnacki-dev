@@ -22,7 +22,11 @@
      medium / size / year / price (EUR, number)
      w, h   pixel size of the display jpg (for layout stability)
      sold   true when sold (omit otherwise)
-     hero   1, 2, 3... = position in the homepage slideshow (omit otherwise)
+     cover  true = this work is the frontispiece on the cover (exactly one)
+
+   Each collection can carry a short `note` (1-2 sentences) shown
+   under its chapter heading. Plates are displayed at widths
+   proportional to the real painting width parsed from `size`.
    ============================================================ */
 
 const SITE = {
@@ -42,10 +46,11 @@ const SITE = {
 const COLLECTIONS = [
   {
     name: "Atmosphere",
+    note: "pigment settling into raw cotton — gravity as the brush. thin acrylic washes drift, pool and dry into weather.",
     works: [
-      { ref: "01", slug: "01-atmosphere-navy-khaki",         title: "Atmosphere | navy khaki",           medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2025, price: 1500, w: 6048, h: 8064, hero: 3 },
-      { ref: "02", slug: "02-atmosphere-burgundy-blue",      title: "Atmosphere | burgundy blue",        medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, hero: 1, sold: true },
-      { ref: "03", slug: "03-atmosphere-maroon-khaki",       title: "Atmosphere | maroon khaki",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, hero: 2, sold: true },
+      { ref: "01", slug: "01-atmosphere-navy-khaki",         title: "Atmosphere | navy khaki",           medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2025, price: 1500, w: 6048, h: 8064, cover: true },
+      { ref: "02", slug: "02-atmosphere-burgundy-blue",      title: "Atmosphere | burgundy blue",        medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true },
+      { ref: "03", slug: "03-atmosphere-maroon-khaki",       title: "Atmosphere | maroon khaki",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true },
       { ref: "04", slug: "04-atmosphere-cyan-purple-blue",   title: "Atmosphere | cyan purple blue",     medium: "acrylic on raw canvas", size: "100 × 80 cm",  year: 2026, price: 1100, w: 3024, h: 4032 },
       { ref: "05", slug: "05-atmosphere-burnt-red-green-i",  title: "Atmosphere | burnt red green I",    medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2574, h: 3432 },
       { ref: "06", slug: "06-atmosphere-burnt-red-green-ii", title: "Atmosphere | burnt red green II",   medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2574, h: 3432 },
@@ -63,11 +68,12 @@ const COLLECTIONS = [
   },
   {
     name: "Chromatic",
+    note: "single hues pushed to their edges — saturation, temperature and light studied one color at a time.",
     works: [
-      { ref: "19", slug: "19-chromatic-blue-orange", title: "Chromatic | blue orange", medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, hero: 4 },
-      { ref: "20", slug: "20-chromatic-red",         title: "Chromatic | red",         medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2025, price: 1300, w: 3024, h: 4032, hero: 6 },
+      { ref: "19", slug: "19-chromatic-blue-orange", title: "Chromatic | blue orange", medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032 },
+      { ref: "20", slug: "20-chromatic-red",         title: "Chromatic | red",         medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2025, price: 1300, w: 3024, h: 4032 },
       { ref: "21", slug: "21-chromatic-orange",      title: "Chromatic | orange",      medium: "acrylic on raw canvas", size: "100 × 70 cm",  year: 2024, price: 950,  w: 3024, h: 4032 },
-      { ref: "22", slug: "22-chromatic-blue-i",      title: "Chromatic | blue",        medium: "acrylic on raw canvas", size: "100 × 70 cm",  year: 2026, price: 950,  w: 6048, h: 8064, hero: 5 },
+      { ref: "22", slug: "22-chromatic-blue-i",      title: "Chromatic | blue",        medium: "acrylic on raw canvas", size: "100 × 70 cm",  year: 2026, price: 950,  w: 6048, h: 8064 },
       { ref: "25", slug: "25-chromatic-blue-red",    title: "Chromatic | blue red",    medium: "acrylic on raw canvas", size: "30 × 30 cm",   year: 2026, price: 260,  w: 2574, h: 3432 },
       { ref: "27", slug: "27-chromatic-blue-ii",     title: "Chromatic | blue",        medium: "oil on canvas",         size: "27 × 22 cm",   year: 2024, price: 150,  w: 3024, h: 4032 },
       { ref: "28", slug: "28-chromatic-blue-iii",    title: "Chromatic | blue",        medium: "oil on canvas",         size: "27 × 22 cm",   year: 2024, price: 150,  w: 3024, h: 4032 },
