@@ -38,3 +38,32 @@ The collapsible section, counts, grid and legend are generated automatically.
 
 Add `sold: true` to its entry in `js/data.js`. Red styling in grid, legend and
 lightbox plus the structured-data availability all follow from that one flag.
+
+## Sharing a link to one painting
+
+Every work has a permalink: `https://kubachojnacki.com/#<slug>`, e.g.
+`https://kubachojnacki.com/#02-atmosphere-burgundy-blue`. Opening it shows
+that painting in the lightbox — ideal for Instagram DMs and email inquiries.
+
+## Staging → production workflow
+
+Test changes on the staging repo before they touch the live site:
+
+```
+git push dev dev-pages:main      # publish to wodzueu.github.io/kubachojnacki-dev
+git push origin refactor:main    # promote to kubachojnacki.com when happy
+```
+
+(`dev-pages` = `refactor` + one commit that removes CNAME; the custom domain
+must exist only in the production repo.)
+
+## Analytics & newsletter
+
+Both are off until configured in the `SITE` block of `js/data.js`:
+
+- **Analytics — [GoatCounter](https://www.goatcounter.com)** (free, privacy-friendly,
+  no cookie banner needed). Create an account, pick a code (e.g. `kubachojnacki`),
+  paste it into `goatcounter: ""`. Dashboard: `https://<code>.goatcounter.com`.
+- **Newsletter — [Buttondown](https://buttondown.com)** (free up to 100 subscribers).
+  Create an account, paste your username into `buttondown: ""`. The signup form
+  then appears automatically in the contact section.

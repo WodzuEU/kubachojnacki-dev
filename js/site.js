@@ -125,6 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const lbInfo  = document.querySelector('.lightbox-info');
     let lbIdx = 0;
 
+    // deep links: kubachojnacki.com/#<slug> opens that work's lightbox
+    const slugIndex = Object.fromEntries(WORKS.map((w, i) => [w.slug, i]));
+    function setHash(slug) {
+        history.replaceState(null, '', slug ? '#' + slug : location.pathname + location.search);
+    }
+    function closeLb() {
+        lb.classList.remove('active');
+        if (slugIndex[location.hash.slice(1)] !== undefined) setHash(null);
+    }
+
     function openWork(i) {
         lbIdx = (i + WORKS.length) % WORKS.length;
         const w = WORKS[lbIdx];
@@ -153,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['lb-inquiry-section', 'lb-price'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         [lbPrev, lbNext].forEach(el => el.classList.remove('hidden'));
         lb.classList.add('active');
+        setHash(w.slug);
     }
 
     function openPhoto(src, alt, title) {
@@ -185,13 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     lbPrev.addEventListener('click', e => { e.stopPropagation(); openWork(lbIdx - 1); });
     lbNext.addEventListener('click', e => { e.stopPropagation(); openWork(lbIdx + 1); });
-    lbClose.addEventListener('click', e => { e.stopPropagation(); lb.classList.remove('active'); });
+    lbClose.addEventListener('click', e => { e.stopPropagation(); closeLb(); });
     lb.addEventListener('click', e => {
-        if (!e.target.closest('.lightbox-info,.lightbox-btn') && e.target !== lbImg) lb.classList.remove('active');
+        if (!e.target.closest('.lightbox-info,.lightbox-btn') && e.target !== lbImg) closeLb();
     });
     document.addEventListener('keydown', e => {
         if (!lb.classList.contains('active')) return;
-        if (e.key === 'Escape') lb.classList.remove('active');
+        if (e.key === 'Escape') closeLb();
         else if (e.key === 'ArrowLeft'  && !lbPrev.classList.contains('hidden')) lbPrev.click();
         else if (e.key === 'ArrowRight' && !lbNext.classList.contains('hidden')) lbNext.click();
     });
@@ -257,6 +268,30 @@ document.addEventListener('DOMContentLoaded', () => {
     goTo(0);
     startTimer();
 
+    // open lightbox when the URL carries a work slug (shareable links)
+    function openFromHash() {
+        const idx = slugIndex[location.hash.slice(1)];
+        if (idx !== undefined) openWork(idx);
+        else if (lb.classList.contains('active')) lb.classList.remove('active');
+    }
+    window.addEventListener('hashchange', openFromHash);
+    openFromHash();
+
+    // ── newsletter signup (renders only when configured) ─────
+    if (SITE.buttondown) {
+        const nl = document.createElement('div');
+        nl.className = 'newsletter-block fade-up';
+        nl.innerHTML =
+            `<h4>Newsletter</h4>
+             <p class="newsletter-note">occasional updates about new works and exhibitions. no spam.</p>
+             <form action="https://buttondown.com/api/emails/embed-subscribe/${SITE.buttondown}"
+                   method="post" target="_blank" class="newsletter-form">
+                 <input type="email" name="email" required placeholder="your email" aria-label="Email address">
+                 <button type="submit" class="lb-submit">subscribe</button>
+             </form>`;
+        document.querySelector('#contact .contact-inner').after(nl);
+    }
+
     // ── scroll-in animations ─────────────────────────────────
     const io = new IntersectionObserver(entries => {
         entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
@@ -293,4 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ldEl.type = 'application/ld+json';
     ldEl.textContent = JSON.stringify(ld);
     document.head.appendChild(ldEl);
+
+    // ── analytics (loads only when configured) ───────────────
+    if (SITE.goatcounter) {
+        const s = document.createElement('script');
+        s.async = true;
+        s.dataset.goatcounter = `https://${SITE.goatcounter}.goatcounter.com/count`;
+        s.src = 'https://gc.zgo.at/count.js';
+        document.body.appendChild(s);
+    }
 });

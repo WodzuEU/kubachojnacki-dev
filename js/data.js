@@ -30,6 +30,10 @@ const SITE = {
   email:     "chojnacki.studio@gmail.com",
   instagram: "https://instagram.com/chojnacki.studio",
   instagramHandle: "@chojnacki.studio",
+
+  // optional integrations — paste your account name to activate (see README)
+  goatcounter: "",   // analytics: your code from goatcounter.com, e.g. "kubachojnacki"
+  buttondown:  "",   // newsletter: your username from buttondown.com
 };
 
 const COLLECTIONS = [
