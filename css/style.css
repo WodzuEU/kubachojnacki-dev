@@ -458,26 +458,34 @@ nav a[aria-current="page"] {
     text-transform: lowercase;
 }
 .about-hero-text { padding-top: 0.2rem; }
-.about-hero-text p {                 /* bio — serif prose */
+.about-hero-text p {                 /* bio — serif prose, fills its column */
     font-family: var(--serif);
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     line-height: 1.75;
     color: var(--ink);
     text-transform: lowercase;
-    max-width: 34em;
+    max-width: none;
 }
 
 .about-statement {
     padding: 3.5rem 0 1rem;
     border-top: 1px solid rgba(26,26,24,0.12);
 }
-.statement-text {                    /* the one emphasised line */
+/* statement reads in the same serif voice as the bio, set across the
+   full page in two editorial columns so nothing ends mid-width */
+.statement-text {
     font-family: var(--serif);
-    font-size: clamp(1.4rem, 2.8vw, 2rem);
-    line-height: 1.5;
+    font-size: 1.5rem;
+    line-height: 1.6;
     text-transform: lowercase;
     color: var(--ink);
-    max-width: 28em;
+    max-width: none;
+}
+@media (min-width: 900px) {
+    .statement-text {
+        columns: 2;
+        column-gap: clamp(2.5rem, 5vw, 5rem);
+    }
 }
 
 /* ── CONTACT PAGE (/contact) ── */
@@ -528,31 +536,61 @@ nav a[aria-current="page"] {
 .contact-newsletter .nl-signup { max-width: 380px; }
 .nl-archive { margin-top: 3.5rem; }
 
-/* ── NEWSLETTER PAGE (/newsletter) — clean minimal signup ── */
+/* ── NEWSLETTER PAGE (/newsletter) — full-width split hero ── */
 .newsletter-page {
-    padding: 8rem var(--pad) 4rem;
-    max-width: 640px;
+    padding: clamp(2.5rem, 5vw, 4rem) var(--pad) 2.5rem;
+    max-width: none;
+    margin-top: var(--header-h);
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+    display: flex;
+    flex-direction: column;
 }
+.newsletter-page > .section-label { margin-bottom: 0; }
+
+/* generic full-width split: prose on one side, action on the other,
+   vertically centered so it fills the page (shared by newsletter) */
+.split-hero {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
+    padding: clamp(2rem, 5vw, 4rem) 0;
+}
+.split-action { max-width: 460px; }
+
 .newsletter-title {
     font-family: var(--serif);
     font-weight: 400;
-    font-size: clamp(1.9rem, 4vw, 2.8rem);
-    line-height: 1.15;
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
     text-transform: lowercase;
     color: var(--ink);
-    margin-bottom: 1.4rem;
+    max-width: 12em;
 }
 .newsletter-lead {
     font-family: var(--sans);
-    font-size: 13px;
-    line-height: 1.75;
+    font-size: 13.5px;
+    line-height: 1.8;
     text-transform: lowercase;
     color: var(--mid);
-    max-width: 34em;
-    margin-bottom: 2.2rem;
+    max-width: 36em;
+    margin-bottom: 2.4rem;
 }
-.newsletter-page .nl-signup { max-width: 380px; }
-.newsletter-page .footer-note { margin-top: 5rem; }
+.newsletter-page .nl-signup { max-width: 420px; }
+.newsletter-page .footer-note { margin-top: auto; }
+
+@media (max-width: 800px) {
+    .split-hero {
+        grid-template-columns: 1fr;
+        gap: 2.2rem;
+        align-items: start;
+        padding: 2.5rem 0;
+    }
+    .newsletter-title { font-size: clamp(2.2rem, 9vw, 3rem); }
+}
 
 /* NEWSLETTER — signup form + archive (contact page) */
 .newsletter-note {
@@ -681,78 +719,117 @@ nav a[aria-current="page"] {
     .issue-link { justify-self: start; }
 }
 
-/* ── COLLECTOR PAGE (/collector) — focused signup landing ── */
+/* ── COLLECTOR PAGE (/collector) — the atmosphere drop ──
+   full-bleed split: a sliding closeup carousel on one side,
+   preview-access signup on the other. Same two families, same
+   achromatic UI, same heading scale as the rest of the site. */
 .collector-page {
-    min-height: calc(100vh - var(--header-h));
     margin-top: var(--header-h);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem var(--pad);
+    padding: 0;
 }
-.collector-inner {
-    width: 100%;
-    max-width: 380px;
+.drop-split {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+}
+.drop-text {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.4rem;
+    justify-content: center;
+    gap: 1.3rem;
+    padding: clamp(2.5rem, 6vw, 6rem) var(--pad);
 }
-.collector-inner .section-label { border: none; padding: 0; margin: 0; }
-.collector-media { width: 240px; max-width: 74%; }
-.collector-media img { width: 100%; height: auto; display: block; }
-.collector-title {
+.drop-text .section-label { border: none; padding: 0; margin: 0 0 0.2rem; }
+.drop-title {
     font-family: var(--serif);
-    font-size: clamp(2rem, 6vw, 2.7rem);
     font-weight: 400;
+    font-size: clamp(2rem, 4.6vw, 3.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
     text-transform: lowercase;
-    line-height: 1.05;
     color: var(--ink);
+    max-width: 12em;
 }
-.collector-lead {
+.drop-lead {
     font-family: var(--serif);
-    font-size: 1.2rem;
-    line-height: 1.5;
+    font-size: 1.3rem;
+    line-height: 1.6;
     text-transform: lowercase;
     color: var(--ink);
-    max-width: 20em;
+    max-width: 24em;
 }
-.collector-sub {
+.drop-sub {
     font-family: var(--sans);
-    font-size: 12.5px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.75;
     text-transform: lowercase;
     color: var(--mid);
-    max-width: 26em;
+    max-width: 30em;
 }
-.collector-signup { width: 100%; max-width: 320px; margin-top: 0.6rem; }
-/* recast the shared newsletter form into a stacked, filled-CTA layout here */
-.collector-signup .newsletter-form { flex-direction: column; align-items: stretch; gap: 0.9rem; }
-.collector-signup .newsletter-form input {
-    flex: none;
-    text-align: center;
-    font-size: 13px;
-    border: 1px solid rgba(26,26,24,0.3);
-    padding: 0.75rem 0.9rem;
+.drop-signup { max-width: 420px; margin-top: 0.7rem; }
+
+/* sliding closeup carousel */
+.drop-media {
+    position: relative;
+    overflow: hidden;
+    background: #0c0c0a;
+    min-height: 46vh;
 }
-.collector-signup .nl-submit {
-    font-family: var(--sans);
-    font-style: normal;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--bg);
-    background: var(--ink);
-    padding: 0.85rem 1rem;
+.preview-carousel { position: absolute; inset: 0; }
+.preview-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.9s cubic-bezier(.16,1,.3,1);
+}
+.preview-slide {
+    position: relative;
+    flex: 0 0 100%;
+    height: 100%;
+    min-height: inherit;
+}
+.preview-slide img {
     width: 100%;
-    text-align: center;
-    transition: opacity 0.2s;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
-.collector-signup .nl-submit:hover { opacity: 0.82; }
-.collector-signup .newsletter-confirm { text-align: center; }
+.preview-slide::after {          /* subtle bottom scrim so caption/dots read */
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%);
+    pointer-events: none;
+}
+.preview-caption {
+    position: absolute; left: var(--pad); bottom: 1.1rem; z-index: 3;
+    font-family: var(--sans);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(255,255,255,0.72);
+}
+.preview-dots {
+    position: absolute; bottom: 1.15rem; right: var(--pad); z-index: 3;
+    display: flex; gap: 7px;
+}
+.preview-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,0.4); border: none; padding: 0;
+    transition: background 0.3s, transform 0.3s;
+}
+.preview-dot.active { background: rgba(255,255,255,0.92); transform: scale(1.25); }
+
+@media (max-width: 800px) {
+    .drop-split {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+    .drop-media { height: 52vh; order: -1; }
+    .drop-text {
+        text-align: center;
+        align-items: center;
+        padding: clamp(2.5rem, 8vw, 4rem) var(--pad) clamp(3rem, 10vw, 5rem);
+    }
+    .drop-signup { margin-left: auto; margin-right: auto; width: 100%; }
+}
 
 /* LIGHTBOX */
 .lightbox {
@@ -910,7 +987,8 @@ nav a[aria-current="page"] {
 }
 @media (max-width: 520px) {
     :root { --header-h: 45px; }
-    .visual-grid  { grid-template-columns: repeat(2, 1fr); }
+    .visual-grid  { grid-template-columns: repeat(3, 1fr); }
+    .visual-item  { padding: 0.5rem 0.55rem 0.4rem; }
     .legend-grid  { grid-template-columns: repeat(4, 1fr); gap: 0.5rem 0.4rem; }
     header { padding-top: 0.75rem; padding-bottom: 0.75rem; }
     .logo { font-size: 0.8rem; letter-spacing: 0.1em; white-space: nowrap; }

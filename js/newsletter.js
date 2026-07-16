@@ -43,6 +43,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ── collector drop: sliding closeup carousel (collector page only) ─
+    const preview = document.getElementById('collector-preview');
+    if (preview && typeof COLLECTIONS !== 'undefined') {
+        const ROOT = window.ROOT || '';
+        // closeups of the new atmosphere series, in order (works held back
+        // from the public site until the drop — each has a -hero crop)
+        const SLUGS = [
+            '44-atmosphere-lavender-green-ochre',
+            '45-atmosphere-deep-violet',
+            '46-atmosphere-dark-plum',
+            '39-atmosphere-brown-purple',
+            '40-atmosphere-blue',
+        ];
+        const allWorks = COLLECTIONS.reduce((a, c) => a.concat(c.works || []), []);
+        const capOf = slug => {
+            const w = allWorks.find(x => x.slug === slug);
+            const t = w && w.title ? w.title.split('|')[1] : '';
+            return (t || '').trim();
+        };
+
+        const slides = SLUGS.map((slug, i) => {
+            const cap = capOf(slug);
+            return `<div class="preview-slide">
+                        <img src="${ROOT}IMAGES/thumbs/${slug}-hero.webp" alt="${cap ? 'atmosphere — ' + cap : 'atmosphere closeup'}"${i ? ' loading="lazy"' : ''} decoding="async" onerror="this.style.opacity=0">
+                        ${cap ? `<span class="preview-caption">${cap}</span>` : ''}
+                    </div>`;
+        }).join('');
+        const dots = SLUGS.map((_, i) =>
+            `<button class="preview-dot${i === 0 ? ' active' : ''}" type="button" aria-label="Show closeup ${i + 1}"></button>`).join('');
+        preview.innerHTML = `<div class="preview-track">${slides}</div><div class="preview-dots">${dots}</div>`;
+
+        const track  = preview.querySelector('.preview-track');
+        const dotEls = Array.from(preview.querySelectorAll('.preview-dot'));
+        let idx = 0, timer = null;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const go = n => {
+            idx = (n + SLUGS.length) % SLUGS.length;
+            track.style.transform = `translateX(-${idx * 100}%)`;
+            dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
+        };
+        const stop  = () => { if (timer) { clearInterval(timer); timer = null; } };
+        const start = () => { if (!reduce && SLUGS.length > 1 && !timer) timer = setInterval(() => go(idx + 1), 3800); };
+
+        dotEls.forEach((d, i) => d.addEventListener('click', () => { go(i); stop(); start(); }));
+        preview.addEventListener('mouseenter', stop);
+        preview.addEventListener('mouseleave', start);
+        start();
+    }
+
     // ── archive of past issues (only where its containers exist) ─
     const list  = document.getElementById('nl-issues');
     const count = document.getElementById('nl-count');

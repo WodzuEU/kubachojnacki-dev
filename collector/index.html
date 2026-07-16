@@ -33,18 +33,21 @@
     </header>
 
     <main class="collector-page">
-        <div class="collector-inner">
-            <span class="section-label">the collector list</span>
-            <h1 class="collector-title">new works</h1>
-            <div class="collector-media">
-                <img src="../IMAGES/collector/preview.gif" alt="Preview of a new series of atmosphere paintings" width="380" height="507" decoding="async">
+        <div class="drop-split">
+            <div class="drop-media">
+                <div id="collector-preview" class="preview-carousel" aria-label="Closeups from the new atmosphere series"></div>
             </div>
-            <p class="collector-lead">a new series of atmosphere paintings, on raw canvas.</p>
-            <p class="collector-sub">collectors on the list see them first — before they go public. launching soon.</p>
-            <div id="nl-signup" class="collector-signup" data-cta="join the list"></div>
+            <div class="drop-text fade-up">
+                <span class="section-label">the atmosphere drop</span>
+                <h1 class="drop-title">new works, seen first</h1>
+                <p class="drop-lead">a new series of atmosphere paintings — poured on raw canvas and still drying in the studio.</p>
+                <p class="drop-sub">collectors on the preview list see the full series before it goes public. request early access below.</p>
+                <div id="nl-signup" class="drop-signup" data-cta="request preview access"></div>
+            </div>
         </div>
     </main>
 
+    <script>window.ROOT = '../';</script>
     <script src="../js/data.js"></script>
     <script src="../js/newsletter.js"></script>
 </body>

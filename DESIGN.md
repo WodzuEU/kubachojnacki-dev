@@ -70,16 +70,19 @@ the legend is scanned there, not read.
 
 - Page gutter: `--pad: clamp(1.5rem, 4vw, 4rem)`; sections separated by
   1px `--rule` hairlines.
-- Works grid: 5 columns desktop → 4 (≤1100px) → 3 (≤800px) → 2 (≤520px).
-  Uniform cells; the photos themselves communicate scale.
+- Works grid: 5 columns desktop → 4 (≤1100px) → 3 (≤800px and below,
+  including phones). Uniform cells; the photos themselves communicate scale.
 - Legend: 8 columns → 6 (≤1100px) → condensed 6 (≤800px) → condensed 4
   (≤520px). Desktop keeps the readable sizes; mobile switches to the compact
   catalogue tiles (see the typography exception above).
 - **Every section runs gutter-to-gutter**, like the works grid — no
-  max-width on section containers, hairline rules span the full page.
-  Line length is capped on the text blocks themselves (bio 34em,
-  statement 28em, contact lead 26em, collection note 40em) so nothing
-  ends mid-page while prose stays readable.
+  max-width on section containers, hairline rules span the full page. Line
+  length stays readable via per-block measures or, where prose would run too
+  wide (the statement), a two-column editorial flow. Nothing ends mid-page.
+- **Full-width split hero** is the standing-page pattern (newsletter,
+  collector drop): a full-height grid with prose/media on one side and the
+  action on the other, vertically centred so it owns the whole viewport
+  instead of hugging the left edge.
 - Header: fixed, single line at every width (compact logo/nav under 520px).
   `--header-h` (58px, 45px ≤520px) keeps the hero offset and scroll
   margins aligned with the real header height.
@@ -160,12 +163,23 @@ header (logo → home; nav: works · about · contact):
   `js/data.js`. A hero slide opens that work in the lightbox. Collection
   descriptions come from the portfolio PDFs and live in each collection's
   `note`. Works flagged `draft: true` are held back everywhere until published.
-- **`/about/`** — bio and artist statement. Static prose from the portfolio.
+- **`/about/`** — bio and artist statement (a home-page section). The bio
+  fills its column beside a 400px portrait; the statement is set in the same
+  serif voice, flowed across two full-width columns.
 - **`/contact/`** — inquiries / studio / purchase details, plus the
   newsletter (signup + past-issues archive).
+- **`/newsletter/`** — the studio letters. Full-width split hero: the title
+  on one side, lead + signup on the other.
+- **`/collector/`** — the atmosphere drop. Full-width split: a sliding
+  closeup carousel of the unreleased `draft` atmosphere works (built by
+  `newsletter.js` when `#collector-preview` is present, sourced from the
+  `<slug>-hero.webp` crops) beside a preview-access signup. `noindex`.
 
 `js/site.js` is **page-aware**: each block (hero / collections / lightbox)
 runs only if its container is present, so one script drives the home page and
-the sub-pages. Image paths are prefixed with `window.ROOT` (`''` at the site
-root, `'../'` in a sub-folder) — set it in each page before the scripts, and
-always link assets and pages **relatively** so staging under a sub-path works.
+the sub-pages. `js/newsletter.js` is the same: it renders the signup form
+everywhere, the past-issues archive only where its containers exist, and the
+drop carousel only on the collector page. Image paths are prefixed with
+`window.ROOT` (`''` at the site root, `'../'` in a sub-folder) — set it in each
+page before the scripts, and always link assets and pages **relatively** so
+staging under a sub-path works.
