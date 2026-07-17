@@ -49,7 +49,7 @@ const SITE = {
 const COLLECTIONS = [
   {
     name: "Atmosphere",
-    note: "fields of thin acrylic on raw canvas. it moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. it studies how color acts on the psyche before cognition catches up — the gradient never reaches a steady state.",
+    note: "fields of thin acrylic on raw canvas. it moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. it studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
     works: [
       { ref: "44", slug: "44-atmosphere-lavender-green-ochre", title: "Atmosphere | lavender green ochre", medium: "acrylic on raw canvas", size: "200 × 150 cm", year: 2026, price: 2800, w: 2588, h: 3450, draft: true },
       { ref: "45", slug: "45-atmosphere-deep-violet",          title: "Atmosphere | deep violet",          medium: "acrylic on raw canvas", size: "150 × 130 cm", year: 2026, price: 1900, w: 2588, h: 3450, draft: true },

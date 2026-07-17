@@ -425,7 +425,7 @@ nav a[aria-current="page"] {
 
 /* ── ONE-PAGE SECTIONS (about + contact on the home page) ── */
 .page-section {
-    padding: 4.5rem var(--pad);
+    padding: clamp(3rem, 5vw, 4rem) var(--pad);
     border-top: 1px solid var(--rule);
     scroll-margin-top: calc(var(--header-h) - 6px);
 }
@@ -482,22 +482,22 @@ nav a[aria-current="page"] {
     padding: 7rem var(--pad) 4rem;
     max-width: 1000px;
 }
-.contact-lead { padding-bottom: 3.5rem; }
+.contact-lead { padding-bottom: 2.2rem; }
 .lead-text {
     font-family: var(--serif);
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-size: clamp(1.1rem, 1.5vw, 1.3rem);
     font-weight: 400;
-    line-height: 1.4;
+    line-height: 1.5;
     text-transform: lowercase;
     color: var(--ink);
-    max-width: 26em;
+    max-width: 30em;
 }
 
 .contact-details {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2.5rem 3rem;
-    padding: 3.5rem 0;
+    gap: 2rem 3rem;
+    padding: 2.2rem 0 0;
     border-top: 1px solid var(--rule);
 }
 .detail .section-label { margin-bottom: 1rem; padding-bottom: 0.7rem; }
