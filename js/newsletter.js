@@ -78,8 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const slides = SLUGS.map((slug, i) => {
             const cap = capOf(slug);
+            // light sources only: the carousel is a preview strip, so the
+            // 800px thumb is the ceiling (the 1600px hero crops are 3-5x
+            // heavier and retina sizing would always select them). First
+            // slide loads up front, the rest are warmed right after (below).
             return `<div class="preview-slide">
-                        <img src="${ROOT}IMAGES/thumbs/${slug}-hero.webp" alt="${cap ? 'atmosphere — ' + cap : 'atmosphere closeup'}" decoding="async" onerror="this.style.opacity=0">
+                        <img src="${ROOT}IMAGES/thumbs/${slug}-800.webp"
+                             srcset="${ROOT}IMAGES/thumbs/${slug}.webp 400w, ${ROOT}IMAGES/thumbs/${slug}-800.webp 800w"
+                             sizes="(max-width: 800px) 100vw, 55vw"
+                             alt="${cap ? 'atmosphere closeup, ' + cap : 'atmosphere closeup'}"
+                             ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.style.opacity=0">
                         ${cap ? `<span class="preview-caption">${cap}</span>` : ''}
                     </div>`;
         }).join('');
@@ -89,6 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const track  = preview.querySelector('.preview-track');
         const dotEls = Array.from(preview.querySelectorAll('.preview-dot'));
+
+        // once the first slide is in, quietly load the rest so no slide
+        // ever transitions in blank
+        const slideImgs = Array.from(track.querySelectorAll('img'));
+        const warmRest = () => slideImgs.slice(1).forEach(im => { im.loading = 'eager'; });
+        if (slideImgs[0] && !slideImgs[0].complete) slideImgs[0].addEventListener('load', warmRest, { once: true });
+        else warmRest();
         let idx = 0, timer = null;
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 

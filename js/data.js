@@ -104,12 +104,12 @@ const COLLECTIONS = [
     name: "Works on paper",
     note: "six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). the series runs from deep purples into crimson reds.",
     works: [
-      { ref: "47", slug: "47-paper-purple-01",  title: "Works on paper | study in purple 01",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 425, h: 578 },
-      { ref: "48", slug: "48-paper-purple-02",  title: "Works on paper | study in purple 02",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
-      { ref: "49", slug: "49-paper-crimson-01", title: "Works on paper | study in crimson 01", medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
-      { ref: "50", slug: "50-paper-crimson-02", title: "Works on paper | study in crimson 02", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
-      { ref: "51", slug: "51-paper-crimson-03", title: "Works on paper | study in crimson 03", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
-      { ref: "52", slug: "52-paper-crimson-04", title: "Works on paper | study in crimson 04", medium: "acrylic on cold press paper", size: "10 × 7.5 cm",  year: 2026, price: 80,  w: 202, h: 289, sold: true },
+      { ref: "47", slug: "47-paper-purple-01",  title: "Study in purple 01",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 425, h: 578 },
+      { ref: "48", slug: "48-paper-purple-02",  title: "Study in purple 02",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
+      { ref: "49", slug: "49-paper-crimson-01", title: "Study in crimson 01", medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
+      { ref: "50", slug: "50-paper-crimson-02", title: "Study in crimson 02", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
+      { ref: "51", slug: "51-paper-crimson-03", title: "Study in crimson 03", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
+      { ref: "52", slug: "52-paper-crimson-04", title: "Study in crimson 04", medium: "acrylic on cold press paper", size: "10 × 7.5 cm",  year: 2026, price: 80,  w: 202, h: 289, sold: true },
     ],
   },
 ];

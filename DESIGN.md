@@ -28,7 +28,9 @@ The paintings supply all the color. The UI stays achromatic.
 
 Rules: no gradients, shadows, or colored UI elements. Never introduce a
 second accent color. Sold styling applies the same `#991b1b` consistently in
-grid ref-numbers, legend entries, status dots, and the lightbox.
+grid ref-numbers, legend entries, status dots, and the lightbox. Sold
+status dots render 50% larger than available ones (8px vs 5px; 6px vs 4px
+in the condensed mobile legend) so the red marker reads at a glance.
 
 ## 2. Typography
 
@@ -108,7 +110,9 @@ the legend is scanned there, not read.
   interleave — no "new works" grouping.**
 - Titles: `"Collection | colors"`. Color words, plain and lowercase
   (burgundy, khaki, navy, plum…). Repeat titles are fine; roman numerals
-  (I, II, III) distinguish siblings.
+  (I, II, III) distinguish siblings. Exception: works on paper carry only
+  their series name ("Study in purple 01", no collection prefix) — the
+  collection name appears once, in the heading.
 - Sold: `sold: true` — nothing else. Sold works stay in the catalog.
 - Prices are the artist's decision, stated plainly in EUR. Current anchors:
   18×18 = 150 · 50×40 = 450 · 60×50 = 600 · 100×100 = 1300 ·
