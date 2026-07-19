@@ -398,6 +398,16 @@ nav a[aria-current="page"] {
     height: 8px;
 }
 
+/* held back from sale but still shown: grey, same enlarged marker so the
+   three states read at the same weight */
+.status-dot.unavailable {
+    background: var(--mid) !important;
+    width: 8px;
+    height: 8px;
+}
+.legend-item.is-unavailable .status-text,
+.lightbox-info.is-unavailable .status-text { color: var(--mid); }
+
 .legend-item.is-sold .legend-ref,
 .legend-item.is-sold .legend-title,
 .legend-item.is-sold .color-subtitle,
@@ -960,7 +970,8 @@ nav a[aria-current="page"] {
     .legend-price { font-size: 9px; margin-top: 0.12rem; }
     .legend-status .status-text { font-size: 8.5px; }
     .legend-status .status-dot  { width: 4px; height: 4px; }
-    .legend-status .status-dot.sold { width: 6px; height: 6px; }
+    .legend-status .status-dot.sold,
+    .legend-status .status-dot.unavailable { width: 6px; height: 6px; }
     .about-hero {
         grid-template-columns: 1fr;
         gap: 1.4rem;

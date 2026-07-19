@@ -26,6 +26,8 @@
      medium / size / year / price (EUR, number)
      w, h   pixel size of the display jpg (for layout stability)
      sold   true when sold (omit otherwise)
+     unavailable  true when held back from sale but still shown
+                  (exhibition, loan, reserved) — grey dot, not red
      hero   1, 2, 3... = position in the homepage slideshow (omit otherwise)
 
    A collection may carry a short `note` (1-2 lowercase sentences)
@@ -55,12 +57,12 @@ const COLLECTIONS = [
       { ref: "45", slug: "45-atmosphere-deep-violet",          title: "Atmosphere | deep violet",          medium: "acrylic on raw canvas", size: "150 × 130 cm", year: 2026, price: 1900, w: 2588, h: 3450, hero: 5 },
       { ref: "46", slug: "46-atmosphere-dark-plum",            title: "Atmosphere | dark plum",            medium: "acrylic on raw canvas", size: "150 × 130 cm", year: 2026, price: 1900, w: 2588, h: 3450, hero: 6 },
       { ref: "01", slug: "01-atmosphere-navy-khaki",           title: "Atmosphere | navy khaki",           medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2025, price: 1500, w: 6048, h: 8064 },
-      { ref: "40", slug: "40-atmosphere-blue",                 title: "Atmosphere | blue",                 medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, hero: 3 },
+      { ref: "40", slug: "40-atmosphere-blue",                 title: "Atmosphere | blue",                 medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, hero: 3, unavailable: true },
       { ref: "43", slug: "43-atmosphere-deep-green-blue",      title: "Atmosphere | deep green blue",      medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450 },
       { ref: "02", slug: "02-atmosphere-burgundy-blue",        title: "Atmosphere | burgundy blue",        medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true },
       { ref: "41", slug: "41-atmosphere-burgundy-blue-ii",     title: "Atmosphere | burgundy blue II",     medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450 },
       { ref: "03", slug: "03-atmosphere-maroon-khaki",         title: "Atmosphere | maroon khaki",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true, hero: 1 },
-      { ref: "38", slug: "38-atmosphere-burgundy-khaki",       title: "Atmosphere | burgundy khaki",       medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450 },
+      { ref: "38", slug: "38-atmosphere-burgundy-khaki",       title: "Atmosphere | burgundy khaki",       medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, unavailable: true },
       { ref: "39", slug: "39-atmosphere-brown-purple",         title: "Atmosphere | brown purple",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, hero: 2 },
       { ref: "42", slug: "42-atmosphere-umber-indigo-azure",   title: "Atmosphere | umber indigo azure",   medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2026, price: 1300, w: 2588, h: 3450 },
       { ref: "32", slug: "32-atmosphere-burgundy",             title: "Atmosphere | burgundy",             medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2026, price: 1300, w: 2588, h: 3450 },

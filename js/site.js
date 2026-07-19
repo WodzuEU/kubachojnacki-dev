@@ -48,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     COLLECTIONS.forEach(c => c.works.filter(w => !w.draft).forEach((w, i) => { collNo[w.slug] = pad(i + 1); }));
     const displayNo = w => collNo[w.slug];
 
+    // three availability states: sold (red), unavailable (grey, held back
+    // from sale but still shown), available (ink)
+    const statusClass = w => w.sold ? ' sold' : (w.unavailable ? ' unavailable' : '');
+    const statusText  = w => w.sold ? 'sold' : (w.unavailable ? 'currently not available' : 'available');
+
     const altText  = w => `${w.title.replace(' | ', ', ')}, ${w.medium}, ${w.size}, ${w.year}`;
     const specsHtml = w => `${w.medium}<br>${w.size}<br>${w.year}`;
     const priceText = w => `${w.price} €`;
@@ -99,8 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const st = document.getElementById('lb-status');
             lbInfo.classList.toggle('is-sold', !!w.sold);
-            if (w.sold) {
-                st.innerHTML = '<span class="status-dot sold"></span><span class="status-text" style="font-size:11px">Sold</span>';
+            lbInfo.classList.toggle('is-unavailable', !w.sold && !!w.unavailable);
+            if (w.sold || w.unavailable) {
+                st.innerHTML = `<span class="status-dot${statusClass(w)}"></span>` +
+                               `<span class="status-text" style="font-size:11px">${statusText(w)}</span>`;
                 st.classList.remove('hidden');
             } else {
                 st.classList.add('hidden');
@@ -283,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          <img src="${ROOT}IMAGES/thumbs/${w.slug}.webp" srcset="${gridSrcset(w)}" sizes="${GRID_SIZES}"
                               alt="${altText(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
                      </div>
-                     <span class="ref-number${w.sold ? ' sold' : ''}">${displayNo(w)}${w.sold ? ' <span class="status-dot sold"></span>' : ''}</span>`;
+                     <span class="ref-number${w.sold ? ' sold' : ''}">${displayNo(w)}${w.sold || w.unavailable ? ` <span class="status-dot${statusClass(w)}"></span>` : ''}</span>`;
                 const wrap = item.querySelector('.item-image-wrapper');
                 wrap.addEventListener('click', () => openWork(idx));
                 wrap.addEventListener('keydown', e => {
@@ -292,13 +299,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 grid.appendChild(item);
 
                 const li = document.createElement('div');
-                li.className = 'legend-item clickable-ref' + (w.sold ? ' is-sold' : '');
+                li.className = 'legend-item clickable-ref' + (w.sold ? ' is-sold' : (w.unavailable ? ' is-unavailable' : ''));
                 li.innerHTML =
                     `<span class="legend-ref">${displayNo(w)}</span>` +
                     `<span class="legend-title">${titleHtml(w.title)}</span>` +
                     `<span class="legend-specs">${specsHtml(w)}</span>` +
                     `<span class="legend-price">${priceText(w)}</span>` +
-                    `<div class="legend-status"><span class="status-dot${w.sold ? ' sold' : ''}"></span><span class="status-text">${w.sold ? 'sold' : 'available'}</span></div>`;
+                    `<div class="legend-status"><span class="status-dot${statusClass(w)}"></span><span class="status-text">${statusText(w)}</span></div>`;
                 li.addEventListener('click', () => openWork(idx));
                 legend.appendChild(li);
             });

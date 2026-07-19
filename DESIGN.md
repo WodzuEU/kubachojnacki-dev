@@ -114,6 +114,10 @@ the legend is scanned there, not read.
   their series name ("Study in purple 01", no collection prefix) — the
   collection name appears once, in the heading.
 - Sold: `sold: true` — nothing else. Sold works stay in the catalog.
+- Held back from sale: `unavailable: true` — reads "currently not
+  available" with a grey (`--mid`) dot instead of the red one, for works
+  on exhibition, on loan or reserved. The price still shows; only the
+  status changes. `sold` wins if both are set.
 - Prices are the artist's decision, stated plainly in EUR. Current anchors:
   18×18 = 150 · 50×40 = 450 · 60×50 = 600 · 100×100 = 1300 ·
   150×100 = 1500 · 150×130 = 1900 · 200×150 = 2800.
