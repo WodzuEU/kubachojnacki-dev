@@ -545,10 +545,9 @@ nav a[aria-current="page"] {
 .nl-archive { margin-top: 3.5rem; }
 
 /* ── NEWSLETTER PAGE (/newsletter) — the coming prints ──
-   the same full-width split as the collector landing: a sliding carousel
-   of the two works becoming prints, shown whole, beside the signup.
-   drop-split, drop-media, drop-text and the carousel styles are shared
-   below; the newsletter carousel adds .preview-carousel--full. */
+   the same full-width split as the collector landing: the sliding closeup
+   carousel of the two works going to print beside the signup. drop-split,
+   drop-media, drop-text and the carousel styles are shared below. */
 .newsletter-page {
     margin-top: var(--header-h);
     padding: 0;
@@ -797,15 +796,6 @@ nav a[aria-current="page"] {
     transform: scale(1.5); /* tighter closeup, fills the pane edge to edge */
     transform-origin: center;
 }
-/* full view (data-view="full"): the whole painting inside the pane instead of
-   a closeup crop — used for the coming prints on the newsletter page. */
-.preview-carousel--full .preview-slide img {
-    object-fit: contain;
-    transform: none;
-    padding: clamp(1.5rem, 3vw, 3rem) var(--pad) clamp(3rem, 4vw, 3.8rem);
-}
-.preview-carousel--full .preview-slide::after { background: none; }
-
 .preview-slide::after {          /* subtle bottom scrim so caption/dots read */
     content: "";
     position: absolute; inset: 0;
@@ -835,9 +825,6 @@ nav a[aria-current="page"] {
         min-height: 0;
     }
     .drop-media { height: 52vh; order: -1; }
-    /* whole works need more room than a closeup crop */
-    .drop-media--full { height: 62vh; }
-    .preview-carousel--full .preview-slide img { padding: 1.2rem var(--pad) 3rem; }
     .drop-text {
         text-align: center;
         align-items: center;

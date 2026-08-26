@@ -6,9 +6,6 @@ Usage:  python scripts/make_thumbs.py        (needs:  pip install Pillow)
 For each  IMAGES/works/<slug>.jpg       creates  IMAGES/thumbs/<slug>.webp (400px)
                                             and  IMAGES/thumbs/<slug>-800.webp (800px)
 For each  IMAGES/works/<slug>-hero.jpg  creates  IMAGES/thumbs/<slug>-hero.webp (1600px)
-For every slug in FULL_VIEW             creates  IMAGES/thumbs/<slug>-1600.webp (1600px,
-                                                 uncropped — the whole painting, used by
-                                                 the newsletter print carousel)
 
 Existing thumbnails are skipped, so it is always safe to re-run.
 """
@@ -19,13 +16,6 @@ ROOT   = Path(__file__).resolve().parent.parent
 WORKS  = ROOT / "IMAGES" / "works"
 THUMBS = ROOT / "IMAGES" / "thumbs"
 THUMBS.mkdir(parents=True, exist_ok=True)
-
-# works shown whole (not cropped) on a full-height pane — the newsletter
-# print carousel. They need a large uncropped source of their own.
-FULL_VIEW = [
-    "02-atmosphere-burgundy-blue",
-    "03-atmosphere-maroon-khaki",
-]
 
 def resize_webp(src: Path, dst: Path, width: int, quality: int = 82):
     if dst.exists():
@@ -44,10 +34,5 @@ for f in sorted(WORKS.glob("*.jpg")):
     else:
         made += resize_webp(f, THUMBS / f"{f.stem}.webp", 400)
         made += resize_webp(f, THUMBS / f"{f.stem}-800.webp", 800)
-
-for slug in FULL_VIEW:
-    src = WORKS / f"{slug}.jpg"
-    if src.exists():
-        made += resize_webp(src, THUMBS / f"{slug}-1600.webp", 1600)
 
 print(f"created {made} new thumbnail(s)")
