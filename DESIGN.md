@@ -129,7 +129,10 @@ the legend is scanned there, not read.
   white). Masters live outside the repo in `STRONA/CATALOG/full`.
 - Repo tiers: `IMAGES/works/<slug>.jpg` display (max 3450px, JPEG q85,
   ~1 MB) · `IMAGES/thumbs/<slug>.webp` 400px + `<slug>-800.webp` 800px
-  (grid srcset) · `<slug>-hero.webp` 1600px (slideshow).
+  (grid srcset) · `<slug>-hero.webp` 1600px, cropped (slideshow) ·
+  `<slug>-1600.webp` 1600px, uncropped — only for works shown whole on a
+  full-height pane (the newsletter print carousel); generated for the slugs
+  listed in `FULL_VIEW` in `scripts/make_thumbs.py`.
 - Hero slides use `<slug>-hero.jpg`: a studio shot if one exists, otherwise
   an auto-crop of the display image with white borders trimmed (see
   scratchpad script history) so slides run full-bleed with no white strips.
@@ -189,16 +192,19 @@ header (logo → home; nav: works · about · contact):
   serif voice, flowed across two full-width columns.
 - **`/contact/`** — inquiries / studio / purchase details, plus the
   newsletter (signup + past-issues archive).
-- **`/newsletter/`** — the drop funnel. Full-width split: the closeup
-  carousel (slides zoomed 1.5x, 800/1600px sources) beside the release
-  pitch — label, release name (atmosphere II), "drop is in" + live
-  countdown (`#drop-timer`, deadline in its `data-deadline`, driven by
-  newsletter.js; after the deadline the line reads "the preview is
-  open."), one short paragraph, signup CTA.
+- **`/newsletter/`** — the prints announcement. Full-width split: a sliding
+  carousel of the two works going to print, shown **whole** on the dark pane
+  (`data-view="full"` → `.preview-carousel--full`: `object-fit: contain`, no
+  1.5x zoom, uncropped `<slug>-1600.webp` source) beside the pitch: label,
+  title, lead, one line of detail, signup CTA. The carousel takes its works
+  from `data-slides` on the container, so changing which paintings show is a
+  one-attribute edit. The countdown block (`#drop-timer` with a
+  `data-deadline`, driven by newsletter.js) still exists for the next drop
+  but is not on the page.
 - **`/collector/`** — the atmosphere drop. Full-width split: a sliding
-  closeup carousel of the unreleased `draft` atmosphere works (built by
-  `newsletter.js` when `#collector-preview` is present, sourced from the
-  `<slug>-hero.webp` crops) beside a preview-access signup. `noindex`.
+  closeup carousel (`newsletter.js`, no `data-slides` → the default drop
+  slugs, zoomed 1.5x from the `<slug>-hero.webp` crops) beside a
+  preview-access signup. `noindex`.
 
 `js/site.js` is **page-aware**: each block (hero / collections / lightbox)
 runs only if its container is present, so one script drives the home page and

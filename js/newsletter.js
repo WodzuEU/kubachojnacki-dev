@@ -1,7 +1,9 @@
 /* Renders the newsletter signup form (site-native Kit submission) and, where
    its containers are present, the archive of past issues from
-   js/newsletter-data.js. Used on the contact page (signup + archive) and the
-   collector page (signup only — the archive block simply doesn't run). */
+   js/newsletter-data.js, and the sliding work carousel. Used on the contact
+   page (signup + archive), the newsletter page (carousel + signup) and the
+   collector page (carousel + signup) — each block runs only where its
+   container exists. */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -55,44 +57,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── the atmosphere drop: sliding closeup carousel ─
-    //    (collector landing + newsletter page — wherever .preview-carousel is)
+    // ── sliding work carousel ────────────────────────────────
+    //    wherever .preview-carousel is: the collector landing (closeups of
+    //    the drop) and the newsletter page (whole works, the coming prints).
+    //    The container drives it:
+    //      data-slides  comma-separated slugs (defaults to the drop closeups)
+    //      data-view    "full" = whole painting, unscaled; default = 1.5x closeup
     const preview = document.querySelector('.preview-carousel');
     if (preview && typeof COLLECTIONS !== 'undefined') {
         const ROOT = window.ROOT || '';
-        // closeups of the new atmosphere series, in order (works held back
-        // from the public site until the drop — each has a -hero crop)
-        const SLUGS = [
+        // closeups of the new atmosphere series, in order (each has a -hero crop)
+        const DEFAULT_SLUGS = [
             '44-atmosphere-lavender-green-ochre',
             '45-atmosphere-deep-violet',
             '46-atmosphere-dark-plum',
             '39-atmosphere-brown-purple',
             '40-atmosphere-blue',
         ];
+        const SLUGS = (preview.dataset.slides || '')
+            .split(',').map(s => s.trim()).filter(Boolean);
+        if (!SLUGS.length) SLUGS.push(...DEFAULT_SLUGS);
+
+        const full = preview.dataset.view === 'full';
+        if (full) preview.classList.add('preview-carousel--full');
+
         const allWorks = COLLECTIONS.reduce((a, c) => a.concat(c.works || []), []);
+        const workOf = slug => allWorks.find(x => x.slug === slug);
         const capOf = slug => {
-            const w = allWorks.find(x => x.slug === slug);
+            const w = workOf(slug);
             const t = w && w.title ? w.title.split('|')[1] : '';
             return (t || '').trim();
         };
 
         const slides = SLUGS.map((slug, i) => {
-            const cap = capOf(slug);
-            // the slides render zoomed 1.5x, so effective width is ~1.5x the
-            // pane: offer the 800px thumb and the 1600px hero crop and let
-            // sizes reflect the zoom. First slide loads up front, the rest
-            // are warmed right after (below).
+            const w = workOf(slug);
+            // full views name the whole work; closeups carry only the colors
+            const cap = full && w && w.title ? w.title.replace('|', '·') : capOf(slug);
+            // closeups render zoomed 1.5x, so their effective width is ~1.5x
+            // the pane; full views sit inside it. Either way: the 800px thumb
+            // and a 1600px source — the hero crop for closeups, the uncropped
+            // -1600 for full views. First slide loads up front, the rest are
+            // warmed right after (below).
+            const large = full ? `${slug}-1600` : `${slug}-hero`;
+            const sizes = full ? '(max-width: 800px) 100vw, 46vw'
+                               : '(max-width: 800px) 150vw, 85vw';
+            const alt   = full ? (w && w.title ? w.title.replace('|', '·') : 'painting')
+                               : (cap ? 'atmosphere closeup, ' + cap : 'atmosphere closeup');
             return `<div class="preview-slide">
-                        <img src="${ROOT}IMAGES/thumbs/${slug}-hero.webp"
-                             srcset="${ROOT}IMAGES/thumbs/${slug}-800.webp 800w, ${ROOT}IMAGES/thumbs/${slug}-hero.webp 1600w"
-                             sizes="(max-width: 800px) 150vw, 85vw"
-                             alt="${cap ? 'atmosphere closeup, ' + cap : 'atmosphere closeup'}"
+                        <img src="${ROOT}IMAGES/thumbs/${large}.webp"
+                             srcset="${ROOT}IMAGES/thumbs/${slug}-800.webp 800w, ${ROOT}IMAGES/thumbs/${large}.webp 1600w"
+                             sizes="${sizes}"
+                             alt="${alt}"
                              ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.style.opacity=0">
                         ${cap ? `<span class="preview-caption">${cap}</span>` : ''}
                     </div>`;
         }).join('');
         const dots = SLUGS.map((_, i) =>
-            `<button class="preview-dot${i === 0 ? ' active' : ''}" type="button" aria-label="Show closeup ${i + 1}"></button>`).join('');
+            `<button class="preview-dot${i === 0 ? ' active' : ''}" type="button" aria-label="Show ${full ? 'work' : 'closeup'} ${i + 1}"></button>`).join('');
         preview.innerHTML = `<div class="preview-track">${slides}</div><div class="preview-dots">${dots}</div>`;
 
         const track  = preview.querySelector('.preview-track');
