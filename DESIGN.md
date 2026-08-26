@@ -195,7 +195,9 @@ header (logo → home; nav: works · about · contact):
   and the signup (label, title, one lead line, CTA — the page says the prints
   are coming and nothing more; sizes, edition, paper, price and date are the
   artist's to decide). The carousel takes its works from `data-slides` on the
-  container, so changing which paintings show is a one-attribute edit. The
+  container and its pace from `data-interval` (2200ms here, against the 3800ms
+  default — two slides want a quicker cycle than five), so both are
+  one-attribute edits. The
   countdown block (`#drop-timer` with a `data-deadline`, driven by
   newsletter.js) still exists for the next drop but is not on the page.
 - **`/collector/`** — the atmosphere drop. Full-width split: a sliding

@@ -60,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── sliding work carousel ────────────────────────────────
     //    wherever .preview-carousel is: the collector landing (the drop) and
     //    the newsletter page (the works going to print). data-slides on the
-    //    container picks the works; without it, the drop slugs below.
+    //    container picks the works (without it, the drop slugs below);
+    //    data-interval sets how long each slide holds, in ms.
     const preview = document.querySelector('.preview-carousel');
     if (preview && typeof COLLECTIONS !== 'undefined') {
         const ROOT = window.ROOT || '';
@@ -120,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
         };
         const stop  = () => { if (timer) { clearInterval(timer); timer = null; } };
-        const start = () => { if (!reduce && SLUGS.length > 1 && !timer) timer = setInterval(() => go(idx + 1), 3800); };
+        const hold  = Number(preview.dataset.interval) || 3800;
+        const start = () => { if (!reduce && SLUGS.length > 1 && !timer) timer = setInterval(() => go(idx + 1), hold); };
 
         dotEls.forEach((d, i) => d.addEventListener('click', () => { go(i); stop(); start(); }));
         preview.addEventListener('mouseenter', stop);
