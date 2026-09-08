@@ -22,7 +22,7 @@ The paintings supply all the color. The UI stays achromatic.
 | `--ink` | `#1a1a18` | Text, primary UI |
 | `--mid` | `#6f6f6a` | Secondary text: specs, captions, counts. Held at ≥4.5:1 on white (WCAG AA) — never lighten past this. |
 | `--rule` | `#111111` | Strong hairlines (header, section borders) |
-| faint rule | `rgba(26,26,24,0.12–0.15)` | Legend top rule, footer rule, inquiry divider |
+| faint rule | `rgba(26,26,24,0.12–0.15)` | The lightbox inquiry divider — the only one left in the page body |
 | sold | `#991b1b` | The only accent. Dark brick red — deliberately muted, not alarm-red. |
 | hero backdrop | `#0c0c0a` | Behind hero slides while images load |
 
@@ -80,19 +80,32 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 3. Layout & spacing
 
-- Page gutter: `--pad: clamp(1.5rem, 4vw, 4rem)`; sections separated by
-  1px `--rule` hairlines.
-- Works grid: 5 columns desktop → 4 (≤1100px) → 3 (≤800px and below,
-  including phones). Uniform cells; the photos themselves communicate scale.
-  Works on paper render at half the cell width (`.col-<collection-slug>`
-  modifier) so small originals read as small.
+- Page gutter: `--pad: clamp(1.5rem, 4vw, 4rem)`.
+- **Sections are separated by whitespace, not lines** (changed 2026-09-08 at
+  the artist's call: the stack of hairlines through about and contact read as
+  clutter). Every section rule, the label underlines, the legend's top rule
+  and the footer rule are gone; 220–300px of air now does that job between
+  sections and 30–60px within one. Two rules survive because they are doing
+  work rather than decorating: the fixed header's bottom edge, and the
+  divider between specs and inquiry links inside the lightbox panel. Do not
+  reintroduce the others — if two blocks feel run together, the answer is
+  more space.
+- **Works grid: the visitor picks the density** — 2, 4 or 6 across, from the
+  small `grid` control at the top of the works section, remembered in
+  `localStorage` (`kch-grid-cols`, default 4). `site.js` writes the count
+  inline on each `.visual-grid`, capping it on narrow screens (≤520px: max 3;
+  ≤800px: max 4; ≤1100px: max 5) so six across never becomes six thumbnails
+  on a phone. The media queries in the stylesheet stay as the no-JS fallback.
+  Uniform cells; the photos themselves communicate scale. Works on paper
+  render at half the cell width (`.col-<collection-slug>` modifier) so small
+  originals read as small.
 - Legend: 8 columns → 6 (≤1100px) → condensed 6 (≤800px) → condensed 4
   (≤520px). Desktop keeps the readable sizes; mobile switches to the compact
   catalogue tiles (see the typography exception above).
 - **Every section runs gutter-to-gutter**, like the works grid — no
-  max-width on section containers, hairline rules span the full page. Line
-  length stays readable via per-block measures or, where prose would run too
-  wide (the statement), a two-column editorial flow. Nothing ends mid-page.
+  max-width on section containers. Line length stays readable via per-block
+  measures or, where prose would run too wide (the statement), a two-column
+  editorial flow. Nothing ends mid-page.
 - **Full-width split hero** is the standing-page pattern (newsletter,
   collector drop): a full-height grid with prose/media on one side and the
   action on the other, vertically centred so it owns the whole viewport
@@ -163,6 +176,10 @@ subtitle is not part of the exception: it scales with the title.
   universal square rule matches children directly, overriding the parent.
   This is the site's fingerprint.
 - Sequential display numbers under every grid image.
+- The lightbox restores the page behind it in a single frame. `html` carries
+  `scroll-behavior: smooth` for the nav anchors, so `unlockScroll()` turns it
+  off for the one jump back — otherwise closing a work animates a scroll all
+  the way down from the top of the page.
 - Collections may carry a short lowercase `note` under the heading —
   written from the work, concrete images, no gallery jargon.
 - Permalinks: `kubachojnacki.com/#<slug>` opens the work's lightbox —
@@ -210,8 +227,8 @@ the nav links to `#about` and `#contact`, and from a sub-folder to
 `../#about`:
 
 - **`/` home** — the hero slideshow (`hero: n` works from data.js) over the
-  catalog: collections (grid + legend) and the lightbox, rendered from
-  `js/data.js`. A hero slide opens that work in the lightbox. Collection
+  catalog: the grid-density control, then collections (grid + legend) and the
+  lightbox, rendered from `js/data.js`. A hero slide opens that work in the lightbox. Collection
   descriptions come from the portfolio PDFs and live in each collection's
   `note`. Works flagged `draft: true` are held back everywhere until published.
   Two sections close the page:

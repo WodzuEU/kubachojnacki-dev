@@ -107,11 +107,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.classList.add('lb-open');
         }
         function unlockScroll() {
-            if (!document.documentElement.classList.contains('lb-open')) return;
-            document.documentElement.classList.remove('lb-open');
+            const root = document.documentElement;
+            if (!root.classList.contains('lb-open')) return;
+            root.classList.remove('lb-open');
             document.body.style.top = '';
             document.body.style.paddingRight = '';
-            window.scrollTo(0, lbScrollY);
+            // html has scroll-behavior: smooth for the nav anchors, which would
+            // animate this restore all the way down from the top. Put the page
+            // back in one frame, then hand smooth scrolling back.
+            const prev = root.style.scrollBehavior;
+            root.style.scrollBehavior = 'auto';
+            window.scrollTo({ top: lbScrollY, left: 0, behavior: 'instant' });
+            root.style.scrollBehavior = prev;
         }
 
         function closeLb() {
@@ -314,9 +321,62 @@ document.addEventListener('DOMContentLoaded', () => {
         startTimer();
     }
 
+    // ── grid density, chosen by the visitor ──────────────────
+    //    2 / 4 / 6 columns. The choice is capped on narrow screens so six
+    //    columns never becomes six thumbnails across a phone, and it is
+    //    written inline on each grid so the stylesheet stays the no-JS
+    //    fallback. Remembered per browser.
+    const COL_CHOICES = [2, 4, 6];
+    const COL_DEFAULT = 4;
+    const COL_KEY = 'kch-grid-cols';
+
+    const readCols = () => {
+        try {
+            const v = parseInt(localStorage.getItem(COL_KEY), 10);
+            return COL_CHOICES.includes(v) ? v : COL_DEFAULT;
+        } catch (e) { return COL_DEFAULT; }
+    };
+    const saveCols = v => { try { localStorage.setItem(COL_KEY, v); } catch (e) {} };
+
+    const fitCols = choice => {
+        const w = window.innerWidth || document.documentElement.clientWidth;
+        if (!w) return choice;          // width not known yet — do not cap blind
+        if (w <= 520)  return Math.min(choice, 3);
+        if (w <= 800)  return Math.min(choice, 4);
+        if (w <= 1100) return Math.min(choice, 5);
+        return choice;
+    };
+    let colChoice = readCols();
+    const applyCols = () => {
+        const n = fitCols(colChoice);
+        document.querySelectorAll('.visual-grid').forEach(g => {
+            g.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+        });
+    };
+
     // ── collections: grid + legend (works page) ──────────────
     if (hasCollections) {
         const worksSection = document.getElementById('works');
+
+        const control = document.createElement('div');
+        control.className = 'grid-control';
+        control.innerHTML =
+            `<span class="grid-control-label">grid</span>` +
+            COL_CHOICES.map(n =>
+                `<button type="button" class="grid-opt" data-cols="${n}"
+                         aria-pressed="${n === colChoice}"
+                         aria-label="Show ${n} works per row">${n}</button>`).join('');
+        control.addEventListener('click', e => {
+            const btn = e.target.closest('.grid-opt');
+            if (!btn) return;
+            colChoice = parseInt(btn.dataset.cols, 10);
+            saveCols(colChoice);
+            control.querySelectorAll('.grid-opt').forEach(b =>
+                b.setAttribute('aria-pressed', parseInt(b.dataset.cols, 10) === colChoice));
+            applyCols();
+            track('grid/' + colChoice, 'Grid ' + colChoice + ' across');
+        });
+        worksSection.appendChild(control);
         COLLECTIONS.forEach(col => {
             const visibleWorks = col.works.filter(w => !w.draft);
             if (!visibleWorks.length) return;   // skip a collection with nothing to show yet
@@ -380,6 +440,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             worksSection.appendChild(block);
+        });
+
+        applyCols();
+        let colResize = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(colResize);
+            colResize = setTimeout(applyCols, 150);
         });
 
         // accordion
