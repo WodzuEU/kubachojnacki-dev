@@ -59,14 +59,24 @@ shrink below these):
 | hero caption title | clamp(1.4rem, 3vw, 2.4rem) |
 | lightbox title | 1.6rem |
 | legend work title | 1.15rem serif |
+| colour subtitle | 0.85em of its title, serif, ink |
 | body/meta sans | 12–13.5px |
 | small labels (refs, captions, counts) | 11–12px |
 | absolute minimum anywhere | 10.5px |
 
+**A work's title is two lines, and both are titles.** The collection name
+("Atmosphere") repeats across 31 paintings; the colour words ("blue red")
+are what actually name the work. So `.color-subtitle` is set in the serif,
+in ink, at `0.85em` of whichever title contains it — a second title one step
+down, never a spec line in the sans. Because the size is relative, the pair
+holds the same proportion in the legend, in the lightbox, and in the
+condensed mobile legend, and there is only one rule to change.
+
 One deliberate exception: below 800px the legend drops to the original
-condensed catalogue density (titles 0.85rem, sans 8–9px). The artist prefers
-the old site's compact price tiles on mobile over long readable columns —
-the legend is scanned there, not read.
+condensed catalogue density (titles 0.85rem, specs and price 8–9px sans).
+The artist prefers the old site's compact price tiles on mobile over long
+readable columns — the legend is scanned there, not read. The colour
+subtitle is not part of the exception: it scales with the title.
 
 ## 3. Layout & spacing
 
@@ -154,10 +164,15 @@ the legend is scanned there, not read.
   set via `hero: 1…n` in data.js.
 - The lowercase voice: short factual lines, prices stated openly,
   "certificate of authenticity included. shipping worldwide."
-- Newsletter lives on the domain, not a Kit subdomain: the signup form
-  and an archive of past issues (rendered from `js/newsletter-data.js`)
-  sit on the **contact** page. Keep them inside this system — achromatic,
-  two families, lowercase — never a second layout language.
+- Newsletter lives on the domain, not a Kit subdomain. `newsletter.js`
+  renders the signup wherever `#nl-signup` exists (today: `/newsletter/`
+  and `/collector/`) and the archive of past issues from
+  `js/newsletter-data.js` wherever `#nl-issues` and `#nl-count` exist
+  (today: nowhere). **Neither is on the home page — the contact section is
+  where the signup belongs, and putting it there is an open task; until
+  then every visitor who does not click *Newsletter* is never asked.**
+  Keep both inside this system — achromatic, two families, lowercase —
+  never a second layout language.
 
 ## 7. Workflow (non-negotiable)
 
@@ -177,19 +192,22 @@ the legend is scanned there, not read.
 
 ## 8. Site structure
 
-Three pages, one design system, all sharing `css/style.css` and the fixed
-header (logo → home; nav: works · about · contact):
+Three HTML pages, one design system, all sharing `css/style.css` and the
+fixed header (logo → home; nav: works · about · contact · newsletter).
+**About and contact are sections of the home page, not pages of their own** —
+the nav links to `#about` and `#contact`, and from a sub-folder to
+`../#about`:
 
 - **`/` home** — the hero slideshow (`hero: n` works from data.js) over the
   catalog: collections (grid + legend) and the lightbox, rendered from
   `js/data.js`. A hero slide opens that work in the lightbox. Collection
   descriptions come from the portfolio PDFs and live in each collection's
   `note`. Works flagged `draft: true` are held back everywhere until published.
-- **`/about/`** — bio and artist statement (a home-page section). The bio
-  fills its column beside a 400px portrait; the statement is set in the same
-  serif voice, flowed across two full-width columns.
-- **`/contact/`** — inquiries / studio / purchase details, plus the
-  newsletter (signup + past-issues archive).
+  Two sections close the page:
+  - **`#about`** — bio and artist statement. The bio fills its column beside
+    a 200px portrait; the statement is set in the same serif voice.
+  - **`#contact`** — inquiries / studio / purchase details. The newsletter
+    signup belongs here and is not here yet (see §6).
 - **`/newsletter/`** — the prints announcement. Full-width split: the sliding
   closeup carousel of the two works going to print beside three short lines
   and the signup (label, title, one lead line, CTA — the page says the prints

@@ -1,10 +1,11 @@
-/* Renders the works pages from COLLECTIONS (js/data.js).
-   Page-aware: each block runs only if its container is on the page, so the
-   same file drives the splash (hero only) and the works page (collections +
-   lightbox). No artwork data lives in HTML — edit data.js only.
+/* Renders the catalogue from COLLECTIONS (js/data.js).
+   Page-aware: each block runs only if its container is on the page, so one
+   file drives the home page (hero + collections + lightbox) and any sub-page
+   that carries only some of them. No artwork data lives in HTML — edit
+   data.js only.
 
    ROOT (set per page before this script) prefixes image paths so they resolve
-   from sub-folders: '' on the splash at site root, '../' on /works/. */
+   from sub-folders: '' at the site root, '../' in a sub-folder. */
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof COLLECTIONS === 'undefined') return;
@@ -80,16 +81,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const lbClose = document.getElementById('lb-close-btn');
         const lbInfo  = document.querySelector('.lightbox-info');
         let lbIdx = 0;
+        let lbReturnFocus = null;   // the tile or legend row that opened it
+        let lbScrollY = 0;
 
         function setHash(slug) {
             history.replaceState(null, '', slug ? '#' + slug : location.pathname + location.search);
         }
-        function closeLb() {
-            lb.classList.remove('active');
-            if (slugIndex[location.hash.slice(1)] !== undefined) setHash(null);
+
+        // hold the page still while the lightbox is up: without this a scroll
+        // gesture that misses the image drags the catalogue underneath, and
+        // closing drops you somewhere you did not choose. The scrollbar width
+        // is padded back so nothing shifts while the lightbox fades out.
+        function lockScroll() {
+            lbScrollY = window.scrollY;
+            const sbw = window.innerWidth - document.documentElement.clientWidth;
+            if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
+            document.body.style.top = `-${lbScrollY}px`;
+            document.documentElement.classList.add('lb-open');
+        }
+        function unlockScroll() {
+            if (!document.documentElement.classList.contains('lb-open')) return;
+            document.documentElement.classList.remove('lb-open');
+            document.body.style.top = '';
+            document.body.style.paddingRight = '';
+            window.scrollTo(0, lbScrollY);
         }
 
-        openWork = function (i) {
+        function closeLb() {
+            lb.classList.remove('active');
+            unlockScroll();
+            if (slugIndex[location.hash.slice(1)] !== undefined) setHash(null);
+            // hand focus back to whatever opened the work, so a keyboard user
+            // lands where they were instead of at the top of the page
+            if (lbReturnFocus) { lbReturnFocus.focus(); lbReturnFocus = null; }
+        }
+
+        openWork = function (i, trigger) {
             lbIdx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[lbIdx];
 
@@ -118,6 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ['lb-inquiry-section', 'lb-price'].forEach(id => document.getElementById(id).classList.remove('hidden'));
             [lbPrev, lbNext].forEach(el => el.classList.remove('hidden'));
+            // record the opener on the way in only; prev/next must not clobber it
+            if (!lb.classList.contains('active')) {
+                lbReturnFocus = trigger || null;
+                lockScroll();
+            }
             lb.classList.add('active');
             setHash(w.slug);
             track('open/' + w.slug, workLabel(w));
@@ -169,12 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (lb.classList.contains('active')) { const els = focusables(lb); if (els.length) els[0].focus(); }
         }).observe(lb, { attributes: true, attributeFilter: ['class'] });
 
-        // open lightbox when the URL carries a work slug (shareable links,
-        // and hero → works/#slug navigation from the splash)
+        // open the lightbox when the URL carries a work slug — the
+        // shareable permalink, kubachojnacki.com/#<slug>
         function openFromHash() {
             const idx = slugIndex[location.hash.slice(1)];
             if (idx !== undefined) openWork(idx);
-            else if (lb.classList.contains('active')) lb.classList.remove('active');
+            else if (lb.classList.contains('active')) { lb.classList.remove('active'); unlockScroll(); }
         }
         window.addEventListener('hashchange', openFromHash);
         openFromHash();
@@ -198,12 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
                      <div class="slide-caption-title">${w.title}</div>
                      <div class="slide-caption-specs">${w.medium} &ensp;&middot;&ensp; ${w.size} &ensp;&middot;&ensp; ${w.year}</div>
                  </div>`;
-            // on the splash there is no lightbox: a slide leads into the works
-            // page and opens that work; on a page with a lightbox it opens inline
-            slide.querySelector('img').addEventListener('click', () => {
-                if (hasLightbox) openWork(WORKS.indexOf(w));
-                else location.href = `${ROOT}works/#${w.slug}`;
-            });
+            // a slide opens its own work in the lightbox
+            if (hasLightbox) {
+                slide.querySelector('img').addEventListener('click', () => openWork(WORKS.indexOf(w)));
+            }
             slidesWrap.appendChild(slide);
         });
 
@@ -292,21 +322,27 @@ document.addEventListener('DOMContentLoaded', () => {
                      </div>
                      <span class="ref-number${w.sold ? ' sold' : ''}">${displayNo(w)}${w.sold || w.unavailable ? ` <span class="status-dot${statusClass(w)}"></span>` : ''}</span>`;
                 const wrap = item.querySelector('.item-image-wrapper');
-                wrap.addEventListener('click', () => openWork(idx));
+                wrap.addEventListener('click', () => openWork(idx, wrap));
                 wrap.addEventListener('keydown', e => {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWork(idx); }
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWork(idx, wrap); }
                 });
                 grid.appendChild(item);
 
                 const li = document.createElement('div');
                 li.className = 'legend-item clickable-ref' + (w.sold ? ' is-sold' : (w.unavailable ? ' is-unavailable' : ''));
+                li.setAttribute('role', 'button');
+                li.setAttribute('tabindex', '0');
+                li.setAttribute('aria-label', `View ${w.title.replace('|', '-')}`);
                 li.innerHTML =
                     `<span class="legend-ref">${displayNo(w)}</span>` +
                     `<span class="legend-title">${titleHtml(w.title)}</span>` +
                     `<span class="legend-specs">${specsHtml(w)}</span>` +
                     `<span class="legend-price">${priceText(w)}</span>` +
                     `<div class="legend-status"><span class="status-dot${statusClass(w)}"></span><span class="status-text">${statusText(w)}</span></div>`;
-                li.addEventListener('click', () => openWork(idx));
+                li.addEventListener('click', () => openWork(idx, li));
+                li.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWork(idx, li); }
+                });
                 legend.appendChild(li);
             });
 
@@ -349,7 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         "@type": "Offer",
                         "price": w.price,
                         "priceCurrency": "EUR",
-                        "availability": w.sold ? "https://schema.org/SoldOut" : "https://schema.org/InStock"
+                        "availability": w.sold        ? "https://schema.org/SoldOut"
+                                      : w.unavailable ? "https://schema.org/OutOfStock"
+                                      :                 "https://schema.org/InStock"
                     }
                 }
             }))

@@ -340,15 +340,22 @@ nav a[aria-current="page"] {
     line-height: 1.15;
     margin-bottom: 0;
 }
+/* The colour words are what actually names a work: "Atmosphere" repeats
+   across 31 paintings, "blue red" does not. So they are set as a second
+   title, not a spec line — the same serif as the line above, one step down
+   in size, in ink. The size is relative, so the pair keeps its proportion
+   wherever a title is rendered: legend, lightbox, and the condensed
+   mobile legend. */
 .color-subtitle {
-    font-family: var(--sans);
+    font-family: var(--serif);
     font-style: normal;
-    font-size: 11px;
-    letter-spacing: 0.03em;
+    font-size: 0.85em;
+    letter-spacing: 0;
     text-transform: lowercase;
-    color: var(--mid);
+    color: var(--ink);
     display: block;
-    margin-top: 0.08rem;
+    line-height: 1.15;
+    margin-top: 0.12rem;
 }
 .legend-specs {
     font-family: var(--sans);
@@ -453,11 +460,7 @@ nav a[aria-current="page"] {
 .page-section .section-inner { max-width: none; }
 .page-section .section-inner > .section-label { margin-bottom: 2.2rem; }
 
-/* ── ABOUT PAGE (/about) ── */
-.about-page {
-    padding: 7rem var(--pad) 4rem;
-    max-width: 940px;
-}
+/* ── ABOUT (a section of the home page) ── */
 .about-hero {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -496,11 +499,7 @@ nav a[aria-current="page"] {
 }
 .statement-text { line-height: 1.7; }
 
-/* ── CONTACT PAGE (/contact) ── */
-.contact-page {
-    padding: 7rem var(--pad) 4rem;
-    max-width: 1000px;
-}
+/* ── CONTACT (a section of the home page) ── */
 .contact-lead { padding-bottom: 2.2rem; }
 .lead-text {
     font-family: var(--serif);
@@ -834,6 +833,12 @@ nav a[aria-current="page"] {
 }
 
 /* LIGHTBOX */
+/* while a work is open the page underneath is frozen in place: body goes
+   fixed at its scroll offset (site.js sets `top`), so a stray swipe cannot
+   drag the catalogue around behind the image. */
+html.lb-open { overflow: hidden; }
+html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
+
 .lightbox {
     visibility: hidden; pointer-events: none;
     position: fixed; z-index: 9999; inset: 0;
@@ -965,7 +970,6 @@ nav a[aria-current="page"] {
     .legend-item  { padding: 0.25rem 0.3rem; }
     .legend-ref   { font-size: 8.5px; letter-spacing: 0.04em; }
     .legend-title { font-size: 0.85rem; }
-    .color-subtitle { font-size: 8px; letter-spacing: 0.02em; }
     .legend-specs { font-size: 8px; letter-spacing: 0.02em; line-height: 1.35; margin-top: 0.12rem; }
     .legend-price { font-size: 9px; margin-top: 0.12rem; }
     .legend-status .status-text { font-size: 8.5px; }
@@ -986,7 +990,7 @@ nav a[aria-current="page"] {
     }
     .lightbox img { max-width: 88vw; max-height: 48vh; }
     .lightbox-info { width: 100%; max-width: 380px; }
-    #works, .about-page, .contact-page, .page-section, .newsletter-page { padding-left: clamp(1rem, 3vw, 2.5rem); padding-right: clamp(1rem, 3vw, 2.5rem); }
+    #works, .page-section, .newsletter-page { padding-left: clamp(1rem, 3vw, 2.5rem); padding-right: clamp(1rem, 3vw, 2.5rem); }
     header { padding-left: clamp(1rem, 3vw, 2.5rem); padding-right: clamp(1rem, 3vw, 2.5rem); }
 }
 @media (max-width: 520px) {
