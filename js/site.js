@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // sends the event if the API is ready, otherwise queues it; the loader
     // flushes the queue once count.js is in. Off the live domain the queue
     // is never flushed, so nothing is ever sent from staging or local.
-    const gcQueue = [];
+    const gcQueue = (window.__gcQueue = window.__gcQueue || []);
     const track = (path, title) => {
         const vars = { path, title: title || path, event: true };
         if (window.goatcounter && typeof window.goatcounter.count === 'function') window.goatcounter.count(vars);
@@ -38,9 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── helpers ──────────────────────────────────────────────
     const displaySrc = w => `${ROOT}IMAGES/works/${w.slug}.jpg`;
     const heroSrc    = w => `${ROOT}IMAGES/works/${w.slug}-hero.jpg`;
-    const gridSrcset = w =>
-        `${ROOT}IMAGES/thumbs/${w.slug}.webp 400w, ${ROOT}IMAGES/thumbs/${w.slug}-800.webp 800w, ${displaySrc(w)} ${w.w}w`;
+    const thumb      = (w, tier) => `${ROOT}IMAGES/thumbs/${w.slug}${tier || ''}.webp`;
+
+    // Every rendered work is WebP: 400 / 800 / 1600. The source JPEG is a
+    // master, not a delivery format — it is fetched only when someone zooms
+    // inside the lightbox, which is the one moment the detail is wanted.
+    // (Median 1600px WebP is 107 KB against 505 KB for the JPEG.)
+    const workSrcset = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
     const GRID_SIZES = '(max-width: 800px) 33vw, (max-width: 1100px) 25vw, 20vw';
+    const LB_SIZES   = '(max-width: 800px) 88vw, 58vw';
 
     // displayed numbers are sequential per collection (each restarts at 01);
     // w.ref stays the permanent archive number used in file names
@@ -83,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let lbIdx = 0;
         let lbReturnFocus = null;   // the tile or legend row that opened it
         let lbScrollY = 0;
+        let lbFullFetched = false;  // has this work's full-res JPEG been pulled?
 
         function setHash(slug) {
             history.replaceState(null, '', slug ? '#' + slug : location.pathname + location.search);
@@ -122,8 +129,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             lbImg.classList.remove('is-zoomed');
             lbImg.style.transformOrigin = 'center center';
-            lbImg.src = displaySrc(w);
-            lbImg.alt = altText(w);
+            lbFullFetched = false;
+            // width/height give the browser the ratio before the file lands,
+            // so the panel does not jump as each work loads
+            lbImg.width  = w.w;
+            lbImg.height = w.h;
+            lbImg.src    = thumb(w, '-1600');
+            lbImg.srcset = workSrcset(w);
+            lbImg.sizes  = LB_SIZES;
+            lbImg.alt    = altText(w);
 
             document.getElementById('lb-title').innerHTML = titleHtml(w.title);
             document.getElementById('lb-price').textContent = priceText(w);
@@ -155,9 +169,28 @@ document.addEventListener('DOMContentLoaded', () => {
             track('open/' + w.slug, workLabel(w));
         };
 
+        // zooming is the moment someone actually wants the brush detail, so
+        // that is when the full-resolution JPEG is fetched — preloaded first,
+        // then swapped in, so the picture never blinks. Nobody pays for the
+        // master by simply opening a work.
+        function fetchFullRes() {
+            if (lbFullFetched) return;
+            lbFullFetched = true;
+            const w = WORKS[lbIdx];
+            const master = new Image();
+            master.onload = () => {
+                if (WORKS[lbIdx] !== w) return;      // moved on before it landed
+                lbImg.removeAttribute('srcset');
+                lbImg.removeAttribute('sizes');
+                lbImg.src = master.src;
+            };
+            master.src = displaySrc(w);
+        }
+
         lbImg.addEventListener('click', e => {
             e.stopPropagation();
             if (!lbImg.classList.contains('is-zoomed')) {
+                fetchFullRes();
                 const r = lbImg.getBoundingClientRect();
                 lbImg.style.transformOrigin =
                     `${((e.clientX - r.left) / r.width * 100).toFixed(1)}% ${((e.clientY - r.top) / r.height * 100).toFixed(1)}%`;
@@ -317,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.id = w.slug;
                 item.innerHTML =
                     `<div class="item-image-wrapper" role="button" tabindex="0" aria-label="View ${w.title.replace('|', '-')}">
-                         <img src="${ROOT}IMAGES/thumbs/${w.slug}.webp" srcset="${gridSrcset(w)}" sizes="${GRID_SIZES}"
+                         <img src="${thumb(w)}" srcset="${workSrcset(w)}" sizes="${GRID_SIZES}"
                               alt="${altText(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
                      </div>
                      <span class="ref-number${w.sold ? ' sold' : ''}">${displayNo(w)}${w.sold || w.unavailable ? ` <span class="status-dot${statusClass(w)}"></span>` : ''}</span>`;
@@ -404,12 +437,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // ── analytics (live domain only) ─────────────────────────
-    if (SITE.goatcounter && location.hostname === 'kubachojnacki.com') {
+    // site.js and newsletter.js both run on the home page, so the loader is
+    // claimed once and the queue is shared — two count.js tags would report
+    // every home-page view twice.
+    if (SITE.goatcounter && location.hostname === 'kubachojnacki.com' && !window.__gcLoader) {
+        window.__gcLoader = true;
         const s = document.createElement('script');
         s.async = true;
         s.dataset.goatcounter = `https://${SITE.goatcounter}.goatcounter.com/count`;
         s.src = 'https://gc.zgo.at/count.js';
-        s.onload = () => { gcQueue.forEach(v => window.goatcounter.count(v)); gcQueue.length = 0; };
+        s.onload = () => { gcQueue.splice(0).forEach(v => window.goatcounter.count(v)); };
         document.body.appendChild(s);
     }
 });

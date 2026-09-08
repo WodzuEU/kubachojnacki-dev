@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // count.js loads only on the live domain (bottom of this file); track()
     // queues until it is ready, then the loader flushes. Nothing is sent off
     // the live domain.
-    const gcQueue = [];
+    const gcQueue = (window.__gcQueue = window.__gcQueue || []);
     const track = (path, title) => {
         const vars = { path, title: title || path, event: true };
         if (window.goatcounter && typeof window.goatcounter.count === 'function') window.goatcounter.count(vars);
@@ -40,7 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const btn = form.querySelector('button');
             btn.disabled = true;
-            track('signup/' + (location.pathname.includes('collector') ? 'collector' : 'newsletter'), 'Drop signup');
+            const where = location.pathname.includes('collector')  ? 'collector'
+                        : location.pathname.includes('newsletter') ? 'newsletter'
+                        :                                            'home';
+            track('signup/' + where, 'Newsletter signup');
             try {
                 const res = await fetch(form.action, {
                     method: 'POST',
@@ -196,13 +199,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     reveal();
 
-    // ── analytics (live domain only, same rule as the homepage) ─
-    if (typeof SITE !== 'undefined' && SITE.goatcounter && location.hostname === 'kubachojnacki.com') {
+    // ── analytics (live domain only) ─────────────────────────
+    // site.js and newsletter.js both run on the home page, so the loader is
+    // claimed once and the queue is shared — two count.js tags would report
+    // every home-page view twice.
+    if (typeof SITE !== 'undefined' && SITE.goatcounter && location.hostname === 'kubachojnacki.com' && !window.__gcLoader) {
+        window.__gcLoader = true;
         const s = document.createElement('script');
         s.async = true;
         s.dataset.goatcounter = `https://${SITE.goatcounter}.goatcounter.com/count`;
         s.src = 'https://gc.zgo.at/count.js';
-        s.onload = () => { gcQueue.forEach(v => window.goatcounter.count(v)); gcQueue.length = 0; };
+        s.onload = () => { gcQueue.splice(0).forEach(v => window.goatcounter.count(v)); };
         document.body.appendChild(s);
     }
 });

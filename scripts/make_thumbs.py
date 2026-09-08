@@ -5,7 +5,11 @@ Usage:  python scripts/make_thumbs.py        (needs:  pip install Pillow)
 
 For each  IMAGES/works/<slug>.jpg       creates  IMAGES/thumbs/<slug>.webp (400px)
                                             and  IMAGES/thumbs/<slug>-800.webp (800px)
+                                            and  IMAGES/thumbs/<slug>-1600.webp (1600px)
 For each  IMAGES/works/<slug>-hero.jpg  creates  IMAGES/thumbs/<slug>-hero.webp (1600px)
+
+The 1600px tier is what the lightbox shows. The source JPEG is only fetched
+when a visitor zooms into a work, so nobody downloads a megabyte by accident.
 
 Existing thumbnails are skipped, so it is always safe to re-run.
 """
@@ -34,5 +38,6 @@ for f in sorted(WORKS.glob("*.jpg")):
     else:
         made += resize_webp(f, THUMBS / f"{f.stem}.webp", 400)
         made += resize_webp(f, THUMBS / f"{f.stem}-800.webp", 800)
+        made += resize_webp(f, THUMBS / f"{f.stem}-1600.webp", 1600)
 
 print(f"created {made} new thumbnail(s)")

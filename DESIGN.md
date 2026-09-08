@@ -137,10 +137,17 @@ subtitle is not part of the exception: it scales with the title.
 
 - Source photos: painting on a white background (this is why the site bg is
   white). Masters live outside the repo in `STRONA/CATALOG/full`.
-- Repo tiers: `IMAGES/works/<slug>.jpg` display (max 3450px, JPEG q85,
-  ~1 MB) · `IMAGES/thumbs/<slug>.webp` 400px + `<slug>-800.webp` 800px
-  (grid srcset) · `<slug>-hero.webp` 1600px (slideshow and the closeup
-  carousels).
+- Repo tiers: `IMAGES/thumbs/<slug>.webp` 400px · `<slug>-800.webp` 800px ·
+  `<slug>-1600.webp` 1600px — one srcset serves both the grid and the
+  lightbox · `<slug>-hero.webp` 1600px, cropped (slideshow and the closeup
+  carousels) · `IMAGES/works/<slug>.jpg` the master (max 3450px, q85, median
+  505 KB).
+- **The JPEG master is not a delivery format.** Everything the site renders
+  is WebP; the master is fetched only when a visitor zooms inside the
+  lightbox, preloaded and then swapped in so the picture never blinks. That
+  is the one moment the brush detail is actually wanted, and the only moment
+  anyone pays a megabyte for it. Opening a work costs the 1600px WebP —
+  median 107 KB against 505 KB.
 - Hero slides use `<slug>-hero.jpg`: a studio shot if one exists, otherwise
   an auto-crop of the display image with white borders trimmed (see
   scratchpad script history) so slides run full-bleed with no white strips.
@@ -165,14 +172,18 @@ subtitle is not part of the exception: it scales with the title.
 - The lowercase voice: short factual lines, prices stated openly,
   "certificate of authenticity included. shipping worldwide."
 - Newsletter lives on the domain, not a Kit subdomain. `newsletter.js`
-  renders the signup wherever `#nl-signup` exists (today: `/newsletter/`
-  and `/collector/`) and the archive of past issues from
-  `js/newsletter-data.js` wherever `#nl-issues` and `#nl-count` exist
-  (today: nowhere). **Neither is on the home page — the contact section is
-  where the signup belongs, and putting it there is an open task; until
-  then every visitor who does not click *Newsletter* is never asked.**
-  Keep both inside this system — achromatic, two families, lowercase —
-  never a second layout language.
+  renders the signup wherever `#nl-signup` exists — the home page's contact
+  section (`.contact-newsletter`, "join the list"), `/newsletter/` and
+  `/collector/` — and the archive of past issues from `js/newsletter-data.js`
+  wherever `#nl-issues` and `#nl-count` exist (nowhere yet; add it to contact
+  once there are issues to show). Each placement reports its own
+  `signup/home | newsletter | collector` event, so the numbers say which one
+  converts. Keep both inside this system — achromatic, two families,
+  lowercase — never a second layout language.
+- `site.js` and `newsletter.js` both run on the home page. They share one
+  GoatCounter queue and the first to arrive claims the loader
+  (`window.__gcLoader`) — two `count.js` tags would count every home-page
+  view twice.
 
 ## 7. Workflow (non-negotiable)
 
@@ -206,8 +217,9 @@ the nav links to `#about` and `#contact`, and from a sub-folder to
   Two sections close the page:
   - **`#about`** — bio and artist statement. The bio fills its column beside
     a 200px portrait; the statement is set in the same serif voice.
-  - **`#contact`** — inquiries / studio / purchase details. The newsletter
-    signup belongs here and is not here yet (see §6).
+  - **`#contact`** — inquiries / studio / purchase details, then the
+    newsletter signup (see §6). This is the only signup most visitors ever
+    see, since reaching `/newsletter/` takes a nav click.
 - **`/newsletter/`** — the prints announcement. Full-width split: the sliding
   closeup carousel of the two works going to print beside three short lines
   and the signup (label, title, one lead line, CTA — the page says the prints
