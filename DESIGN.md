@@ -10,6 +10,27 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**2026-10: four pages, minimal first.** Built from this site after several
+rejected proposals (none of them on this branch). The artist's brief:
+minimalism first, start from the original, nothing overworked; the measure
+of clean is the Elias Vorn reference (name, menu, one sentence, then the
+work, each in a fixed place). The rules:
+
+- **Twelve columns; everything starts on column 1 or column 7.** The menu,
+  the sentence, the name in a caption row and the about/contact text all
+  share column 7.
+- **Two families, two jobs.** EB Garamond is the voice: the name in the
+  header and the sentences (statement, notes, bio). Montserrat is
+  information: the menu, caption rows, sizes, prices, the index.
+- **Three sizes:** `--name`, `--say`, `--info` (12px). Do not add a fourth.
+- **One line**, under the fixed header. No other rules, boxes or shadows.
+- **Nothing that is not needed.** No counters, switches, views, hover
+  previews or decorations. If something new seems necessary, it has to
+  replace something.
+
+Where sections 1–7 below describe the one-page site and disagree with
+these rules, these rules win. Section 8 describes the new structure.
+
 ---
 
 ## 1. Color
@@ -220,43 +241,35 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 8. Site structure
 
-Three HTML pages, one design system, all sharing `css/style.css` and the
-fixed header (logo → home; nav: works · about · contact · newsletter).
-**About and contact are sections of the home page, not pages of their own** —
-the nav links to `#about` and `#contact`, and from a sub-folder to
-`../#about`:
+Four pages and the header on each: the name (home), then `works, about,
+contact` from column 7, `inquire` at the edge (on a phone the menu takes its
+place). All share `css/style.css`; `/newsletter/` and `/collector/` keep the
+old look through `css/legacy.css`.
 
-- **`/` home** — the hero slideshow (`hero: n` works from data.js) over the
-  catalog: the grid-density control, then collections (grid + legend) and the
-  lightbox, rendered from `js/data.js`. A hero slide opens that work in the lightbox. Collection
-  descriptions come from the portfolio PDFs and live in each collection's
-  `note`. Works flagged `draft: true` are held back everywhere until published.
-  Two sections close the page:
-  - **`#about`** — bio and artist statement. The bio fills its column beside
-    a 200px portrait; the statement is set in the same serif voice.
-  - **`#contact`** — inquiries / studio / purchase details, then the
-    newsletter signup (see §6). This is the only signup most visitors ever
-    see, since reaching `/newsletter/` takes a nav click.
-- **`/newsletter/`** — the prints announcement. Full-width split: the sliding
-  closeup carousel of the two works going to print beside three short lines
-  and the signup (label, title, one lead line, CTA — the page says the prints
-  are coming and nothing more; sizes, edition, paper, price and date are the
-  artist's to decide). The carousel takes its works from `data-slides` on the
-  container and its pace from `data-interval` (2200ms here, against the 3800ms
-  default — two slides want a quicker cycle than five), so both are
-  one-attribute edits. The
-  countdown block (`#drop-timer` with a `data-deadline`, driven by
-  newsletter.js) still exists for the next drop but is not on the page.
-- **`/collector/`** — the atmosphere drop. Full-width split: a sliding
-  closeup carousel (`newsletter.js`, no `data-slides` → the default drop
-  slugs, zoomed 1.5x from the `<slug>-hero.webp` crops) beside a
-  preview-access signup. `noindex`.
+- **`/` home** — the sentence from column 7, then the selected works (the
+  `hero: 1…n` works in data.js, in that order), one after another: a caption
+  row — (number), name, collection and size, arrow — over a wide closeup
+  (`<slug>-hero` crop). Each opens the work on the works page. A last row
+  leads to all works. No slideshow, no controls.
+- **`/works/`** — one collection at a time. From column 7: the collections
+  as one line of words (`atmosphere, chromatic, works on paper, prints`,
+  the current one in ink) with `grid 2 4 6` at the edge, then the
+  collection's `note`. Under it the grid, each work with one caption row
+  (number, name, price; sold in red with the dot), then the index of the
+  same works (number, name, medium, size, price, status). Prints is a
+  collection with `kind: "prints"`: while it has no works, its page is its
+  note and the signup. Addresses: `/works/#chromatic` a collection,
+  `/works/#<slug>` a work open in the lightbox; prev/next stay in the
+  collection.
+- **`/about/`** — the portrait on column 1, the bio and the statement from
+  column 7.
+- **`/contact/`** — the sentence, then the facts as rows (email, instagram,
+  studio, shipping, newsletter with the signup).
+- Links from the one-page site keep working: `/#<slug>` goes to
+  `/works/#<slug>`, and `/#works`, `/#about`, `/#contact` to their pages.
 
-`js/site.js` is **page-aware**: each block (hero / collections / lightbox)
-runs only if its container is present, so one script drives the home page and
-the sub-pages. `js/newsletter.js` is the same: it renders the signup form
-everywhere, the past-issues archive only where its containers exist, and the
-drop carousel only on the collector page. Image paths are prefixed with
-`window.ROOT` (`''` at the site root, `'../'` in a sub-folder) — set it in each
-page before the scripts, and always link assets and pages **relatively** so
-staging under a sub-path works.
+`js/site.js` is **page-aware**: each block (the selected works, the works
+page, the lightbox) runs only if its container is present. Image and page
+paths are prefixed with `window.ROOT` (`''` at the site root, `'../'` in a
+sub-folder); always link assets and pages **relatively** so staging under a
+sub-path works.

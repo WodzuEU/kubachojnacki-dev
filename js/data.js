@@ -114,4 +114,12 @@ const COLLECTIONS = [
       { ref: "52", slug: "52-paper-crimson-04", title: "Study in crimson 04", medium: "acrylic on cold press paper", size: "10 × 7.5 cm",  year: 2026, price: 80,  w: 202, h: 289, sold: true },
     ],
   },
+  // prints: listed beside the collections; until the first print is
+  // added to `works`, its page is this sentence and the signup
+  {
+    name: "Prints",
+    kind: "prints",
+    note: "the first prints are coming. two paintings, soon in print. subscribers hear first.",
+    works: [],
+  },
 ];
