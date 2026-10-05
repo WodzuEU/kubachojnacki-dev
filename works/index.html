@@ -16,15 +16,14 @@
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css?v=20261005m3">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20261005m4">
 </head>
 <body>
 
-    <header class="top grid">
+    <header class="top">
         <a class="name" href="../">Kuba Chojnacki</a>
         <nav class="menu" aria-label="Site"><a href="./" aria-current="page">works</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
-        <a class="inquire" href="mailto:chojnacki.studio@gmail.com">inquire</a>
     </header>
 
     <main>
@@ -45,33 +44,41 @@
         <span class="f3">© 2026, cracow</span>
     </footer>
 
-    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork">
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork detail">
         <button class="lightbox-btn lb-close" type="button" aria-label="Close">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
         <button class="lightbox-btn lb-prev" type="button" aria-label="Previous work">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="">
             <div class="lightbox-info">
-                <h2 id="lb-title" class="lb-title"></h2>
-                <dl id="lb-facts" class="lb-facts"></dl>
-                <div id="lb-ask" class="lb-ask">
-                    <a id="lb-mail" href="mailto:chojnacki.studio@gmail.com">inquire via email</a>
-                    <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">inquire via instagram</a>
+                <div>
+                    <h2 id="lb-title" class="lb-title"></h2>
+                    <div id="lb-price" class="lb-price"></div>
+                    <div id="lb-status" class="lb-status" hidden></div>
+                    <div id="lb-specs" class="lb-specs"></div>
                 </div>
-                <p class="lb-note">certificate of authenticity included.<br>shipping worldwide.</p>
+                <div class="lb-inquiry-section">
+                    <p class="purchase-info">For inquiries please use email or instagram direct message.</p>
+                    <a id="lb-inquire-mail" href="mailto:chojnacki.studio@gmail.com" class="lb-submit">Inquire via email</a>
+                    <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener" class="lb-submit">Inquire via instagram</a>
+                    <div class="lb-extra">
+                        <p>Certificate of authenticity included.</p>
+                        <p>Shipping worldwide.</p>
+                    </div>
+                </div>
             </div>
         </div>
         <button class="lightbox-btn lb-next" type="button" aria-label="Next work">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 18l6-6-6-6"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 18l6-6-6-6"/></svg>
         </button>
     </div>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261005m3"></script>
-    <script src="../js/site.js?v=20261005m3"></script>
-    <script src="../js/newsletter.js?v=20261005m3"></script>
+    <script src="../js/data.js?v=20261005m4"></script>
+    <script src="../js/site.js?v=20261005m4"></script>
+    <script src="../js/newsletter.js?v=20261005m4"></script>
 </body>
 </html>

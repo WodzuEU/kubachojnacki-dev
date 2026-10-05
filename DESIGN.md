@@ -14,19 +14,23 @@ lives only in git history (`aeefb41`).
 rejected proposals (none of them on this branch). The artist's brief:
 minimalism first, start from the original, nothing overworked; the measure
 of clean is the Elias Vorn reference (name, menu, one sentence, then the
-work, each in a fixed place). The rules:
+work, each in a fixed place). After the first minimal pass he asked for
+three originals back: the **header** (the name in capitals, now semibold;
+the menu at the right edge, the current page underlined), the **slideshow**
+on the home page, and the **lightbox**. Contact took the newsletter page's
+split, with its sliding closeups. The rules:
 
-- **Twelve columns; everything starts on column 1 or column 7.** The menu,
-  the sentence, the name in a caption row and the about/contact text all
-  share column 7.
-- **Two families, two jobs.** EB Garamond is the voice: the name in the
-  header and the sentences (statement, notes, bio). Montserrat is
-  information: the menu, caption rows, sizes, prices, the index.
-- **Three sizes:** `--name`, `--say`, `--info` (12px). Do not add a fourth.
-- **One line**, under the fixed header. No other rules, boxes or shadows.
-- **Nothing that is not needed.** No counters, switches, views, hover
-  previews or decorations. If something new seems necessary, it has to
-  replace something.
+- **Twelve columns; text starts on column 1 or column 7.** The sentence,
+  the works page's line and note, and the about text share column 7.
+- **Two families, two jobs.** EB Garamond is the voice: the name and menu,
+  the sentences (statement, notes, bio), titles. Montserrat is
+  information: caption rows, sizes, prices, the index.
+- **Few sizes:** `--menu` (1.1rem, name and menu), `--say`, `--big`
+  (slideshow and contact titles), `--info` (12px); the lightbox keeps
+  its original sizes.
+- **One line**, under the fixed header.
+- **Nothing that is not needed.** If something new seems necessary, it has
+  to replace something.
 
 Where sections 1–7 below describe the one-page site and disagree with
 these rules, these rules win. Section 8 describes the new structure.
@@ -241,16 +245,16 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 8. Site structure
 
-Four pages and the header on each: the name (home), then `works, about,
-contact` from column 7, `inquire` at the edge (on a phone the menu takes its
-place). All share `css/style.css`; `/newsletter/` and `/collector/` keep the
+Four pages and the original header on each: `KUBA CHOJNACKI` (EB Garamond
+600, capitals, home link) and `works, about, contact` at the right edge, the
+current page underlined. All share `css/style.css`; `/collector/` keeps the
 old look through `css/legacy.css`.
 
-- **`/` home** — the sentence from column 7, then the selected works (the
-  `hero: 1…n` works in data.js, in that order), one after another: a caption
-  row — (number), name, collection and size, arrow — over a wide closeup
-  (`<slug>-hero` crop). Each opens the work on the works page. A last row
-  leads to all works. No slideshow, no controls.
+- **`/` home** — the original slideshow of the selected works (the
+  `hero: 1…n` works in data.js, in that order): full height under the header,
+  crossfade every 5 s, caption, counter, dots, arrows, swipe. A slide opens
+  its work on the works page. Under it the sentence from column 7 and
+  "view works".
 - **`/works/`** — one collection at a time. From column 7: the collections
   as one line of words (`atmosphere, chromatic, works on paper, prints`,
   the current one in ink) with `grid 2 4 6` at the edge, then the
@@ -259,17 +263,21 @@ old look through `css/legacy.css`.
   same works (number, name, medium, size, price, status). Prints is a
   collection with `kind: "prints"`: while it has no works, its page is its
   note and the signup. Addresses: `/works/#chromatic` a collection,
-  `/works/#<slug>` a work open in the lightbox; prev/next stay in the
-  collection.
+  `/works/#<slug>` a work open in the original lightbox; prev/next stay in
+  the collection.
 - **`/about/`** — the portrait on column 1, the bio and the statement from
   column 7.
-- **`/contact/`** — the sentence, then the facts as rows (email, instagram,
-  studio, shipping, newsletter with the signup).
+- **`/contact/`** — the newsletter page's split: on the left half, bleeding
+  to the edge, the sliding closeups of the two works going to print
+  (`.preview-carousel`, newsletter.js); from column 8 the inquiry sentence
+  at `--big`, then the facts as rows (email, instagram, studio, shipping,
+  newsletter with the signup).
 - Links from the one-page site keep working: `/#<slug>` goes to
-  `/works/#<slug>`, and `/#works`, `/#about`, `/#contact` to their pages.
+  `/works/#<slug>`; `/#works`, `/#about`, `/#contact` to their pages;
+  `/newsletter/` and `/#newsletter` to `/contact/`.
 
-`js/site.js` is **page-aware**: each block (the selected works, the works
-page, the lightbox) runs only if its container is present. Image and page
+`js/site.js` is **page-aware**: each block (the slideshow, the works page,
+the lightbox) runs only if its container is present. Image and page
 paths are prefixed with `window.ROOT` (`''` at the site root, `'../'` in a
 sub-folder); always link assets and pages **relatively** so staging under a
 sub-path works.

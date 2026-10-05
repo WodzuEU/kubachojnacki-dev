@@ -9,7 +9,7 @@
         (function () {
             var h = decodeURIComponent(location.hash.slice(1));
             if (!h) return;
-            var pages = { works: 'works/', about: 'about/', contact: 'contact/' };
+            var pages = { works: 'works/', about: 'about/', contact: 'contact/', newsletter: 'contact/' };
             if (pages[h]) location.replace(pages[h]);
             else if (/^\d{2}-/.test(h)) location.replace('works/#' + h);
         })();
@@ -26,22 +26,33 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261005m3">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20261005m4">
 </head>
 <body>
 
-    <header class="top grid">
-        <a class="name" href="./" aria-current="page">Kuba Chojnacki</a>
+    <header class="top">
+        <h1 class="name"><a href="./" aria-current="page">Kuba Chojnacki</a></h1>
         <nav class="menu" aria-label="Site"><a href="works/">works</a><a href="about/">about</a><a href="contact/">contact</a></nav>
-        <a class="inquire" href="mailto:chojnacki.studio@gmail.com">inquire</a>
     </header>
 
     <main>
+        <section class="hero" aria-label="Selected works">
+            <div class="slides" id="slides"></div>
+            <button class="slider-btn prev-btn" type="button" aria-label="Previous slide">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="slider-btn next-btn" type="button" aria-label="Next slide">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+            <div class="hero-progress" id="hero-progress"></div>
+            <div class="hero-counter" id="hero-counter"></div>
+            <div class="slide-dots" id="slide-dots"></div>
+        </section>
         <section class="say grid">
             <p class="say-text">Kuba Chojnacki is a painter working with color, gravity and diffusion. abstract paintings: color absorbed directly into unprimed canvas, from a studio in cracow.</p>
+            <p class="say-more"><a href="works/">view works</a></p>
         </section>
-        <div id="sequence"></div>
     </main>
 
     <footer class="foot grid">
@@ -51,7 +62,7 @@
     </footer>
 
     <script>window.ROOT = '';</script>
-    <script src="js/data.js?v=20261005m3"></script>
-    <script src="js/site.js?v=20261005m3"></script>
+    <script src="js/data.js?v=20261005m4"></script>
+    <script src="js/site.js?v=20261005m4"></script>
 </body>
 </html>

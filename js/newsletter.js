@@ -1,9 +1,9 @@
 /* Renders the newsletter signup form (site-native Kit submission) and, where
    its containers are present, the archive of past issues from
    js/newsletter-data.js, and the sliding work carousel. Used on the contact
-   page (signup + archive), the newsletter page (carousel + signup) and the
-   collector page (carousel + signup) — each block runs only where its
-   container exists. */
+   page (carousel + signup), the prints collection on the works page (signup)
+   and the collector page (carousel + signup); each block runs only where
+   its container exists. */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -40,9 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const btn = form.querySelector('button');
             btn.disabled = true;
-            const where = location.pathname.includes('collector')  ? 'collector'
-                        : location.pathname.includes('newsletter') ? 'newsletter'
-                        :                                            'home';
+            const where = location.pathname.includes('collector') ? 'collector'
+                        : location.pathname.includes('contact')   ? 'contact'
+                        : location.pathname.includes('works')     ? 'works'
+                        :                                           'home';
             track('signup/' + where, 'Newsletter signup');
             try {
                 const res = await fetch(form.action, {

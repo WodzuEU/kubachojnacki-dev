@@ -1,7 +1,7 @@
 /* Renders the works from COLLECTIONS (js/data.js).
 
-     /          the sentence, then the selected works (hero: 1…n in data.js)
-                one after another, each under its row: (number), name, details
+     /          the slideshow of the selected works (hero: 1…n in data.js),
+                as on the original site; each slide opens its work
      /works/    one collection at a time: its note, the grid, the index.
                 /works/#chromatic is a collection, /works/#<slug> a work
                 open in the lightbox.
@@ -12,6 +12,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof COLLECTIONS === 'undefined') return;
     const ROOT = window.ROOT || '';
+    const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // analytics events (GoatCounter): sent only on the live domain
     const gcQueue = (window.__gcQueue = window.__gcQueue || []);
@@ -37,44 +38,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
     const plain   = w => (w.title.split('|')[1] || w.title).trim();
     const altOf   = w => `${w.title.replace(' | ', ', ')}, ${w.medium}, ${w.size}, ${w.year}`;
+    const label   = w => w.title.replace(' | ', ' ');
     const price   = w => `${w.price} €`;
     const status  = w => w.sold ? 'sold' : (w.unavailable ? 'currently not available' : 'available');
     const dot     = w => w.sold ? '<span class="dot"></span>' : (w.unavailable ? '<span class="dot held"></span>' : '');
-    const ARROW   = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 8.5L8.5 1.5M3 1.5h5.5V7" fill="none" stroke="currentColor" stroke-width="1"/></svg>';
+    // "Atmosphere | maroon khaki": the collection, the colours under it
+    const titleHtml = w => {
+        const [main, sub] = w.title.split('|').map(s => s.trim());
+        return main + (sub ? `<span class="color-subtitle">${roman(sub)}</span>` : '');
+    };
 
-    // ── home: the selected works, one after another ─────────
-    const seq = document.getElementById('sequence');
-    if (seq) {
+    // ── home: the slideshow, as on the original site ────────
+    const slidesWrap = document.getElementById('slides');
+    if (slidesWrap) {
         const picks = WORKS.filter(w => w.hero).sort((a, b) => a.hero - b.hero);
-        seq.innerHTML = picks.map((w, i) => {
-            const href = `works/#${w.slug}`;
-            return `<article class="piece">
-                <a class="row grid" href="${href}">
-                    <span class="no">(${String(i + 1).padStart(2, '0')})</span>
-                    <span class="nm">${nameOf(w)}</span>
-                    <span class="dt">${colOf[w.slug].name.toLowerCase()}, ${w.size}</span>
-                    <span class="go">${ARROW}</span>
-                </a>
-                <a class="frame" href="${href}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
-                    <img src="${thumb(w, '-hero')}" srcset="${thumb(w, '-hero')} 1600w, ${ROOT}IMAGES/works/${w.slug}-hero.jpg 3024w"
-                         sizes="100vw" alt="${altOf(w)}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
-                </a>
-            </article>`;
-        }).join('') +
-        `<a class="row grid all" href="works/">
-             <span class="no">(all)</span>
-             <span class="nm">all works</span>
-             <span class="dt">${WORKS.length} works</span>
-             <span class="go">${ARROW}</span>
-         </a>`;
+        slidesWrap.innerHTML = picks.map((w, i) =>
+            `<div class="slide">
+                 <a href="${ROOT}works/#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
+                     <img src="${ROOT}IMAGES/works/${w.slug}-hero.jpg"
+                          srcset="${thumb(w, '-hero')} 1600w, ${ROOT}IMAGES/works/${w.slug}-hero.jpg 3024w"
+                          sizes="100vw" alt="${altOf(w)}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
+                 </a>
+                 <div class="slide-vignette"></div>
+                 <div class="slide-caption">
+                     <div class="slide-caption-title">${roman(w.title)}</div>
+                     <div class="slide-caption-specs">${[w.medium, w.size, w.year].map((t, k, a) => k < a.length - 1 ? `<span class="nw">${t}&ensp;&middot;</span>&ensp;` : t).join('')}</div>
+                 </div>
+             </div>`).join('');
+
+        const slides = Array.from(slidesWrap.children);
+        const dotsWrap = document.getElementById('slide-dots');
+        dotsWrap.innerHTML = slides.map((_, i) => `<button class="slide-dot" type="button" aria-label="Go to slide ${i + 1}"></button>`).join('');
+        const dots = Array.from(dotsWrap.children);
+        const counter = document.getElementById('hero-counter');
+        const progress = document.getElementById('hero-progress');
+        const N = slides.length, two = n => String(n).padStart(2, '0');
+        let cur = 0, timer = null;
+
+        // only the slide on show can be reached with the keyboard
+        const goTo = i => {
+            cur = (i + N) % N;
+            slides.forEach((s, k) => {
+                s.classList.toggle('active', k === cur);
+                s.setAttribute('aria-hidden', k !== cur);
+                s.querySelector('a').tabIndex = k === cur ? 0 : -1;
+                dots[k].classList.toggle('active', k === cur);
+            });
+            counter.textContent = `${two(cur + 1)} / ${two(N)}`;
+            progress.style.width = ((cur + 1) / N * 100) + '%';
+        };
+        const start = () => { if (!REDUCE_MOTION) timer = setInterval(() => goTo(cur + 1), 5000); };
+        const restart = () => { clearInterval(timer); start(); };
+
+        dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); restart(); }));
+        document.querySelector('.prev-btn').addEventListener('click', () => { goTo(cur - 1); restart(); });
+        document.querySelector('.next-btn').addEventListener('click', () => { goTo(cur + 1); restart(); });
+
+        const hero = slidesWrap.parentElement;
+        let x0 = 0;
+        hero.addEventListener('touchstart', e => { x0 = e.changedTouches[0].clientX; }, { passive: true });
+        hero.addEventListener('touchend', e => {
+            const dx = x0 - e.changedTouches[0].clientX;
+            if (Math.abs(dx) > 40) { goTo(dx > 0 ? cur + 1 : cur - 1); restart(); }
+        }, { passive: true });
+
+        goTo(0);
+        start();
     }
 
-    // ── lightbox ─────────────────────────────────────────────
+    // ── lightbox, as on the original site ───────────────────
     let openWork = () => {}, closeLb = () => {}, current = null;
     const lb = document.getElementById('lightbox');
     if (lb) {
         const img = document.getElementById('lightbox-img');
         const info = lb.querySelector('.lightbox-info');
+        const mail = document.getElementById('lb-inquire-mail');
         let idx = 0, back = null, scrollY = 0, full = false;
 
         // hold the page still behind the lightbox, and put it back in one frame
@@ -102,10 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
             lb.classList.remove('active');
             unlock();
             if (!keepHash) history.replaceState(null, '', '#' + (current || ''));
-            if (back) { back.focus(); back = null; }
+            if (back) { back.focus({ preventScroll: true }); back = null; }
         };
 
-        openWork = (i, from) => {
+        openWork = i => {
             idx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[idx];
             img.classList.remove('is-zoomed');
@@ -114,21 +152,25 @@ document.addEventListener('DOMContentLoaded', () => {
             img.width = w.w; img.height = w.h;
             img.src = thumb(w, '-1600'); img.srcset = srcset(w); img.sizes = '(max-width: 800px) 88vw, 58vw';
             img.alt = altOf(w);
-            document.getElementById('lb-title').innerHTML = `${nameOf(w)}<span class="lb-col">${colOf[w.slug].name.toLowerCase()}, ${noOf[w.slug]}</span>`;
-            document.getElementById('lb-facts').innerHTML =
-                `<div><dt>medium</dt><dd>${w.medium}</dd></div>
-                 <div><dt>size</dt><dd>${w.size}</dd></div>
-                 <div><dt>year</dt><dd>${w.year}</dd></div>
-                 <div><dt>price</dt><dd>${price(w)}</dd></div>
-                 <div><dt>status</dt><dd>${dot(w)}${status(w)}</dd></div>`;
+
+            document.getElementById('lb-title').innerHTML = titleHtml(w);
+            document.getElementById('lb-price').textContent = price(w);
+            document.getElementById('lb-specs').innerHTML = `${w.medium}<br>${w.size}<br>${w.year}`;
+            const st = document.getElementById('lb-status');
+            st.hidden = !(w.sold || w.unavailable);
+            st.innerHTML = st.hidden ? '' : `<span class="status-dot${w.sold ? '' : ' unavailable'}"></span><span class="status-text">${status(w)}</span>`;
             info.classList.toggle('is-sold', !!w.sold);
-            document.getElementById('lb-ask').hidden = !!w.sold;
-            document.getElementById('lb-mail').href =
-                `mailto:${SITE.email}?subject=` + encodeURIComponent(`Inquiry: ${noOf[w.slug]}, ${w.title.replace(/\s*\|\s*/g, ' ')}`);
-            if (!lb.classList.contains('active')) { back = from || null; lock(); }
-            lb.classList.add('active');
+            info.classList.toggle('is-unavailable', !w.sold && !!w.unavailable);
+            mail.href = `mailto:${SITE.email}?subject=` + encodeURIComponent(`Inquiry: ${noOf[w.slug]}, ${label(w)}`);
+
+            if (!lb.classList.contains('active')) {
+                back = document.activeElement !== document.body ? document.activeElement : null;
+                lock();
+                lb.classList.add('active');
+                lb.querySelector('.lb-close').focus({ preventScroll: true });
+            }
             history.replaceState(null, '', '#' + w.slug);
-            track('open/' + w.slug, w.title.replace(' | ', ' '));
+            track('open/' + w.slug, label(w));
         };
 
         // prev / next stay inside the work's collection
@@ -158,12 +200,21 @@ document.addEventListener('DOMContentLoaded', () => {
         lb.querySelector('.lb-next').addEventListener('click', e => { e.stopPropagation(); step(1); });
         lb.querySelector('.lb-close').addEventListener('click', e => { e.stopPropagation(); closeLb(); });
         lb.addEventListener('click', e => { if (!e.target.closest('.lightbox-info, .lightbox-btn') && e.target !== img) closeLb(); });
-        document.getElementById('lb-mail').addEventListener('click', () => track('inquire-email/' + WORKS[idx].slug));
+        mail.addEventListener('click', () => track('inquire-email/' + WORKS[idx].slug, label(WORKS[idx])));
+        lb.querySelector('.lb-inquiry-section a[href*="instagram"]')
+          .addEventListener('click', () => track('inquire-instagram/' + WORKS[idx].slug, label(WORKS[idx])));
         document.addEventListener('keydown', e => {
             if (!lb.classList.contains('active')) return;
             if (e.key === 'Escape') closeLb();
             else if (e.key === 'ArrowLeft') step(-1);
             else if (e.key === 'ArrowRight') step(1);
+            else if (e.key === 'Tab') {
+                // keep the keyboard inside while it is open
+                const els = Array.from(lb.querySelectorAll('button, a[href]'));
+                const first = els[0], last = els[els.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
         });
     }
 
