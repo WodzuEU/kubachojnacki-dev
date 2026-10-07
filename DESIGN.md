@@ -10,25 +10,37 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
-**2026-10: four pages, minimal first.** Built from this site after several
-rejected proposals (none of them on this branch). The artist's brief:
-minimalism first, start from the original, nothing overworked; the measure
-of clean is the Elias Vorn reference (name, menu, one sentence, then the
-work, each in a fixed place). After the first minimal pass he asked for
-three originals back: the **header** (the name in capitals, now semibold;
-the menu at the right edge, the current page underlined), the **slideshow**
-on the home page, and the **lightbox**. Contact took the newsletter page's
-split, with its sliding closeups. The rules:
+**2026-10: minimal first, then a page per collection.** Built from this
+site after several rejected proposals (none of them on this branch). The
+artist's brief: minimalism first, start from the original, nothing
+overworked. After the first minimal pass he asked for three originals back:
+the **header** (the name in capitals, semibold; the menu at the right edge,
+the current page underlined), the **slideshow** on the home page, and the
+**lightbox**. Contact took the newsletter page's split, with its sliding
+closeups. On 2026-10-07, after a study of ten references he chose (artifact
+"Website redesign"), he asked for: home = slideshow, then the sentence, then
+one closeup per collection; a page for every collection, reached through a
+line of all collections; prints sold by email with formats and prices; a
+newsletter line in every footer; and the type layout he liked in
+Holographik and Daniel Lanzrath, words framing the page with empty margin
+around. The rules:
 
-- **Twelve columns; text starts on column 1 or column 7.** The sentence,
-  the works page's line and note, and the about text share column 7.
+- **Twelve columns; text starts on column 1 or column 7**, the menu ends at
+  the right edge. Pictures fill whole columns (2, 4 or 6 across; five
+  across is gone, twelve does not split into five).
 - **Two families, two jobs.** EB Garamond is the voice: the name and menu,
-  the sentences (statement, notes, bio), titles. Montserrat is
-  information: caption rows, sizes, prices, the index.
-- **Few sizes:** `--menu` (1.1rem, name and menu), `--say`, `--big`
-  (slideshow and contact titles), `--info` (12px); the lightbox keeps
-  its original sizes.
-- **One line**, under the fixed header.
+  the sentences (statement, notes, bio), the names of works. Montserrat is
+  information: caption rows, sizes, prices, the price list.
+- **Three sizes:** `--s` (12px, facts), `--m` (1.15rem, the voice),
+  `--l` (≤2.2rem, collection names and the contact sentence). The lightbox
+  keeps its original sizes; the phone header keeps its smaller name/menu.
+- **Words frame the picture.** The home slideshow sits inside the page
+  margins, between the header line and one row of words under it (title
+  on column 1, medium on 7, size on 10, counter at the edge), nothing laid
+  over the painting.
+- **One line**, under the fixed header. Two accents only: the underline on
+  the page (or collection) you are on, and the line of an email field.
+- **Two distances:** `--near` inside a block, `--far` between blocks.
 - **Nothing that is not needed.** If something new seems necessary, it has
   to replace something.
 
@@ -207,21 +219,23 @@ subtitle is not part of the exception: it scales with the title.
   the way down from the top of the page.
 - Collections may carry a short lowercase `note` under the heading —
   written from the work, concrete images, no gallery jargon.
-- Permalinks: `kubachojnacki.com/#<slug>` opens the work's lightbox —
-  the link to send collectors.
+- Permalinks: `kubachojnacki.com/<collection>/#<slug>` opens the work's
+  lightbox, the link to send collectors (the short `/#<slug>` forwards
+  there).
 - Hero slideshow: currently 03 maroon khaki → 39 → 40 → 44 → 45 → 46,
   set via `hero: 1…n` in data.js.
 - The lowercase voice: short factual lines, prices stated openly,
   "certificate of authenticity included. shipping worldwide."
 - Newsletter lives on the domain, not a Kit subdomain. `newsletter.js`
-  renders the signup wherever `#nl-signup` exists — the home page's contact
-  section (`.contact-newsletter`, "join the list"), `/newsletter/` and
-  `/collector/` — and the archive of past issues from `js/newsletter-data.js`
-  wherever `#nl-issues` and `#nl-count` exist (nowhere yet; add it to contact
-  once there are issues to show). Each placement reports its own
-  `signup/home | newsletter | collector` event, so the numbers say which one
-  converts. Keep both inside this system — achromatic, two families,
-  lowercase — never a second layout language.
+  renders a signup into every `.nl-signup` (and `#nl-signup` on
+  `/collector/`): the footer line on each page (`join`), the contact page's
+  newsletter row, the page of a collection still to come. Each reports its
+  `data-where` as a `signup/<where>` event (`footer`, `contact`,
+  `miniatures`, `collector`), so the numbers say which placement converts.
+  The archive of past issues from `js/newsletter-data.js` renders wherever
+  `#nl-issues` and `#nl-count` exist (nowhere yet). Keep all of it inside
+  this system: achromatic, two families, lowercase, never a second layout
+  language.
 - `site.js` and `newsletter.js` both run on the home page. They share one
   GoatCounter queue and the first to arrive claims the loader
   (`window.__gcLoader`) — two `count.js` tags would count every home-page
@@ -245,36 +259,55 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 8. Site structure
 
-Four pages and the original header on each: `KUBA CHOJNACKI` (EB Garamond
-600, capitals, home link) and `works, about, contact` at the right edge, the
-current page underlined. All share `css/style.css`; `/collector/` keeps the
-old look through `css/legacy.css`.
+The home page, a page per collection, about and contact, with the original
+header on each: `KUBA CHOJNACKI` (EB Garamond 600, capitals, home link) and
+`works, about, contact` at the right edge. `works` leads to the collections
+on the home page and is underlined on every collection page. All share
+`css/style.css`; `/collector/` keeps the old look through `css/legacy.css`.
 
-- **`/` home** — the original slideshow of the selected works (the
-  `hero: 1…n` works in data.js, in that order): full height under the header,
-  crossfade every 5 s, caption, counter, dots, arrows, swipe. A slide opens
-  its work on the works page. Under it the sentence from column 7 and
-  "view works".
-- **`/works/`** — one collection at a time. From column 7: the collections
-  as one line of words (`atmosphere, chromatic, works on paper, prints`,
-  the current one in ink) with `grid 2 4 6` at the edge, then the
-  collection's `note`. Under it the grid, each work with one caption row
-  (number, name, price; sold in red with the dot), then the index of the
-  same works (number, name, medium, size, price, status). Prints is a
-  collection with `kind: "prints"`: while it has no works, its page is its
-  note and the signup. Addresses: `/works/#chromatic` a collection,
-  `/works/#<slug>` a work open in the original lightbox; prev/next stay in
-  the collection.
-- **`/about/`** — the portrait on column 1, the bio and the statement from
+- **`/` home**: the original slideshow of the selected works (the
+  `hero: 1…n` works in data.js, in that order), inside the page margins and
+  filling the first screen under the header; crossfade every 5 s, arrows,
+  swipe. Under it one row of words: title, medium, size and year, counter.
+  A slide opens its work on its collection page. Then the sentence from
+  column 7, then `collections`: one closeup per collection, three across
+  (its `cover` work's `-hero.webp`; prints show the A2 print on the wall;
+  a collection still to come shows "photographs soon"), name and count
+  under each, opening the collection's page.
+- **`/<collection>/`** (atmosphere, chromatic, works-on-paper, miniatures,
+  prints): the collections as one line of words (the current one in ink,
+  underlined) with `grid 2 4 6` at the edge; the name at `--l` with its
+  count on column 1, the `note` from column 7. Under it the grid, each work
+  with one caption row (number, name, price; sold in red with the dot),
+  then the price list (number, name, medium, size, price, status), then
+  `next` and the following collection. `/<collection>/#<slug>` opens a work
+  in the original lightbox; prev/next stay in the collection; a slug from
+  another collection forwards to its page. The pages are written by
+  `scripts/build_collections.py` from data.js (run it after adding or
+  renaming a collection; its STAMP must match the pages' `?v=`).
+- **`/prints/`** (`kind: "prints"`): the two prints side by side on a light
+  wall tone (`IMAGES/prints/`, from the final print files by
+  `scripts/make_prints.py`), each with the original's size and status and a
+  row per format (size, cm, price, `order` by email). Picking a format
+  shows its own framing; a format without a price reads "price soon".
+- **`/miniatures/`** (`kind: "soon"`): the note and a signup until the
+  photographs arrive; then it becomes an ordinary collection.
+- **`/about/`**: the portrait on column 1, the bio and the statement from
   column 7.
-- **`/contact/`** — the newsletter page's split: on the left half, bleeding
-  to the edge, the sliding closeups of the two works going to print
+- **`/contact/`**: the newsletter page's split: on the left half, bleeding
+  to the edge, the sliding closeups of the two works in print
   (`.preview-carousel`, newsletter.js); from column 8 the inquiry sentence
-  at `--big`, then the facts as rows (email, instagram, studio, shipping,
-  newsletter with the signup).
-- Links from the one-page site keep working: `/#<slug>` goes to
-  `/works/#<slug>`; `/#works`, `/#about`, `/#contact` to their pages;
-  `/newsletter/` and `/#newsletter` to `/contact/`.
+  at `--l`, then the facts as rows (email, instagram, studio, shipping,
+  prints, newsletter with the signup).
+- **Footer** on every page: the newsletter in one line (label on column 1,
+  the field from column 7, `join` at the edge), then email, instagram,
+  city. Contact and a collection still to come leave the footer line out,
+  since their page already holds the signup.
+- Links from the one-page site keep working: `/#<slug>` and
+  `/works/#<slug>` go to `/<collection>/#<slug>`; `/works/#<collection>`
+  to that page; `/works/` and `/#works` to the collections on the home
+  page; `/#about`, `/#contact` to their pages; `/newsletter/` and
+  `/#newsletter` to `/contact/`.
 
 `js/site.js` is **page-aware**: each block (the slideshow, the works page,
 the lightbox) runs only if its container is present. Image and page

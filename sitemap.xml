@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://kubachojnacki.com/</loc><lastmod>2026-10-05</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://kubachojnacki.com/works/</loc><lastmod>2026-10-05</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://kubachojnacki.com/about/</loc><lastmod>2026-10-05</lastmod><changefreq>yearly</changefreq></url>
-  <url><loc>https://kubachojnacki.com/contact/</loc><lastmod>2026-10-05</lastmod><changefreq>yearly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/atmosphere/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/chromatic/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/works-on-paper/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/miniatures/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/prints/</loc><lastmod>2026-10-07</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/about/</loc><lastmod>2026-10-07</lastmod><changefreq>yearly</changefreq></url>
+  <url><loc>https://kubachojnacki.com/contact/</loc><lastmod>2026-10-07</lastmod><changefreq>yearly</changefreq></url>
 </urlset>

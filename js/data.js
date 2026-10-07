@@ -31,7 +31,18 @@
      hero   1, 2, 3... = position in the homepage slideshow (omit otherwise)
 
    A collection may carry a short `note` (1-2 lowercase sentences)
-   shown under its heading.
+   shown under its heading, and a `cover`: the slug of the work whose
+   closeup (IMAGES/thumbs/<slug>-hero.webp) stands for it on the home page.
+
+   Every collection has its own page, /<name>/ (e.g. /works-on-paper/).
+   After adding or renaming a collection, run
+        python scripts/build_collections.py
+   which writes those pages and the sitemap from this file.
+
+   Two kinds of collection have their own layout:
+     kind: "soon"    announced, no photographs yet: `count` works
+     kind: "prints"  `prints`: the painting (slug) and its formats;
+                     price null shows "price soon"
    ============================================================ */
 
 const SITE = {
@@ -48,9 +59,20 @@ const SITE = {
   },
 };
 
+// sizes the two paintings are printed in. A1-A3 prices: the artist's plan
+// (2026-10-05); A4 and A5 not decided yet.
+const PRINT_FORMATS = [
+  { size: "A1", cm: "59.4 × 84.1 cm", price: 450 },
+  { size: "A2", cm: "42 × 59.4 cm",   price: 250 },
+  { size: "A3", cm: "29.7 × 42 cm",   price: 150 },
+  { size: "A4", cm: "21 × 29.7 cm",   price: null },
+  { size: "A5", cm: "14.8 × 21 cm",   price: null },
+];
+
 const COLLECTIONS = [
   {
     name: "Atmosphere",
+    cover: "44-atmosphere-lavender-green-ochre",
     note: "fields of thin acrylic on raw canvas. it moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. it studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
     works: [
       { ref: "44", slug: "44-atmosphere-lavender-green-ochre", title: "Atmosphere | lavender green ochre", medium: "acrylic on raw canvas", size: "200 × 150 cm", year: 2026, price: 2800, w: 2588, h: 3450, hero: 4 },
@@ -88,6 +110,7 @@ const COLLECTIONS = [
   },
   {
     name: "Chromatic",
+    cover: "20-chromatic-red",
     note: "archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.",
     works: [
       { ref: "19", slug: "19-chromatic-blue-orange",  title: "Chromatic | blue orange", medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032 },
@@ -104,6 +127,7 @@ const COLLECTIONS = [
   },
   {
     name: "Works on paper",
+    cover: "47-paper-purple-01",
     note: "six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). the series runs from deep purples into crimson reds.",
     works: [
       { ref: "47", slug: "47-paper-purple-01",  title: "Study in purple 01",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 425, h: 578 },
@@ -114,12 +138,22 @@ const COLLECTIONS = [
       { ref: "52", slug: "52-paper-crimson-04", title: "Study in crimson 04", medium: "acrylic on cold press paper", size: "10 × 7.5 cm",  year: 2026, price: 80,  w: 202, h: 289, sold: true },
     ],
   },
-  // prints: listed beside the collections; until the first print is
-  // added to `works`, its page is this sentence and the signup
+  // nine new small works; the page and the home closeup wait for photographs
+  {
+    name: "Miniatures",
+    kind: "soon",
+    count: 9,
+    note: "nine new small works. photographs soon.",
+    works: [],
+  },
   {
     name: "Prints",
     kind: "prints",
-    note: "the first prints are coming. two paintings, soon in print. subscribers hear first.",
+    note: "two paintings in print, as fine art giclée with a white border. each size frames the painting a little closer. to order, write with the size.",
     works: [],
+    prints: [
+      { work: "03-atmosphere-maroon-khaki",  formats: PRINT_FORMATS },
+      { work: "02-atmosphere-burgundy-blue", formats: PRINT_FORMATS },
+    ],
   },
 ];

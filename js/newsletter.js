@@ -1,9 +1,11 @@
-/* Renders the newsletter signup form (site-native Kit submission) and, where
+/* Renders the newsletter signup forms (site-native Kit submission) and, where
    its containers are present, the archive of past issues from
-   js/newsletter-data.js, and the sliding work carousel. Used on the contact
-   page (carousel + signup), the prints collection on the works page (signup)
-   and the collector page (carousel + signup); each block runs only where
-   its container exists. */
+   js/newsletter-data.js, and the sliding work carousel. A signup goes into
+   every .nl-signup: the footer line on each page, the contact page's
+   newsletter row, the page of a collection still to come; data-cta names
+   its button, data-where the placement it reports. The carousel runs on the
+   contact page and the collector page. Each block runs only where its
+   container exists. */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -23,41 +25,43 @@ document.addEventListener('DOMContentLoaded', () => {
         else gcQueue.push(vars);
     };
 
-    // ── signup form ───────────────────────────────────────────
-    const signup = document.getElementById('nl-signup');
-    if (signup && typeof SITE !== 'undefined' && SITE.newsletter && SITE.newsletter.action) {
-        const cta = signup.dataset.cta || 'subscribe';
-        signup.innerHTML =
-            `<form action="${SITE.newsletter.action}" method="post" target="_blank" class="newsletter-form">
-                 <input type="email" name="${SITE.newsletter.field || 'email'}" required placeholder="your email" aria-label="Email address">
-                 <button type="submit" class="lb-submit nl-submit">${cta}</button>
-             </form>`;
+    // ── signup forms ──────────────────────────────────────────
+    const signups = document.querySelectorAll('.nl-signup, #nl-signup');
+    if (signups.length && typeof SITE !== 'undefined' && SITE.newsletter && SITE.newsletter.action) {
+        signups.forEach(signup => {
+            const cta = signup.dataset.cta || 'subscribe';
+            signup.innerHTML =
+                `<form action="${SITE.newsletter.action}" method="post" target="_blank" class="newsletter-form">
+                     <input type="email" name="${SITE.newsletter.field || 'email'}" required placeholder="your email" aria-label="Email address">
+                     <button type="submit" class="lb-submit nl-submit">${cta}</button>
+                 </form>`;
 
-        // submit in the background and confirm inline, in our own typography;
-        // if the request fails, fall back to a normal form submission
-        const form = signup.querySelector('form');
-        form.addEventListener('submit', async e => {
-            e.preventDefault();
-            const btn = form.querySelector('button');
-            btn.disabled = true;
-            const where = location.pathname.includes('collector') ? 'collector'
-                        : location.pathname.includes('contact')   ? 'contact'
-                        : location.pathname.includes('works')     ? 'works'
-                        :                                           'home';
-            track('signup/' + where, 'Newsletter signup');
-            try {
-                const res = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'Accept': 'application/json' },
-                });
-                if (!res.ok) throw new Error('subscribe failed: ' + res.status);
-                signup.innerHTML =
-                    '<p class="newsletter-confirm">thank you. now check your inbox to confirm the subscription.</p>';
-            } catch (err) {
-                btn.disabled = false;
-                form.submit();
-            }
+            // submit in the background and confirm inline, in our own typography;
+            // if the request fails, fall back to a normal form submission
+            const form = signup.querySelector('form');
+            form.addEventListener('submit', async e => {
+                e.preventDefault();
+                const btn = form.querySelector('button');
+                btn.disabled = true;
+                const where = signup.dataset.where
+                            || (location.pathname.includes('collector') ? 'collector'
+                              : location.pathname.includes('contact')   ? 'contact'
+                              :                                           'home');
+                track('signup/' + where, 'Newsletter signup');
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) throw new Error('subscribe failed: ' + res.status);
+                    signup.innerHTML =
+                        '<p class="newsletter-confirm">thank you. now check your inbox to confirm the subscription.</p>';
+                } catch (err) {
+                    btn.disabled = false;
+                    form.submit();
+                }
+            });
         });
     }
 

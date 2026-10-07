@@ -6,21 +6,26 @@ Design decisions, tokens, and workflow rules live in [DESIGN.md](DESIGN.md) — 
 
 ## Structure
 
-Three pages, one design system (see [DESIGN.md](DESIGN.md) §8):
+A page per collection, one design system (see [DESIGN.md](DESIGN.md) §8):
 
 ```
-index.html            home — hero slideshow over the catalog (grid, legend, lightbox)
+index.html            home: the slideshow, the sentence, one closeup per collection
+<collection>/         one page per collection (atmosphere, chromatic, works-on-paper,
+                      miniatures, prints), written from data.js by
+                      scripts/build_collections.py
 about/index.html      bio + artist statement (static prose)
-contact/index.html    inquiries + the newsletter (signup + archive)
+contact/index.html    inquiries + the newsletter
+works/index.html      forwards old /works/ links to the right collection page
 css/style.css         all styling
-js/data.js            ★ THE CATALOG — the only file to edit for new works
-js/site.js            page-aware: renders hero / grid / legend / lightbox from data.js
-js/newsletter-data.js past newsletter issues, newest first (contact page)
-js/newsletter.js      renders the signup form + archive on the contact page
+js/data.js            ★ THE CATALOG: the only file to edit for new works
+js/site.js            page-aware: renders slideshow / closeups / grid / price list /
+                      prints / lightbox from data.js
+js/newsletter.js      renders every signup form (footer, contact) + the contact carousel
 IMAGES/works/         display images + hero shots   <slug>.jpg, <slug>-hero.jpg
-IMAGES/thumbs/        generated WebP (400/800/1600px) — run scripts/make_thumbs.py
+IMAGES/thumbs/        generated WebP (400/800/1600px): run scripts/make_thumbs.py
+IMAGES/prints/        the prints on a wall tone: run scripts/make_prints.py
 IMAGES/about/         studio & portrait photos
-scripts/              image tooling
+scripts/              image and page tooling
 ```
 
 Assets and cross-page links are **relative** (`../css/…`, `../about/`) so the
@@ -43,8 +48,12 @@ sold or withdrawn works. All image files use the slug as their base name.
 
 ## Adding a collection
 
-Add a new `{ name: "...", works: [...] }` block to `COLLECTIONS` in `js/data.js`.
-The collapsible section, counts, grid and legend are generated automatically.
+Add a new `{ name: "...", cover: "<slug>", note: "...", works: [...] }` block to
+`COLLECTIONS` in `js/data.js`, then run `python scripts/build_collections.py`.
+That writes the collection's page and the sitemap; its closeup on the home page,
+the line of collections, the grid and the price list follow from data.js. A
+collection without photographs yet can be announced with `kind: "soon"` and a
+`count`.
 
 ## Marking a work as sold
 
@@ -53,9 +62,11 @@ lightbox plus the structured-data availability all follow from that one flag.
 
 ## Sharing a link to one painting
 
-Every work has a permalink: `https://kubachojnacki.com/#<slug>`, e.g.
-`https://kubachojnacki.com/#02-atmosphere-burgundy-blue`. Opening it shows
-that painting in the lightbox — ideal for Instagram DMs and email inquiries.
+Every work has a permalink: `https://kubachojnacki.com/<collection>/#<slug>`,
+e.g. `https://kubachojnacki.com/atmosphere/#02-atmosphere-burgundy-blue`. Opening
+it shows that painting in the lightbox, ideal for Instagram DMs and email
+inquiries. The older short form `https://kubachojnacki.com/#<slug>` still works
+and forwards there.
 
 ## Staging → production workflow
 
@@ -77,8 +88,8 @@ staging site never pollute the numbers. Dashboard: https://kubachojnacki.goatcou
 
 ## Newsletter
 
-The signup form lives on the **contact page** (`contact/index.html`, rendered by
-`js/newsletter.js`) and works once `SITE.newsletter.action` in `js/data.js` is
+The signup form sits in the footer of every page and on the **contact page**
+(rendered by `js/newsletter.js` into every `.nl-signup`) and works once `SITE.newsletter.action` in `js/data.js` is
 filled in. It is provider-agnostic — any service that accepts a plain form POST
 works. Set `action` and `field`:
 

@@ -1,12 +1,15 @@
 /* Renders the works from COLLECTIONS (js/data.js).
 
-     /          the slideshow of the selected works (hero: 1…n in data.js),
-                as on the original site; each slide opens its work
-     /works/    one collection at a time: its note, the grid, the index.
-                /works/#chromatic is a collection, /works/#<slug> a work
-                open in the lightbox.
+     /              the slideshow of the selected works (hero: 1…n in data.js),
+                    framed by one row of words under it; the sentence; one
+                    closeup per collection, each opening its page
+     /<collection>/ one collection: the line of all collections, the grid,
+                    the price list, the next collection. /<collection>/#<slug>
+                    opens that work in the original lightbox. Prints and a
+                    collection still to come have their own layouts.
 
-   No artwork data lives in HTML: edit data.js only.
+   No artwork data lives in HTML: edit data.js only. The collection pages
+   themselves are written from data.js by scripts/build_collections.py.
    ROOT (set per page) prefixes paths: '' at the root, '../' in a folder. */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,18 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
         else gcQueue.push(vars);
     };
 
-    // published works only; prints is listed even before there are prints
+    // published works only; prints and announced collections have pages before works
     const slugOf = c => c.name.toLowerCase().replace(/\s+/g, '-');
     const COLS = COLLECTIONS
         .map(c => Object.assign({}, c, { slug: slugOf(c), works: (c.works || []).filter(w => !w.draft) }))
-        .filter(c => c.works.length || c.kind === 'prints');
+        .filter(c => c.works.length || c.kind === 'prints' || c.kind === 'soon');
     const WORKS = COLS.flatMap(c => c.works);
     const colOf = {}, noOf = {};
     COLS.forEach(c => c.works.forEach((w, i) => { colOf[w.slug] = c; noOf[w.slug] = String(i + 1).padStart(2, '0'); }));
     const bySlug = Object.fromEntries(WORKS.map(w => [w.slug, w]));
 
+    const pageOf  = c => `${ROOT}${c.slug}/`;
+    const countOf = c => c.kind === 'prints' ? `${(c.prints || []).length} prints`
+                       : c.kind === 'soon'   ? `${c.count} works, soon`
+                       :                       `${c.works.length} works`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp`;
     const roman   = s => s.replace(/\b(III|II|I)\b/g, '<span style="text-transform:none">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
     const plain   = w => (w.title.split('|')[1] || w.title).trim();
@@ -48,30 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return main + (sub ? `<span class="color-subtitle">${roman(sub)}</span>` : '');
     };
 
-    // ── home: the slideshow, as on the original site ────────
+    // ── home: the slideshow, framed by the row of words under it ──
     const slidesWrap = document.getElementById('slides');
     if (slidesWrap) {
         const picks = WORKS.filter(w => w.hero).sort((a, b) => a.hero - b.hero);
         slidesWrap.innerHTML = picks.map((w, i) =>
             `<div class="slide">
-                 <a href="${ROOT}works/#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
+                 <a href="${pageOf(colOf[w.slug])}#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
                      <img src="${ROOT}IMAGES/works/${w.slug}-hero.jpg"
                           srcset="${thumb(w, '-hero')} 1600w, ${ROOT}IMAGES/works/${w.slug}-hero.jpg 3024w"
                           sizes="100vw" alt="${altOf(w)}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
                  </a>
-                 <div class="slide-vignette"></div>
-                 <div class="slide-caption">
-                     <div class="slide-caption-title">${roman(w.title)}</div>
-                     <div class="slide-caption-specs">${[w.medium, w.size, w.year].map((t, k, a) => k < a.length - 1 ? `<span class="nw">${t}&ensp;&middot;</span>&ensp;` : t).join('')}</div>
-                 </div>
              </div>`).join('');
 
         const slides = Array.from(slidesWrap.children);
-        const dotsWrap = document.getElementById('slide-dots');
-        dotsWrap.innerHTML = slides.map((_, i) => `<button class="slide-dot" type="button" aria-label="Go to slide ${i + 1}"></button>`).join('');
-        const dots = Array.from(dotsWrap.children);
-        const counter = document.getElementById('hero-counter');
-        const progress = document.getElementById('hero-progress');
+        const cap = document.getElementById('hero-cap');
+        const capTitle = cap.querySelector('.hc-title'), capMedium = cap.querySelector('.hc-medium');
+        const capSize = cap.querySelector('.hc-size'), capCount = cap.querySelector('.hc-count');
         const N = slides.length, two = n => String(n).padStart(2, '0');
         let cur = 0, timer = null;
 
@@ -82,15 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 s.classList.toggle('active', k === cur);
                 s.setAttribute('aria-hidden', k !== cur);
                 s.querySelector('a').tabIndex = k === cur ? 0 : -1;
-                dots[k].classList.toggle('active', k === cur);
             });
-            counter.textContent = `${two(cur + 1)} / ${two(N)}`;
-            progress.style.width = ((cur + 1) / N * 100) + '%';
+            const w = picks[cur];
+            capTitle.innerHTML = `<a href="${pageOf(colOf[w.slug])}#${w.slug}">${roman(w.title)}</a>`;
+            capMedium.textContent = w.medium;
+            capSize.textContent = `${w.size}, ${w.year}`;
+            capCount.textContent = `${two(cur + 1)} / ${two(N)}`;
         };
         const start = () => { if (!REDUCE_MOTION) timer = setInterval(() => goTo(cur + 1), 5000); };
         const restart = () => { clearInterval(timer); start(); };
 
-        dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); restart(); }));
         document.querySelector('.prev-btn').addEventListener('click', () => { goTo(cur - 1); restart(); });
         document.querySelector('.next-btn').addEventListener('click', () => { goTo(cur + 1); restart(); });
 
@@ -106,8 +108,30 @@ document.addEventListener('DOMContentLoaded', () => {
         start();
     }
 
+    // ── home: one closeup per collection ────────────────────
+    const covers = document.getElementById('covers');
+    if (covers) {
+        covers.innerHTML = COLS.map(c => {
+            let img;
+            if (c.kind === 'prints') {
+                const p = c.prints[0];
+                img = `<img src="${printImg(p.work, 'A2', 1100)}" srcset="${printImg(p.work, 'A2', 600)} 600w, ${printImg(p.work, 'A2', 1100)} 1100w"
+                            sizes="(max-width: 800px) 50vw, 33vw" alt="Print of ${plain(bySlug[p.work])}" width="1100" height="1375" loading="lazy" decoding="async">`;
+            } else if (c.kind === 'soon') {
+                img = `<span class="cover-soon">photographs soon</span>`;
+            } else {
+                const w = bySlug[c.cover] || c.works[0];
+                img = `<img src="${thumb(w, '-hero')}" alt="Closeup of ${altOf(w)}" loading="lazy" decoding="async">`;
+            }
+            return `<a class="cover" href="${pageOf(c)}">
+                        <span class="cover-img">${img}</span>
+                        <span class="cover-cap"><span class="cn">${c.name.toLowerCase()}</span><span class="cc">${countOf(c)}</span></span>
+                    </a>`;
+        }).join('');
+    }
+
     // ── lightbox, as on the original site ───────────────────
-    let openWork = () => {}, closeLb = () => {}, current = null;
+    let openWork = () => {}, closeLb = () => {};
     const lb = document.getElementById('lightbox');
     if (lb) {
         const img = document.getElementById('lightbox-img');
@@ -139,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!lb.classList.contains('active')) return;
             lb.classList.remove('active');
             unlock();
-            if (!keepHash) history.replaceState(null, '', '#' + (current || ''));
+            if (!keepHash) history.replaceState(null, '', location.pathname + location.search);
             if (back) { back.focus({ preventScroll: true }); back = null; }
         };
 
@@ -218,48 +242,89 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── works: one collection at a time ─────────────────────
-    const panel = document.getElementById('collection');
-    if (panel) {
-        const sub = document.getElementById('sub');
-        const note = document.getElementById('note');
-        const signup = document.getElementById('nl-signup');
+    // ── a collection page ───────────────────────────────────
+    const page = document.querySelector('main[data-collection]');
+    if (page) {
+        const c = COLS.find(x => x.slug === page.dataset.collection) || COLS[0];
+        const panel = document.getElementById('collection');
         const density = document.getElementById('density');
 
-        sub.innerHTML = COLS.map(c => `<a href="#${c.slug}" data-col="${c.slug}">${c.name.toLowerCase()}</a>`).join('');
+        // every collection in one line, this one in ink
+        document.getElementById('sub').innerHTML = COLS.map(x =>
+            `<a href="${pageOf(x)}"${x === c ? ' aria-current="page"' : ''}>${x.name.toLowerCase()}</a>`).join('');
 
-        // 2 / 4 / 6 across on a wide screen, remembered; a phone keeps two
-        const CHOICES = [2, 4, 6];
-        let cols = 4;
-        try { const v = parseInt(localStorage.getItem('kch-grid-cols'), 10); if (CHOICES.includes(v)) cols = v; } catch (e) {}
-        density.innerHTML = 'grid' + CHOICES.map(n => `<button type="button" data-cols="${n}" aria-pressed="${n === cols}">${n}</button>`).join('');
-        const applyCols = () => {
-            const g = panel.querySelector('.works-grid');
-            if (!g) return;
-            if (window.innerWidth > 800) { g.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`; g.dataset.cols = cols; }
-            else { g.style.gridTemplateColumns = ''; g.dataset.cols = 2; }
-        };
-        density.addEventListener('click', e => {
-            const b = e.target.closest('button[data-cols]');
-            if (!b) return;
-            cols = parseInt(b.dataset.cols, 10);
-            try { localStorage.setItem('kch-grid-cols', cols); } catch (err) {}
-            density.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', parseInt(x.dataset.cols, 10) === cols));
-            applyCols();
-            track('grid/' + cols);
-        });
-        window.addEventListener('resize', applyCols);
+        const nx = COLS[(COLS.indexOf(c) + 1) % COLS.length];
+        document.getElementById('next').innerHTML =
+            `<a href="${pageOf(nx)}"><span class="next-label">next</span>${nx.name.toLowerCase()}</a>`;
 
-        function show(slug) {
-            const c = COLS.find(x => x.slug === slug) || COLS[0];
-            if (c.slug === current) return false;
-            current = c.slug;
-            sub.querySelectorAll('a').forEach(a => a.toggleAttribute('aria-current', a.dataset.col === c.slug));
-            note.textContent = c.note || '';
-            signup.hidden = c.works.length > 0;
-            density.hidden = !c.works.length;
+        if (c.kind === 'prints') {
+            density.hidden = true;
+            panel.innerHTML = `<div class="prints grid">` + c.prints.map(p => {
+                const w = bySlug[p.work];
+                const first = p.formats.find(f => f.size === 'A2') || p.formats[0];
+                return `<article class="print" data-work="${p.work}">
+                            <div class="print-img">
+                                <img src="${printImg(p.work, first.size, 1100)}"
+                                     srcset="${printImg(p.work, first.size, 600)} 600w, ${printImg(p.work, first.size, 1100)} 1100w"
+                                     sizes="(max-width: 800px) 100vw, 50vw" width="1100" height="1375"
+                                     alt="Print of ${plain(w)}, ${first.size}" decoding="async">
+                            </div>
+                            <p class="cap"><span class="nm">${nameOf(w)}</span><span class="pr">original ${w.size}, ${w.sold ? 'sold' : status(w)}</span></p>
+                            <div class="formats">` +
+                            p.formats.map(f =>
+                                `<div class="fmt">
+                                     <button type="button" class="fmt-pick" data-size="${f.size}" aria-pressed="${f === first}">
+                                         <span class="fs">${f.size}</span><span class="fc">${f.cm}</span><span class="fp">${f.price ? f.price + ' €' : 'price soon'}</span>
+                                     </button>
+                                     <a class="fo lb-submit" href="mailto:${SITE.email}?subject=${encodeURIComponent(`Print order: ${plain(w)}, ${f.size}`)}">order</a>
+                                 </div>`).join('') +
+                            `</div>
+                        </article>`;
+            }).join('') + `</div>`;
+
+            // a size shows its own framing of the painting
+            panel.addEventListener('click', e => {
+                const pick = e.target.closest('.fmt-pick');
+                const order = e.target.closest('.fo');
+                const art = e.target.closest('.print');
+                if (order && art) {
+                    const size = order.closest('.fmt').querySelector('.fmt-pick').dataset.size;
+                    track(`order-print/${art.dataset.work}-${size.toLowerCase()}`, `Print order: ${plain(bySlug[art.dataset.work])}, ${size}`);
+                }
+                if (!pick || !art) return;
+                const size = pick.dataset.size, slug = art.dataset.work, im = art.querySelector('.print-img img');
+                im.src = printImg(slug, size, 1100);
+                im.srcset = `${printImg(slug, size, 600)} 600w, ${printImg(slug, size, 1100)} 1100w`;
+                im.alt = `Print of ${plain(bySlug[slug])}, ${size}`;
+                art.querySelectorAll('.fmt-pick').forEach(b => b.setAttribute('aria-pressed', b === pick));
+            });
+        } else if (c.kind === 'soon') {
+            density.hidden = true;
+        } else {
+            // 2 / 4 / 6 across on a wide screen, remembered; a phone keeps two
+            const CHOICES = [2, 4, 6];
+            let cols = 4;
+            try { const v = parseInt(localStorage.getItem('kch-grid-cols'), 10); if (CHOICES.includes(v)) cols = v; } catch (e) {}
+            density.innerHTML = 'grid' + CHOICES.map(n => `<button type="button" data-cols="${n}" aria-pressed="${n === cols}">${n}</button>`).join('');
+            const applyCols = () => {
+                const g = panel.querySelector('.works-grid');
+                if (!g) return;
+                if (window.innerWidth > 800) { g.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`; g.dataset.cols = cols; }
+                else { g.style.gridTemplateColumns = ''; g.dataset.cols = 2; }
+            };
+            density.addEventListener('click', e => {
+                const b = e.target.closest('button[data-cols]');
+                if (!b) return;
+                cols = parseInt(b.dataset.cols, 10);
+                try { localStorage.setItem('kch-grid-cols', cols); } catch (err) {}
+                density.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', parseInt(x.dataset.cols, 10) === cols));
+                applyCols();
+                track('grid/' + cols);
+            });
+            window.addEventListener('resize', applyCols);
+
             panel.className = `col-${c.slug}`;
-            panel.innerHTML = !c.works.length ? '' :
+            panel.innerHTML =
                 `<div class="works-grid">` +
                 c.works.map(w =>
                     `<div class="tile${w.sold ? ' sold' : ''}">
@@ -270,7 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
                          <p class="cap"><span class="no">${noOf[w.slug]}</span><span class="nm">${nameOf(w)}</span><span class="pr">${dot(w)}${price(w)}</span></p>
                      </div>`).join('') +
                 `</div>
-                 <div class="index">` +
+                 <div class="index">
+                     <p class="index-label">price list</p>` +
                 c.works.map(w =>
                     `<a class="ix grid${w.sold ? ' sold' : ''}${w.unavailable ? ' held' : ''}" href="#${w.slug}">
                          <span class="no">${noOf[w.slug]}</span>
@@ -282,21 +348,16 @@ document.addEventListener('DOMContentLoaded', () => {
                      </a>`).join('') +
                 `</div>`;
             applyCols();
-            return true;
         }
 
-        function route() {
+        // #<slug>: a work of this collection opens; one of another goes to its page
+        const route = () => {
             const h = decodeURIComponent(location.hash.slice(1));
             if (bySlug[h]) {
-                show(colOf[h].slug);
+                if (colOf[h] !== c) { location.replace(pageOf(colOf[h]) + '#' + h); return; }
                 openWork(WORKS.indexOf(bySlug[h]));
-                return;
-            }
-            closeLb(true);
-            const changed = show(h);
-            if (changed && route.ran) window.scrollTo({ top: 0, behavior: 'instant' });
-            route.ran = true;
-        }
+            } else closeLb(true);
+        };
         window.addEventListener('hashchange', route);
         route();
     }
