@@ -323,6 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             window.addEventListener('resize', applyCols);
 
+            // the paintings with their names; under them the prices, in the
+            // original site's grid of small tiles
             panel.className = `col-${c.slug}`;
             panel.innerHTML =
                 `<div class="works-grid">` +
@@ -332,19 +334,17 @@ document.addEventListener('DOMContentLoaded', () => {
                              <img src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 50vw, 25vw"
                                   alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
                          </a>
-                         <p class="cap"><span class="no">${noOf[w.slug]}</span><span class="nm">${nameOf(w)}</span><span class="pr">${dot(w)}${price(w)}</span></p>
+                         <p class="cap"><span class="no">${noOf[w.slug]}</span><span class="nm">${nameOf(w)}</span>${dot(w) ? `<span class="st">${dot(w)}</span>` : ''}</p>
                      </div>`).join('') +
                 `</div>
-                 <div class="index">
-                     <p class="index-label">price list</p>` +
+                 <div class="legend-grid grid">` +
                 c.works.map(w =>
-                    `<a class="ix grid${w.sold ? ' sold' : ''}${w.unavailable ? ' held' : ''}" href="#${w.slug}">
-                         <span class="no">${noOf[w.slug]}</span>
-                         <span class="nm">${nameOf(w)}</span>
-                         <span class="md">${w.medium}</span>
-                         <span class="sz">${w.size}</span>
-                         <span class="pr">${price(w)}</span>
-                         <span class="st">${dot(w)}${status(w)}</span>
+                    `<a class="legend-item${w.sold ? ' is-sold' : (w.unavailable ? ' is-unavailable' : '')}" href="#${w.slug}">
+                         <span class="legend-ref">${noOf[w.slug]}</span>
+                         <span class="legend-title">${nameOf(w)}</span>
+                         <span class="legend-specs">${w.medium}<br>${w.size}<br>${w.year}</span>
+                         <span class="legend-price">${price(w)}</span>
+                         <span class="legend-status"><span class="status-dot${w.sold ? '' : (w.unavailable ? ' unavailable' : ' available')}"></span><span class="status-text">${status(w)}</span></span>
                      </a>`).join('') +
                 `</div>`;
             applyCols();

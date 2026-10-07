@@ -10,15 +10,15 @@ A page per collection, one design system (see [DESIGN.md](DESIGN.md) §8):
 
 ```
 index.html            home: the slideshow, the sentence, one closeup per collection
-<collection>/         one page per collection (atmosphere, chromatic, works-on-paper,
-                      miniatures, prints), written from data.js by
-                      scripts/build_collections.py
+collections/          all collections as closeups      (written by
+<collection>/         one page per collection:           scripts/build_collections.py
+                      atmosphere, chromatic, works-on-paper, miniatures, prints)
 about/index.html      bio + artist statement (static prose)
 contact/index.html    inquiries + the newsletter
 works/index.html      forwards old /works/ links to the right collection page
 css/style.css         all styling
 js/data.js            ★ THE CATALOG: the only file to edit for new works
-js/site.js            page-aware: renders slideshow / closeups / grid / price list /
+js/site.js            page-aware: renders slideshow / closeups / grid / price tiles /
                       prints / lightbox from data.js
 js/newsletter.js      renders every signup form (footer, contact) + the contact carousel
 IMAGES/works/         display images + hero shots   <slug>.jpg, <slug>-hero.jpg

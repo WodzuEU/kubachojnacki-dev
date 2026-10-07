@@ -259,11 +259,13 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 8. Site structure
 
-The home page, a page per collection, about and contact, with the original
-header on each: `KUBA CHOJNACKI` (EB Garamond 600, capitals, home link) and
-`works, about, contact` at the right edge. `works` leads to the collections
-on the home page and is underlined on every collection page. All share
-`css/style.css`; `/collector/` keeps the old look through `css/legacy.css`.
+The home page, a collections page, a page per collection, about and
+contact, with the original header on each: `KUBA CHOJNACKI` (EB Garamond
+600, capitals, home link) and `home, collections, about, contact` at the
+right edge (2026-10-07: he renamed `works` to `collections` and asked for a
+plain way back to the home page). `collections` is underlined on the
+collections page and on every collection page. All share `css/style.css`;
+`/collector/` keeps the old look through `css/legacy.css`.
 
 - **`/` home**: the original slideshow of the selected works (the
   `hero: 1…n` works in data.js, in that order), inside the page margins and
@@ -274,13 +276,19 @@ on the home page and is underlined on every collection page. All share
   (its `cover` work's `-hero.webp`; prints show the A2 print on the wall;
   a collection still to come shows "photographs soon"), name and count
   under each, opening the collection's page.
+- **`/collections/`**: `collections` at `--l` with the count, then the same
+  closeups as on the home page.
 - **`/<collection>/`** (atmosphere, chromatic, works-on-paper, miniatures,
-  prints): the collections as one line of words (the current one in ink,
-  underlined) with `grid 2 4 6` at the edge; the name at `--l` with its
+  prints): the collections as one line of words set like the menu (EB
+  Garamond `--m`, ink; he found the small grey line invisible), the current
+  one underlined, with `grid 2 4 6` at the edge; the name at `--l` with its
   count on column 1, the `note` from column 7. Under it the grid, each work
-  with one caption row (number, name, price; sold in red with the dot),
-  then the price list (number, name, medium, size, price, status), then
-  `next` and the following collection. `/<collection>/#<slug>` opens a work
+  with its number and name only (sold in red, a dot for sold or held
+  back; no prices beside the paintings, at his request), then the prices
+  in **the original site's grid of small tiles** (number, name, medium /
+  size / year, price, status; 8 across, 6 under 1100px, the condensed 6
+  and 4 on phones), without repeating the collection's name in each tile.
+  Then `next` and the following collection. `/<collection>/#<slug>` opens a work
   in the original lightbox; prev/next stay in the collection; a slug from
   another collection forwards to its page. The pages are written by
   `scripts/build_collections.py` from data.js (run it after adding or
@@ -305,8 +313,7 @@ on the home page and is underlined on every collection page. All share
   since their page already holds the signup.
 - Links from the one-page site keep working: `/#<slug>` and
   `/works/#<slug>` go to `/<collection>/#<slug>`; `/works/#<collection>`
-  to that page; `/works/` and `/#works` to the collections on the home
-  page; `/#about`, `/#contact` to their pages; `/newsletter/` and
+  to that page; `/works/` and `/#works` to `/collections/`; `/#about`, `/#contact` to their pages; `/newsletter/` and
   `/#newsletter` to `/contact/`.
 
 `js/site.js` is **page-aware**: each block (the slideshow, the works page,

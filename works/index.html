@@ -10,9 +10,9 @@
     <script>
         /* /works/ became a page per collection: old links go on to the right one.
            /works/#chromatic -> /chromatic/, /works/#<slug> -> its collection with
-           the work open, anything else -> the collections on the home page */
+           the work open, anything else -> the collections page */
         (function () {
-            var h = decodeURIComponent(location.hash.slice(1)), to = '../#collections';
+            var h = decodeURIComponent(location.hash.slice(1)), to = '../collections/';
             var page = function (c) { return '../' + c.name.toLowerCase().replace(/\s+/g, '-') + '/'; };
             COLLECTIONS.forEach(function (c) {
                 if (page(c) === '../' + h + '/') to = page(c);

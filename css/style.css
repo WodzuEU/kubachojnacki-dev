@@ -184,11 +184,13 @@ main { padding-top: var(--top); }
       the price list, the next one ── */
 .col-head { padding-top: var(--near); align-items: start; }
 .sub-row { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: var(--far); }
-.sub a { color: var(--mid); transition: color 0.2s; }
-.sub a:hover, .sub a[aria-current="page"] { color: var(--ink); }
-.sub a[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
-.sub a:not(:last-child)::after { content: ","; color: var(--mid); text-decoration: none; display: inline-block; }
-.sub a + a { margin-left: 0.3em; }
+/* the collections, set like the menu so they read as the way through */
+.sub { font-family: var(--serif); font-size: var(--m); }
+.sub a { transition: opacity 0.25s ease; }
+.sub a:hover { opacity: 0.45; }
+.sub a[aria-current="page"] { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+.sub a:not(:last-child)::after { content: ","; text-decoration: none; display: inline-block; }
+.sub a + a { margin-left: 0.35em; }
 .density { color: var(--mid); white-space: nowrap; }
 .density button { color: var(--mid); margin-left: 0.6em; }
 .density button[aria-pressed="true"] { color: var(--ink); }
@@ -201,6 +203,7 @@ main { padding-top: var(--top); }
     text-transform: lowercase;
 }
 .col-count { grid-column: 1 / 7; margin-top: 0.5rem; color: var(--mid); }
+.page-head { padding-top: var(--far); }
 .col-head .note { grid-column: 7 / 13; grid-row: 2 / span 2; }
 #collection { padding-top: var(--far); }
 
@@ -218,23 +221,39 @@ main { padding-top: var(--top); }
 .cap { display: flex; gap: 0.6rem; align-items: baseline; }
 .cap .no { color: var(--mid); font-variant-numeric: tabular-nums; }
 .cap .pr { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cap .st { margin-left: auto; }
 .works-grid[data-cols="6"] .cap .nm { display: none; }
-.tile.sold .cap, .ix.sold { color: var(--sold); }
-.tile.sold .cap .no, .ix.sold .no { color: var(--sold); }
-.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sold); margin-right: 0.4rem; vertical-align: 0; }
+.tile.sold .cap { color: var(--sold); }
+.tile.sold .cap .no { color: var(--sold); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sold); vertical-align: 0; }
 .dot.held { background: var(--mid); }
 
-.index { margin-top: var(--far); }
-.index-label { padding-inline: var(--pad); margin-bottom: var(--near); color: var(--mid); }
-.ix { width: 100%; text-align: left; padding-block: 0.4rem; align-items: baseline; }
-.ix:hover .nm { text-decoration: underline; text-underline-offset: 3px; }
-.ix .no  { grid-column: 1 / 2; color: var(--mid); }
-.ix .nm  { grid-column: 2 / 6; }
-.ix .md  { grid-column: 7 / 9; color: var(--mid); }
-.ix .sz  { grid-column: 9 / 11; }
-.ix .pr  { grid-column: 11 / 12; font-variant-numeric: tabular-nums; }
-.ix .st  { grid-column: 12 / 13; justify-self: end; white-space: nowrap; }
-.ix.held .st { color: var(--mid); }
+/* the prices: the original site's grid of small tiles, eight across.
+   Every second tile starts where a painting does in the four-across grid. */
+.legend-grid {
+    margin-top: var(--far);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    row-gap: 0.85rem;
+}
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    padding: 0.1rem 0.3rem;
+    margin-inline: -0.3rem;
+    transition: background 0.18s;
+}
+.legend-item:hover { background: rgba(26,26,24,0.04); }
+.legend-ref { font-weight: 500; letter-spacing: 0.08em; color: var(--mid); line-height: 1.15; }
+.legend-title { font-family: var(--serif); font-size: var(--m); text-transform: lowercase; line-height: 1.15; }
+.legend-specs { color: var(--mid); text-transform: lowercase; line-height: 1.4; margin-top: 0.2rem; }
+.legend-price { font-weight: 500; letter-spacing: 0.03em; margin-top: 0.15rem; font-variant-numeric: tabular-nums; }
+.legend-status { display: flex; align-items: flex-start; gap: 0.3rem; margin-top: 0.2rem; }
+.legend-status .status-dot { margin-top: 0.45em; }   /* level with the first line when the words wrap */
+.legend-status .status-text { font-size: var(--s); letter-spacing: 0.04em; }
+.status-dot.available { width: 5px; height: 5px; background: var(--ink); }
+.legend-item.is-unavailable .status-text { color: var(--mid); }
+.legend-item.is-sold > *, .legend-item.is-sold .status-text { color: var(--sold); }
 
 .next { padding-top: var(--far); }
 .next a { grid-column: 7 / 13; width: fit-content; font-family: var(--serif); font-size: var(--m); text-transform: lowercase; }
@@ -446,6 +465,10 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .slide, .preview-track, .lightbox, .lightbox img, .tile-img img, .cover-img img { transition: none; }
 }
 
+@media (max-width: 1100px) {
+    .legend-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
 /* ── narrow: one column, the same order ── */
 @media (max-width: 800px) {
     :root { --pad: clamp(1rem, 3vw, 2.5rem); }
@@ -462,10 +485,16 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .col-head .note { margin-top: var(--near); }
     .works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .density { display: none; }
-    .ix .no { grid-column: 1 / 3; }
-    .ix .nm { grid-column: 3 / 10; }
-    .ix .md, .ix .sz, .ix .st { display: none; }
-    .ix .pr { grid-column: 10 / 13; justify-self: end; }
+    /* the original condensed price tiles: scanned on a phone, not read */
+    .legend-grid  { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.55rem 0.45rem; }
+    .legend-item  { padding: 0.25rem 0.3rem; }
+    .legend-ref   { font-size: 8.5px; letter-spacing: 0.04em; }
+    .legend-title { font-size: 0.85rem; }
+    .legend-specs { font-size: 8px; letter-spacing: 0.02em; line-height: 1.35; margin-top: 0.12rem; }
+    .legend-price { font-size: 9px; margin-top: 0.12rem; }
+    .legend-status .status-text { font-size: 8.5px; }
+    .legend-status .status-dot { width: 6px; height: 6px; }
+    .legend-status .status-dot.available { width: 4px; height: 4px; }
     .print { grid-column: 1 / -1; }
     .contact-page { display: block; min-height: 0; padding: 0; }
     .contact-media { height: 52vh; margin: 0; }
@@ -486,11 +515,13 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 }
 @media (max-width: 520px) {
     :root { --top: 45px; }
-    .name { font-size: 0.8rem; letter-spacing: 0.1em; }
-    .menu a { font-size: 0.95rem; margin-left: 0.9rem; }
+    .name { font-size: 0.74rem; letter-spacing: 0.06em; }
+    .menu a { font-size: 0.88rem; margin-left: 0.75rem; }
     .hc-medium { display: none; }
     .hc-size { grid-column: 1 / 9; }
     .hc-count { grid-column: 9 / 13; }
+    .legend-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem 0.4rem; }
+    .sub { font-size: 1rem; }
 }
 @media (max-width: 360px) {
     .name { font-size: 0.72rem; letter-spacing: 0.04em; }

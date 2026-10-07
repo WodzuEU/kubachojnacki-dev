@@ -1,5 +1,5 @@
-"""Writes a page for every collection in js/data.js, the /works/ forwarder for
-old links, and sitemap.xml. Run it after adding or renaming a collection:
+"""Writes a page for every collection in js/data.js, the /collections/ page
+that lists them, the /works/ forwarder for old links, and sitemap.xml. Run it after adding or renaming a collection:
 
     python scripts/build_collections.py
 
@@ -132,7 +132,7 @@ HEAD = """<!DOCTYPE html>
 
     <header class="top">
         <a class="name" href="../">Kuba Chojnacki</a>
-        <nav class="menu" aria-label="Site"><a href="../#collections" aria-current="true">works</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../collections/" aria-current="true">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
     </header>
 
     <main data-collection="{slug}">
@@ -221,6 +221,46 @@ TAIL = """
 </html>
 """
 
+COLLECTIONS_PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collections | Kuba Chojnacki</title>
+    <meta name="description" content="{desc}">
+    <link rel="canonical" href="{site}/collections/">
+    <meta property="og:title" content="Collections | Kuba Chojnacki">
+    <meta property="og:description" content="{desc}">
+    <meta property="og:image" content="{site}/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{site}/collections/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v={stamp}">
+</head>
+<body>
+
+    <header class="top">
+        <a class="name" href="../">Kuba Chojnacki</a>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="./" aria-current="page">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
+    </header>
+
+    <main>
+        <section class="page-head grid">
+            <h1 class="col-title">collections</h1>
+            <p class="col-count">{count}</p>
+        </section>
+        <section class="covers grid" aria-label="Collections">
+            <div class="cover-grid" id="covers"></div>
+        </section>
+    </main>
+
+"""
+
 FORWARD = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -233,9 +273,9 @@ FORWARD = """<!DOCTYPE html>
     <script>
         /* /works/ became a page per collection: old links go on to the right one.
            /works/#chromatic -> /chromatic/, /works/#<slug> -> its collection with
-           the work open, anything else -> the collections on the home page */
+           the work open, anything else -> the collections page */
         (function () {{
-            var h = decodeURIComponent(location.hash.slice(1)), to = '../#collections';
+            var h = decodeURIComponent(location.hash.slice(1)), to = '../collections/';
             var page = function (c) {{ return '../' + c.name.toLowerCase().replace(/\\s+/g, '-') + '/'; }};
             COLLECTIONS.forEach(function (c) {{
                 if (page(c) === '../' + h + '/') to = page(c);
@@ -296,10 +336,16 @@ def main():
         page += TAIL.format(stamp=STAMP)
         write(f"{c['slug']}/index.html", page)
 
+    names = ", ".join(c["name"].lower() for c in cols)
+    write("collections/index.html",
+          COLLECTIONS_PAGE.format(site=SITE, stamp=STAMP, count=f"{len(cols)} collections",
+                                  desc=esc(f"Collections of paintings by Kuba Chojnacki: {names}."))
+          + FOOT_NL + TAIL.format(stamp=STAMP))
+
     write("works/index.html", FORWARD.format(site=SITE, stamp=STAMP))
 
     today = datetime.date.today().isoformat()
-    urls = [("", "monthly")] + [(c["slug"] + "/", "monthly") for c in cols] + [("about/", "yearly"), ("contact/", "yearly")]
+    urls = [("", "monthly"), ("collections/", "monthly")] + [(c["slug"] + "/", "monthly") for c in cols] + [("about/", "yearly"), ("contact/", "yearly")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     xml += [f"  <url><loc>{SITE}/{u}</loc><lastmod>{today}</lastmod><changefreq>{f}</changefreq></url>" for u, f in urls]
     xml.append("</urlset>")

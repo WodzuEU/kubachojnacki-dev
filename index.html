@@ -10,7 +10,7 @@
             var h = decodeURIComponent(location.hash.slice(1));
             if (!h) return;
             var pages = { about: 'about/', contact: 'contact/', newsletter: 'contact/' };
-            if (h === 'works') location.replace('#collections');
+            if (h === 'works') location.replace('collections/');
             else if (pages[h]) location.replace(pages[h]);
             else if (/^\d{2}-/.test(h)) location.replace('works/#' + h);
         })();
@@ -34,7 +34,7 @@
 
     <header class="top">
         <h1 class="name"><a href="./" aria-current="page">Kuba Chojnacki</a></h1>
-        <nav class="menu" aria-label="Site"><a href="#collections">works</a><a href="about/">about</a><a href="contact/">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="./" aria-current="page">home</a><a href="collections/">collections</a><a href="about/">about</a><a href="contact/">contact</a></nav>
     </header>
 
     <main>
