@@ -1,0 +1,39 @@
+/* The effects lab (js/explore.js): each test lives under its own class on
+   <html>, so it can be switched on and off on the real pages. Not part of the
+   site; what is chosen moves into style.css. */
+
+/* ── fill: on hover the painting grows to fill its square, past the white of
+      the photograph, and its number and name sit over it in white ── */
+html.fx-fill .sel-item, html.fx-fill .tile-img { aspect-ratio: 4 / 5; overflow: hidden; }
+html.fx-fill .tile-img img, html.fx-fill .sel-item img { width: 100%; height: 100%; object-fit: contain; }
+html.fx-fill .col-works-on-paper .tile-img img { width: 100%; }
+html.fx-fill .sel-item img.fade.in, html.fx-fill .tile-img img.fade.in {
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2, .7, .2, 1);
+}
+html.fx-fill .sel-item:hover img.fade.in, html.fx-fill .tile-img:hover img.fade.in {
+    opacity: 1;
+    transform: scale(var(--fill, 1.3));
+}
+html.fx-fill .hl {
+    top: auto; bottom: 0.75rem; left: 0.8rem;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+    transition-delay: 0.15s;
+}
+html.fx-fill .hl-no { color: rgba(255, 255, 255, 0.75); }
+
+/* ── the panel ── */
+.fx-lab {
+    position: fixed; left: 1rem; bottom: 1rem; z-index: 90;
+    width: 300px; padding: 0.8rem 1rem 0.9rem;
+    background: #fff; color: #1a1a18;
+    border: 1px solid rgba(26, 26, 24, 0.22);
+    box-shadow: 0 10px 30px rgba(26, 26, 24, 0.12);
+    font: 12px/1.45 "Montserrat", sans-serif;
+}
+.fx-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+.fx-head b { font-weight: 500; }
+.fx-lab button { text-decoration: underline; text-underline-offset: 3px; }
+.fx-lab label { display: flex; gap: 0.5rem; align-items: baseline; }
+.fx-lab input { accent-color: #1a1a18; }
+.fx-foot { margin-top: 0.6rem; color: #6f6f6a; }

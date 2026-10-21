@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All works | Kuba Chojnacki</title>
+    <meta name="description" content="Every painting by Kuba Chojnacki on one white plane: move across it, come closer, arrange the works by color, size, price, year or collection.">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <link rel="preload" href="../../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../../css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="../../css/style.css?v=20261015a">
+    <link rel="stylesheet" href="canvas.css?v=20261015a">
+</head>
+<body class="cv-page">
+
+    <a class="skip" href="#main">skip to content</a>
+
+    <header class="top">
+        <a class="name" href="../../">Kuba Chojnacki</a>
+        <nav class="menu" aria-label="Site"><a href="../../">home</a><a href="../../atmosphere/" aria-current="true">collections</a><a href="../../about/">about</a><a href="../../contact/">contact</a></nav>
+    </header>
+
+    <main id="main">
+        <section class="cv" aria-labelledby="cv-title">
+            <div class="cv-bar">
+                <div class="cv-head">
+                    <h1 class="cv-title" id="cv-title">all works</h1>
+                    <span class="cv-count" id="cv-count" aria-live="polite"></span>
+                    <button type="button" class="cv-clear" id="cv-clear" hidden>show all</button>
+                </div>
+                <div class="cv-arrange" role="group" aria-label="Arrange the works by">
+                    <span class="cv-lead" aria-hidden="true">arrange</span>
+                </div>
+                <div class="cv-tools">
+                    <button type="button" id="cv-filter" aria-expanded="false" aria-controls="cv-panel">filter</button>
+                    <span class="cv-zoom">
+                        <button type="button" data-zoom="out" aria-label="Zoom out">&#8722;</button>
+                        <button type="button" data-zoom="fit">fit all</button>
+                        <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+                    </span>
+                </div>
+                <button type="button" class="cv-more" id="cv-more" aria-expanded="false" aria-controls="cv-panel">arrange</button>
+            </div>
+
+            <div class="cv-body">
+                <div class="cv-stage" id="cv-stage" tabindex="0" role="region"
+                     aria-label="All paintings on one plane. Arrow keys move it, plus and minus zoom, zero shows all."
+                     aria-describedby="cv-hint">
+                    <div class="cv-plane" id="cv-plane"></div>
+                </div>
+                <p class="cv-hint" id="cv-hint"><span class="mouse">drag to move, scroll to zoom</span><span class="touch">drag to move, pinch to zoom</span></p>
+                <div class="cv-panel" id="cv-panel" role="group" aria-label="Arrange and filter" hidden></div>
+            </div>
+        </section>
+
+        <noscript>
+            <p class="cv-noscript">the plane needs javascript. the works by collection:
+                <a href="../../atmosphere/">atmosphere</a>, <a href="../../chromatic/">chromatic</a>,
+                <a href="../../works-on-paper/">works on paper</a>.</p>
+        </noscript>
+    </main>
+
+    <footer class="foot">
+        <div class="foot-top grid">
+            <div class="foot-nl">
+                <span class="fl">newsletter: subscribers see new works and prints first</span>
+                <div class="nl-signup" data-cta="join" data-where="footer"></div>
+            </div>
+            <nav class="next" aria-label="Next"><a href="../../about/"><span class="next-label">next</span><span class="next-name">about</span></a></nav>
+        </div>
+        <div class="foot-row grid">
+            <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
+            <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
+            <span class="f3"><a href="../../privacy/">privacy</a><span>© 2026, cracow</span></span>
+        </div>
+    </footer>
+
+    <script src="../../js/data.js?v=20261015a"></script>
+    <script src="../../js/colors.js?v=20261015a"></script>
+    <script src="canvas.js?v=20261015a"></script>
+    <script src="../../js/newsletter.js?v=20261015a"></script>
+</body>
+</html>

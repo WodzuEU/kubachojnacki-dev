@@ -1,0 +1,249 @@
+/* alt/canvas: every painting on one white plane.
+
+   The site's header and footer (css/style.css); between them a line of words
+   and the plane. The plane is one element moved by a single transform
+   (canvas.js); the paintings stand on it in a grid of equal cells, each at a
+   softened version of its real size. The words under them keep their size
+   on screen whatever the zoom: they are scaled back by --inv (1 / zoom).
+   Garamond for the words you act on and the names of groups, Montserrat
+   (12px) for what is read under a painting. */
+
+.cv-page {
+    --cv-fast: var(--t-fast, 200ms);
+    --cv-base: var(--t-base, 450ms);
+    --cv-slow: var(--t-slow, 900ms);
+    --cv-ease: var(--ease, cubic-bezier(.4, 0, .2, 1));
+    --cv-out:  var(--ease-out, cubic-bezier(.16, 1, .3, 1));
+    --cv-lead: 6rem;   /* the small word that starts a line of choices */
+}
+
+/* the page is the plane: the line of words, then the paintings to the foot
+   of the window; the footer follows below */
+.cv {
+    height: calc(100vh - var(--top));
+    height: calc(100svh - var(--top));
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── the line: the name of the page, how the works are arranged, and the
+      three things you do to the plane ── */
+.cv-bar {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gut);
+    align-items: baseline;
+    padding: var(--near) var(--pad) 0.6rem;
+    font-family: var(--serif);
+    font-size: var(--m);
+    text-transform: lowercase;
+}
+.cv-head { grid-column: 1 / 4; display: flex; align-items: baseline; gap: 0.9rem; white-space: nowrap; }
+.cv-title { font-family: var(--serif); font-size: var(--l); line-height: 1.1; letter-spacing: -0.01em; }
+.cv-count { font-family: var(--sans); font-size: var(--s); letter-spacing: 0.04em; color: var(--mid); font-variant-numeric: tabular-nums; }
+.cv-clear { font-family: var(--sans); font-size: var(--s); letter-spacing: 0.04em; text-decoration: underline; text-underline-offset: 3px; }
+
+.cv-arrange { grid-column: 4 / 10; display: flex; align-items: baseline; column-gap: 0.75em; white-space: nowrap; }
+.cv-lead {
+    flex: 0 0 var(--cv-lead);
+    font-family: var(--sans); font-size: var(--s); letter-spacing: 0.04em;
+    color: var(--mid); text-transform: lowercase;
+}
+.cv-tools { grid-column: 10 / 13; justify-self: end; display: flex; align-items: baseline; gap: 2rem; white-space: nowrap; }
+.cv-zoom { display: flex; align-items: baseline; gap: 0.9em; }
+.cv-zoom [data-zoom="in"], .cv-zoom [data-zoom="out"] { min-width: 1em; text-align: center; }
+.cv-more { display: none; }
+
+/* a word that is chosen is underlined, as the page you are on is in the menu */
+.cv-bar button, .cv-panel button { line-height: 1.6; transition: opacity var(--cv-fast) var(--cv-ease); }
+.cv-bar button[aria-pressed="true"], .cv-panel button[aria-pressed="true"], #cv-filter[aria-expanded="true"] {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+}
+@media (hover: hover) {
+    .cv-bar button:hover, .cv-panel button:hover { opacity: 0.45; }
+}
+
+/* ── the filters: one row to each, as an index under the line ── */
+.cv-body { position: relative; flex: 1; min-height: 0; }
+.cv-panel {
+    position: absolute; z-index: 4; inset: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gut);
+    padding: 0.2rem var(--pad) var(--near);
+    background: var(--bg);
+    border-bottom: 1px solid rgba(26, 26, 24, 0.15);
+    font-family: var(--serif);
+    font-size: var(--m);
+    text-transform: lowercase;
+    opacity: 0;
+    transition: opacity var(--cv-fast) var(--cv-ease);
+}
+.cv-panel.open { opacity: 1; }
+.cv-rows { grid-column: 4 / 13; }
+.cv-row { display: flex; align-items: baseline; }
+.cv-row .cv-lead { line-height: 1.6; }
+.cv-opts { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.1em; }
+.cv-opts small { font-family: var(--sans); font-size: var(--s); letter-spacing: 0.04em; color: var(--mid); margin-left: 0.4em; }
+.cv-opts button.is-empty { color: var(--mid); }
+.cv-row-arrange, .cv-row-phone { display: none; }
+.cv-row-end { margin-top: 0.35rem; }
+
+/* ── the plane ── */
+.cv-stage {
+    position: absolute; inset: 0;
+    overflow: hidden;
+    overflow: clip;   /* never scrolled by the browser, only moved by the plane */
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    outline: none;
+}
+.cv-stage:focus-visible { outline: 1px solid var(--ink); outline-offset: -1px; }
+.cv-plane {
+    position: absolute; left: 0; top: 0;
+    transform-origin: 0 0;
+    --inv: 1;
+}
+/* while it moves the plane is held as one picture; at rest it is drawn
+   again at the new size, so the paintings and the words come back sharp */
+.cv-plane.is-moving { will-change: transform; }
+
+/* a painting: its picture cropped to the canvas edge, standing on the line
+   of its row, its number and name under it */
+.cv-work {
+    position: absolute; left: 0; top: 0;
+    display: block;
+    transition: opacity var(--cv-base) var(--cv-ease);
+    -webkit-user-drag: none;
+}
+.cv-frame { position: absolute; inset: 0; overflow: hidden; background: var(--wait); }
+.cv-frame img {
+    position: absolute;
+    max-width: none;
+    opacity: 0;
+    transition: opacity var(--cv-base) var(--cv-ease);
+    -webkit-user-drag: none;
+}
+.cv-work.is-in .cv-frame img { opacity: 1; }
+.cv-work.is-in .cv-frame { background: none; }
+@media (hover: hover) {
+    .cv-work.is-in:hover .cv-frame img { opacity: 0.85; transition-duration: var(--cv-fast); }
+}
+.cv-work:focus { outline: none; }
+.cv-work:focus-visible {
+    outline: calc(2px * var(--inv)) solid var(--ink);
+    outline-offset: calc(3px * var(--inv));
+}
+/* what the filters leave out stays in its place, faint */
+.cv-work.is-out { opacity: 0.1; pointer-events: none; }
+.cv-work.is-out .cv-cap { visibility: hidden; }
+
+.cv-cap {
+    position: absolute; left: 0; top: 100%;
+    transform-origin: 0 0;
+    transform: scale(var(--inv)) translateY(7px);
+    display: flex; flex-direction: column;
+    padding-right: 0.4em;
+    background: var(--bg);
+    font-family: var(--sans); font-size: var(--s); line-height: 1.5; letter-spacing: 0.04em;
+    text-transform: lowercase; white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--cv-fast) var(--cv-ease);
+    pointer-events: none;
+}
+.cv-l1 { display: flex; gap: 0.8em; }
+.cv-no { color: var(--mid); font-variant-numeric: tabular-nums; }
+.cv-l2, .cv-l3 { display: none; color: var(--mid); }
+.cv-l3 { align-items: center; gap: 0.45em; }
+.cv-pr { color: var(--ink); font-variant-numeric: tabular-nums; }
+.cv-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sold); flex-shrink: 0; }
+.cv-dot.grey { background: var(--mid); }
+.cv-sold { color: var(--sold); }
+.rn { text-transform: none; }
+
+/* close enough to read: every name; closer: the size and the price too.
+   Further out a name shows under the painting the pointer or the keyboard is on */
+.z-1 .cv-cap,
+.cv-work:focus-visible .cv-cap { opacity: 1; }
+@media (hover: hover) {
+    .cv-stage:not(.is-dragging) .cv-work:hover .cv-cap { opacity: 1; }
+}
+.z-2 .cv-l2 { display: block; }
+.z-2 .cv-l3 { display: flex; }
+
+/* the name of a group, in brackets, standing on the line where its first
+   painting would; how many works, or how large, under it */
+.cv-group { position: absolute; left: 0; top: 0; width: 0; height: 0; transition: opacity var(--cv-base) var(--cv-ease); }
+.cv-gt {
+    position: absolute; left: 0; bottom: 0;
+    transform-origin: 0 100%;
+    transform: scale(var(--inv));
+    font-family: var(--serif); font-size: var(--m); line-height: 1;
+    text-transform: lowercase; white-space: nowrap;
+}
+.cv-gf {
+    position: absolute; left: 0; top: 0;
+    transform-origin: 0 0;
+    transform: scale(var(--inv)) translateY(7px);
+    font-family: var(--sans); font-size: var(--s); line-height: 1.5; letter-spacing: 0.04em;
+    color: var(--mid); white-space: nowrap;
+}
+.cv-group.is-out { opacity: 0.25; }
+.z-tight .cv-gf { visibility: hidden; }
+
+/* how to move it, until you have */
+.cv-hint {
+    position: absolute; z-index: 2; left: var(--pad); bottom: 0.9rem;
+    font-family: var(--sans); font-size: var(--s); letter-spacing: 0.04em; color: var(--mid);
+    text-transform: lowercase;
+    pointer-events: none;
+    transition: opacity var(--cv-slow) var(--cv-ease);
+}
+.cv-hint.gone { opacity: 0; }
+.cv-hint .touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+    .cv-hint .mouse { display: none; }
+    .cv-hint .touch { display: inline; }
+}
+
+.cv-noscript { padding: var(--far) var(--pad); font-family: var(--serif); font-size: var(--m); }
+.cv-noscript a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* a middling window: "show all" waits in the filters, the line stays one line */
+@media (min-width: 861px) and (max-width: 1100px) {
+    .cv-clear { display: none; }
+}
+
+/* ── narrow: the line keeps the name and one word; the word opens the
+      choices as a sheet from the foot of the screen ── */
+@media (max-width: 860px) {
+    .cv-bar { display: flex; justify-content: space-between; padding-top: 0.9rem; }
+    .cv-head { gap: 0.7rem; }
+    .cv-arrange, .cv-tools { display: none; }
+    .cv-more { display: inline; }
+    .cv-more[aria-expanded="true"] { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+
+    .cv-panel {
+        position: fixed; z-index: 70; inset: auto 0 0;
+        display: block;
+        max-height: 82svh; overflow-y: auto; overscroll-behavior: contain;
+        padding: 1rem var(--pad) calc(1.1rem + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--ink); border-bottom: 0;
+        opacity: 1;
+        transform: translateY(100%);
+        transition: transform var(--cv-base) var(--cv-out);
+    }
+    .cv-panel.open { transform: none; }
+    .cv-page { --cv-lead: 5.6rem; }
+    .cv-row { padding-block: 0.15rem; }
+    .cv-row-arrange { display: flex; }
+    .cv-row-phone { display: flex; margin-top: 0.6rem; }
+    .cv-row-end { margin-top: 0.15rem; }
+    .cv-row-phone .cv-opts { flex: 1; justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cv-panel, .cv-work, .cv-frame img, .cv-cap, .cv-group, .cv-hint { transition: none; }
+}

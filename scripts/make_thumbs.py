@@ -7,9 +7,12 @@ For each  IMAGES/works/<slug>.jpg       creates  IMAGES/thumbs/<slug>.webp (400p
                                             and  IMAGES/thumbs/<slug>-800.webp (800px)
                                             and  IMAGES/thumbs/<slug>-1600.webp (1600px)
 For each  IMAGES/works/<slug>-hero.jpg  creates  IMAGES/thumbs/<slug>-hero.webp (1600px)
+                                            and  IMAGES/thumbs/<slug>-hero-2400.webp (2400px,
+                                                 or the photo's own width when smaller)
 
-The 1600px tier is what the lightbox shows. The source JPEG is only fetched
-when a visitor zooms into a work, so nobody downloads a megabyte by accident.
+The 1600px tier is what the lightbox shows; the slideshow takes the 2400px
+hero on wide or sharp screens. The source JPEG is only fetched when a visitor
+zooms into a work, so nobody downloads a megabyte by accident.
 
 Existing thumbnails are skipped, so it is always safe to re-run.
 """
@@ -35,6 +38,7 @@ made = 0
 for f in sorted(WORKS.glob("*.jpg")):
     if f.stem.endswith("-hero"):
         made += resize_webp(f, THUMBS / f"{f.stem}.webp", 1600, quality=80)
+        made += resize_webp(f, THUMBS / f"{f.stem}-2400.webp", 2400, quality=78)
     else:
         made += resize_webp(f, THUMBS / f"{f.stem}.webp", 400)
         made += resize_webp(f, THUMBS / f"{f.stem}-800.webp", 800)

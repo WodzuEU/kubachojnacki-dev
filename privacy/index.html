@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-order="82">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        /* the pages stand in a row: going on, the next one slides in from the
+           right; going back, from the left (the row itself: js/site.js) */
+        addEventListener('pagereveal', function (e) {
+            if (!e.viewTransition) return;
+            var me = +document.documentElement.dataset.order, dir, from;
+            try { dir = sessionStorage.getItem('kch-dir'); from = +sessionStorage.getItem('kch-from'); sessionStorage.removeItem('kch-dir'); } catch (x) {}
+            e.viewTransition.types.add(dir || (from > me ? 'back' : 'forward'));
+        });
+        addEventListener('pageswap', function () {
+            try { sessionStorage.setItem('kch-from', document.documentElement.dataset.order); } catch (x) {}
+        });
+    </script>
+    <title>Privacy | Kuba Chojnacki</title>
+    <meta name="description" content="What this site keeps about you: your email if you join the newsletter, nothing else. No cookies.">
+    <link rel="canonical" href="https://kubachojnacki.com/privacy/">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="../css/style.css?v=20261015a">
+</head>
+<body class="fit">
+
+    <a class="skip" href="#main">skip to content</a>
+
+    <header class="top">
+        <a class="name" href="../">Kuba Chojnacki</a>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../atmosphere/">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
+    </header>
+
+    <main id="main">
+        <section class="privacy-page grid">
+            <h1 class="col-title">privacy</h1>
+            <dl class="facts">
+                <div><dt>who</dt><dd>kuba chojnacki, painter, cracow, poland. write to <a href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a> about anything on this page.</dd></div>
+                <div><dt>newsletter</dt><dd>if you join, your email address is kept by kit (kit.com), the service that sends the newsletter, in the united states. it is used only to send you the newsletter. you confirm by email, every letter has a link to leave, and leaving takes you off the list.</dd></div>
+                <div><dt>email</dt><dd>when you write to me, i keep our messages to answer you, and for the sale if there is one.</dd></div>
+                <div><dt>visits</dt><dd>goatcounter counts visits to this site without cookies and without keeping your ip address or anything else that identifies you.</dd></div>
+                <div><dt>cookies</dt><dd>none. the grid size you choose is remembered in your own browser only.</dd></div>
+                <div><dt>hosting</dt><dd>the site is served by github pages; github keeps visitors&rsquo; ip addresses in its server logs for security.</dd></div>
+                <div><dt>fonts</dt><dd>the typefaces load from this site, not from google.</dd></div>
+                <div><dt>your rights</dt><dd>you can ask to see, correct or delete what i hold about you, and you can complain to the polish data protection office, <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>.</dd></div>
+                <div><dt>updated</dt><dd>october 2026</dd></div>
+            </dl>
+        </section>
+    </main>
+
+    <footer class="foot">
+        <div class="foot-row grid">
+            <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
+            <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
+            <span class="f3"><a href="./" aria-current="page">privacy</a><span>© 2026, cracow</span></span>
+        </div>
+    </footer>
+
+    <script>window.ROOT = '../';</script>
+    <script src="../js/data.js?v=20261015a"></script>
+    <script src="../js/site.js?v=20261015a"></script>
+</body>
+</html>

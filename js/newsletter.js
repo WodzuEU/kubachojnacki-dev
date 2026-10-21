@@ -32,10 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const cta = signup.dataset.cta || 'subscribe';
             signup.innerHTML =
                 `<form action="${SITE.newsletter.action}" method="post" target="_blank" class="newsletter-form">
-                     <input type="email" name="${SITE.newsletter.field || 'email'}" required placeholder="your email" aria-label="Email address">
+                     <input type="email" name="${SITE.newsletter.field || 'email'}" required placeholder="your email" aria-label="Email address" autocomplete="email" spellcheck="false" autocapitalize="off">
                      <button type="submit" class="lb-submit nl-submit">${cta}</button>
                  </form>`;
 
+            // the thank-you is read out when it replaces the form
+            signup.setAttribute('aria-live', 'polite');
             // submit in the background and confirm inline, in our own typography;
             // if the request fails, fall back to a normal form submission
             const form = signup.querySelector('form');
@@ -43,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 const btn = form.querySelector('button');
                 btn.disabled = true;
+                btn.textContent = 'sending…';
                 const where = signup.dataset.where
                             || (location.pathname.includes('collector') ? 'collector'
                               : location.pathname.includes('contact')   ? 'contact'
@@ -59,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         '<p class="newsletter-confirm">thank you. now check your inbox to confirm the subscription.</p>';
                 } catch (err) {
                     btn.disabled = false;
+                    btn.textContent = cta;
                     form.submit();
                 }
             });
@@ -120,7 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const warmRest = () => slideImgs.slice(1).forEach(im => { im.loading = 'eager'; });
         if (slideImgs[0] && !slideImgs[0].complete) slideImgs[0].addEventListener('load', warmRest, { once: true });
         else warmRest();
-        let idx = 0, timer = null;
+        // one round, then it rests on the first; it waits under the pointer or the keyboard
+        let idx = 0, timer = null, shown = 1;
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         const go = n => {
@@ -130,11 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const stop  = () => { if (timer) { clearInterval(timer); timer = null; } };
         const hold  = Number(preview.dataset.interval) || 3800;
-        const start = () => { if (!reduce && SLUGS.length > 1 && !timer) timer = setInterval(() => go(idx + 1), hold); };
+        const tick  = () => { go(idx + 1); if (++shown > SLUGS.length) stop(); };
+        const start = () => { if (!reduce && SLUGS.length > 1 && !timer && shown <= SLUGS.length) timer = setInterval(tick, hold); };
 
         dotEls.forEach((d, i) => d.addEventListener('click', () => { go(i); stop(); start(); }));
         preview.addEventListener('mouseenter', stop);
         preview.addEventListener('mouseleave', start);
+        preview.addEventListener('focusin', stop);
+        preview.addEventListener('focusout', e => { if (!preview.contains(e.relatedTarget)) start(); });
         start();
     }
 
@@ -207,8 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── analytics (live domain only) ─────────────────────────
     // site.js and newsletter.js both run on the home page, so the loader is
     // claimed once and the queue is shared — two count.js tags would report
-    // every home-page view twice.
-    if (typeof SITE !== 'undefined' && SITE.goatcounter && location.hostname === 'kubachojnacki.com' && !window.__gcLoader) {
+    // every home-page view twice. A page Chrome draws ahead (site.js) is
+    // counted only once it is really opened.
+    const counted = () => {
+        if (typeof SITE === 'undefined' || !SITE.goatcounter || location.hostname !== 'kubachojnacki.com' || window.__gcLoader) return;
         window.__gcLoader = true;
         const s = document.createElement('script');
         s.async = true;
@@ -216,5 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = 'https://gc.zgo.at/count.js';
         s.onload = () => { gcQueue.splice(0).forEach(v => window.goatcounter.count(v)); };
         document.body.appendChild(s);
-    }
+    };
+    if (document.prerendering) document.addEventListener('prerenderingchange', counted, { once: true });
+    else counted();
 });

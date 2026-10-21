@@ -29,20 +29,43 @@ around. The rules:
   the right edge. Pictures fill whole columns (2, 4 or 6 across; five
   across is gone, twelve does not split into five).
 - **Two families, two jobs.** EB Garamond is the voice: the name and menu,
-  the sentences (statement, notes, bio), the names of works. Montserrat is
-  information: caption rows, sizes, prices, the price list.
-- **Three sizes:** `--s` (12px, facts), `--m` (1.15rem, the voice),
-  `--l` (≤2.2rem, collection names and the contact sentence). The lightbox
-  keeps its original sizes; the phone header keeps its smaller name/menu.
-- **Words frame the picture.** The home slideshow sits inside the page
-  margins, between the header line and one row of words under it (title
-  on column 1, medium on 7, size on 10, counter at the edge), nothing laid
-  over the painting.
-- **One line**, under the fixed header. Two accents only: the underline on
-  the page (or collection) you are on, and the line of an email field.
+  the sentences (notes, collection texts), the names of works and
+  collections. Montserrat is information: sizes, prices, the price tiles,
+  the about text and the contact rows (2026-10-10, his Canva).
+- **Sizes.** Garamond: `--m` (1.15rem, sentences and links), `--l` (≤2.2rem,
+  names of collections and works, the slideshow caption, "selected works"), `--xl`
+  (≈2.75rem, the `next` link and the line on the about page). Montserrat:
+  `--s` (12px, small facts) and `--t` (1.0625rem, rows that are read). The
+  lightbox keeps its original sizes; the phone header its smaller name/menu.
+- **EB Garamond 400 only**, roman and italic: the name in the header is
+  regular since 2026-10-10 (he asked for it lighter), headings are set to
+  400 so nothing is ever drawn as a fake bold.
+- **Fonts live on this site** (2026-10-11): `fonts/` holds the variable woff2
+  files (EB Garamond roman and italic, Montserrat; latin and latin-ext for
+  the Polish letters), `css/fonts.css` declares them; nothing loads from
+  Google, so no visitor's address goes there. The roman Garamond is preloaded.
+- **One line**, under the fixed header. Accents only: the underline on the
+  page (or size) you are on, the line of an email field, the short line
+  over the print sizes.
 - **Two distances:** `--near` inside a block, `--far` between blocks.
 - **Nothing that is not needed.** If something new seems necessary, it has
   to replace something.
+- **Checked against Vercel's Web Interface Guidelines** (2026-10-10): a skip
+  link on every page; icon SVGs hidden from screen readers; the slideshow and
+  the contact slider play one round and rest, and wait under the pointer or
+  keyboard focus; the lightbox zooms with Enter or Space too; numbers never
+  part from their units (`nb()` in site.js, `450 €`); the email field
+  autocompletes and says "sending…"; the thank-you is read out; the fixed
+  header never covers what has focus (`scroll-padding-top`); the lightbox
+  keeps its scroll to itself (`overscroll-behavior`). Not followed, by house
+  style: Title Case, second person, numerals for small counts.
+- **Audited with the redesign-existing-projects skill** (2026-10-10): kept
+  from it a -0.01em tracking on large Garamond, even line breaks
+  (`text-wrap`), a pixel of press on buttons, the numeral span as a class
+  (`.rn`), social cards on about/contact, and the 404 brought to the current
+  menu. Not taken, because his choices say otherwise: a font swap, more
+  weights, grain or background imagery, a max-width container, scroll
+  reveals and staggered entries, broken-grid overlaps.
 
 Where sections 1–7 below describe the one-page site and disagree with
 these rules, these rules win. Section 8 describes the new structure.
@@ -127,12 +150,11 @@ subtitle is not part of the exception: it scales with the title.
   divider between specs and inquiry links inside the lightbox panel. Do not
   reintroduce the others — if two blocks feel run together, the answer is
   more space.
-- **Works grid: the visitor picks the density** — 2, 4 or 6 across, from the
-  small `grid` control at the top of the works section, remembered in
-  `localStorage` (`kch-grid-cols`, default 4). `site.js` writes the count
-  inline on each `.visual-grid`, capping it on narrow screens (≤520px: max 3;
-  ≤800px: max 4; ≤1100px: max 5) so six across never becomes six thumbnails
-  on a phone. The media queries in the stylesheet stay as the no-JS fallback.
+- **Works grid: the visitor picks the density**: 2, 4 or 6 across, from three
+  icons at the right of the collection head, each a small picture of its own
+  grid, as in a shop (2026-10-10, his request), the one in use dark. **6 across
+  to start**; a choice is remembered in `localStorage` (`kch-grid-cols`). On a
+  phone (≤800px) the grid is two across and the icons are hidden.
   Uniform cells; the photos themselves communicate scale. Works on paper
   render at half the cell width (`.col-<collection-slug>` modifier) so small
   originals read as small.
@@ -212,7 +234,27 @@ subtitle is not part of the exception: it scales with the title.
   pointer takes the cursor of the exact element under it, and the
   universal square rule matches children directly, overriding the parent.
   This is the site's fingerprint.
-- Sequential display numbers under every grid image.
+- Sequential display numbers under every grid image: number, then name
+  ("07 burgundy blue"), Montserrat 12px. With a mouse they show on hover; on
+  a touch screen (`hover: none`) they always stand under the painting.
+- Motion (2026-10-15 smoothness pass). Three lengths and two curves, as
+  tokens in `:root` that site.js reads too: `--t-fast` 200ms (hover, press),
+  `--t-base` 450ms (lightbox, page slide, caption, a step), `--t-slow` 900ms
+  (slide crossfade, a picture arriving); `--ease` between two rests,
+  `--ease-out` for what arrives. Only opacity and transform move. A picture
+  is decoded before it fades in or replaces another. The slideshow crossfade
+  keeps the leaving painting whole underneath (no grey dip), plays one
+  round, and waits while hovered, focused, scrolled away or in a hidden tab.
+  Pages slide as one row (forward/back types); the header never moves.
+  `scrollbar-gutter: stable` keeps every page the same width, so nothing
+  shifts when the lightbox locks the page. ← → walk the pages only when no
+  control has focus. Reduced motion: no page slide, no rises, instant fades.
+- Prerender: site.js adds speculation rules, so Chrome draws a page of the
+  site while the pointer rests on its link. GoatCounter loads (in site.js
+  and newsletter.js) only once a prerendered page is really opened.
+- The slideshow's first painting is preloaded in index.html; when `hero: 1`
+  changes in data.js, change that `<link rel="preload">` too. Slides use
+  `-hero.webp` (1600) and `-hero-2400.webp`; the JPEG masters are for zoom.
 - The lightbox restores the page behind it in a single frame. `html` carries
   `scroll-behavior: smooth` for the nav anchors, so `unlockScroll()` turns it
   off for the one jump back — otherwise closing a work animates a scroll all
@@ -229,9 +271,9 @@ subtitle is not part of the exception: it scales with the title.
 - Newsletter lives on the domain, not a Kit subdomain. `newsletter.js`
   renders a signup into every `.nl-signup` (and `#nl-signup` on
   `/collector/`): the footer line on each page (`join`), the contact page's
-  newsletter row, the page of a collection still to come. Each reports its
+  newsletter row. Each reports its
   `data-where` as a `signup/<where>` event (`footer`, `contact`,
-  `miniatures`, `collector`), so the numbers say which placement converts.
+  `collector`), so the numbers say which placement converts.
   The archive of past issues from `js/newsletter-data.js` renders wherever
   `#nl-issues` and `#nl-count` exist (nowhere yet). Keep all of it inside
   this system: achromatic, two families, lowercase, never a second layout
@@ -259,61 +301,91 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 8. Site structure
 
+Rebuilt 2026-10-10 from his Canva design ("Copy of Copy of Website redesign",
+DAHXg-DmNi0): home page 2 of his four (page 3, a scroll scene opening the
+slideshow onto a turning row of works and then the collections, was built
+first and set aside the same day: "that's not gonna work"), about page 9.
+
 The home page, a collections page, a page per collection, about and
 contact, with the original header on each: `KUBA CHOJNACKI` (EB Garamond
-600, capitals, home link) and `home, collections, about, contact` at the
-right edge (2026-10-07: he renamed `works` to `collections` and asked for a
-plain way back to the home page). `collections` is underlined on the
-collections page and on every collection page. All share `css/style.css`;
-`/collector/` keeps the old look through `css/legacy.css`.
+400, capitals, home link) and `home, collections, about, contact` at the
+right edge. `collections` is underlined on the collections page and on every
+collection page. All share `css/style.css`; `/collector/` keeps the old look
+through `css/legacy.css`.
 
-- **`/` home**: the original slideshow of the selected works (the
-  `hero: 1…n` works in data.js, in that order), inside the page margins and
-  filling the first screen under the header; crossfade every 5 s, arrows,
-  swipe. Under it one row of words: title, medium, size and year, counter.
-  A slide opens its work on its collection page. Then the sentence from
-  column 7, then `collections`: one closeup per collection, three across
-  (its `cover` work's `-hero.webp`; prints show the A2 print on the wall;
-  a collection still to come shows "photographs soon"), name and count
-  under each, opening the collection's page.
-- **`/collections/`**: `collections` at `--l` with the count, then the same
-  closeups as on the home page.
-- **`/<collection>/`** (atmosphere, chromatic, works-on-paper, miniatures,
-  prints): the collections as one line of words set like the menu (EB
-  Garamond `--m`, ink; he found the small grey line invisible), the current
-  one underlined, with `grid 2 4 6` at the edge; the name at `--l` with its
-  count on column 1, the `note` from column 7. Under it the grid, each work
-  with its number and name only (sold in red, a dot for sold or held
-  back; no prices beside the paintings, at his request), then the prices
-  in **the original site's grid of small tiles** (number, name, medium /
-  size / year, price, status; 8 across, 6 under 1100px, the condensed 6
-  and 4 on phones), without repeating the collection's name in each tile.
-  Then `next` and the following collection. `/<collection>/#<slug>` opens a work
-  in the original lightbox; prev/next stay in the collection; a slug from
-  another collection forwards to its page. The pages are written by
-  `scripts/build_collections.py` from data.js (run it after adding or
+- **`/` home**: the original slideshow of the `hero: 1…n` works, edge to
+  edge across the first screen under the header (4:5 on a phone);
+  crossfade every 5 s, arrows, swipe; the work's name on the painting,
+  bottom left, white Garamond `--l`. Under it "selected works" at `--l` and
+  the eight works of `HOME.selected` (data.js), whole, four across in 4:5
+  boxes (two on a phone), no captions, each opening on its collection page.
+  Then "collections" (`--m`) and the collections one to a row: the name at
+  `--xl` on columns 1-3, its `line` (data.js, a few words) at `--m` from
+  column 4; the row opens the collection (stacked on a phone). His Canva
+  also lists "studio notes" last: not built, no page for it yet. Then the
+  footer with `next works`.
+- **`collections` goes straight in** (2026-10-10, his call: "show already
+  the expanded view"): the menu link and home's `next works` open the first
+  collection (atmosphere) with its paintings and the line of the others.
+  There is no in-between page of tiles: `/collections/` is a forwarder like
+  `/works/`. The hand-written pages (index, about, contact) link
+  `atmosphere/` directly; if the first collection ever changes, change
+  those three links too (the generated pages follow data.js).
+- A collection with no works yet (miniatures, until its photographs come)
+  is left out everywhere: no picture, no page, not in the line of
+  collections or the `next` chain.
+- **`/<collection>/`** (atmosphere, chromatic, works-on-paper, prints): one
+  line of all collections in order, this one as the page's `h1` at `--l`,
+  the others at `--m`; the `note` under it on columns 1–6, `grid 2 4 6` at
+  the right edge. The grid shows **the paintings alone**, no captions (his
+  Canva); names, numbers and prices are in **the original site's grid of
+  small tiles** under it (number, name, medium / size / year, price,
+  status; 8 across, 6 under 1100px, the condensed 6 and 4 on phones).
+  `/<collection>/#<slug>` opens a work in the original lightbox; prev/next
+  stay in the collection; a slug from another collection forwards to its
+  page. The pages, the line of collections and the `next` link are written
+  by `scripts/build_collections.py` from data.js (run it after adding or
   renaming a collection; its STAMP must match the pages' `?v=`).
-- **`/prints/`** (`kind: "prints"`): the two prints side by side on a light
-  wall tone (`IMAGES/prints/`, from the final print files by
-  `scripts/make_prints.py`), each with the original's size and status and a
-  row per format (size, cm, price, `order` by email). Picking a format
-  shows its own framing; a format without a price reads "price soon".
-- **`/miniatures/`** (`kind: "soon"`): the note and a signup until the
-  photographs arrive; then it becomes an ordinary collection.
-- **`/about/`**: the portrait on column 1, the bio and the statement from
-  column 7.
-- **`/contact/`**: the newsletter page's split: on the left half, bleeding
-  to the edge, the sliding closeups of the two works in print
-  (`.preview-carousel`, newsletter.js); from column 8 the inquiry sentence
-  at `--l`, then the facts as rows (email, instagram, studio, shipping,
-  prints, newsletter with the signup).
-- **Footer** on every page: the newsletter in one line (label on column 1,
-  the field from column 7, `join` at the edge), then email, instagram,
-  city. Contact and a collection still to come leave the footer line out,
-  since their page already holds the signup.
+- **`/prints/`** (`kind: "prints"`): one print to a row, the picture on
+  columns 1–4 (an A-paper box over the print on its wall tone,
+  `IMAGES/prints/`), its words from column 5: the name at `--l` with the
+  original's size and status; an optional per-print `note`; a row per
+  format, A1 450 €, A2 250 €, A3 150 €, each with its own `order` link (an
+  email with the size in the subject) and its edition (5, 15, 30;
+  `PRINT_FORMATS` in data.js); at the foot of the column, under a short
+  line, the three sizes in cm. Clicking a size shows its framing (A2 to
+  start) and underlines it. A4 and A5 are gone (his Canva).
+- **`/about/`**: the portrait on column 1; from column 7, in Montserrat
+  `--t`, the sentence that used to open the home page and the statement;
+  then, across the page, centred, at `--xl`: "color caught in a shift,
+  transmission of one hue to another | gradient". Footer row only.
+- **`/contact/`**: the sliding closeups of the two works in print, upright
+  (A-paper proportions) on columns 2–5, no caption or dots; from column 7
+  the rows in Montserrat `--t`: email, instagram, studio, newsletter with
+  the signup. Footer row only.
+- **Footer** on home and every collection page: the newsletter
+  on the left (label over the field, columns 1–4), and on the right the
+  way on, large: `next` (Montserrat, grey) and the next page in Garamond
+  `--xl` with an arrow. Home leads to `works` (atmosphere), each
+  collection to the next, prints to `about`. Then
+  email, instagram, city.
+- **The selected works** (2026-10-11) are the eight he sent, in colour order,
+  one loop from blue through burgundy and khaki to umber: `HOME.selected` in
+  data.js. Two are new paintings not yet on the site (`new-01`, `new-02` in
+  IMAGES/thumbs): they hang unlinked until they have a name, size and price.
+- **Grid icons**: small framed paintings, two, four or six to a row, outlined;
+  the one in use filled.
+- **`/privacy/`**: who keeps what (the newsletter list at Kit, inquiries,
+  cookieless GoatCounter, GitHub's server logs, local fonts), as fact rows like
+  the contact page; linked from every footer beside the year.
+- **The effects lab** (`?explore`, js/explore.js, css/explore.css): switches
+  to try effects on the real pages before choosing. Not part of the site:
+  site.js loads it only after a visit with `?explore`. When he has chosen,
+  move the chosen effects into style.css/site.js and delete both files and
+  the loader.
 - Links from the one-page site keep working: `/#<slug>` and
   `/works/#<slug>` go to `/<collection>/#<slug>`; `/works/#<collection>`
-  to that page; `/works/` and `/#works` to `/collections/`; `/#about`, `/#contact` to their pages; `/newsletter/` and
+  to that page; `/works/`, `/collections/` and `/#works` to the first collection; `/#about`, `/#contact` to their pages; `/newsletter/` and
   `/#newsletter` to `/contact/`.
 
 `js/site.js` is **page-aware**: each block (the slideshow, the works page,

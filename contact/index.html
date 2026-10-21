@@ -1,8 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-order="81">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        /* the pages stand in a row: going on, the next one slides in from the
+           right; going back, from the left (the row itself: js/site.js) */
+        addEventListener('pagereveal', function (e) {
+            if (!e.viewTransition) return;
+            var me = +document.documentElement.dataset.order, dir, from;
+            try { dir = sessionStorage.getItem('kch-dir'); from = +sessionStorage.getItem('kch-from'); sessionStorage.removeItem('kch-dir'); } catch (x) {}
+            e.viewTransition.types.add(dir || (from > me ? 'back' : 'forward'));
+        });
+        addEventListener('pageswap', function () {
+            try { sessionStorage.setItem('kch-from', document.documentElement.dataset.order); } catch (x) {}
+        });
+    </script>
     <title>Contact | Kuba Chojnacki</title>
     <meta name="description" content="Inquiries, commissions and studio visits: chojnacki.studio@gmail.com. Studio in Cracow, Poland; worldwide shipping. Prints of two paintings, and the newsletter.">
     <link rel="canonical" href="https://kubachojnacki.com/contact/">
@@ -11,21 +24,24 @@
     <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kubachojnacki.com/contact/">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css?v=20261007r1">
+    <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="../css/style.css?v=20261015a">
 </head>
-<body>
+<body class="fit lock">
+
+    <a class="skip" href="#main">skip to content</a>
 
     <header class="top">
         <a class="name" href="../">Kuba Chojnacki</a>
-        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../collections/">collections</a><a href="../about/">about</a><a href="./" aria-current="page">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../atmosphere/">collections</a><a href="../about/">about</a><a href="./" aria-current="page">contact</a></nav>
     </header>
 
-    <main>
+    <main id="main">
+        <h1 class="vh">Contact</h1>
         <section class="contact-page grid">
             <div class="contact-media">
                 <div class="preview-carousel"
@@ -34,13 +50,10 @@
                      aria-label="Closeups of maroon khaki and burgundy blue, the two paintings in print"></div>
             </div>
             <div class="contact-text">
-                <h1 class="contact-title">collectors and galleries are welcome to inquire about available works.</h1>
                 <dl class="facts">
                     <div><dt>email</dt><dd><a href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a></dd></div>
                     <div><dt>instagram</dt><dd><a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a></dd></div>
                     <div><dt>studio</dt><dd>cracow, poland. visits by appointment only.</dd></div>
-                    <div><dt>shipping</dt><dd>worldwide, typically 80&ndash;200 &euro;. certificate of authenticity included.</dd></div>
-                    <div><dt>prints</dt><dd>maroon khaki and burgundy blue, in five sizes. <a href="../prints/">see the prints</a></dd></div>
                     <div><dt>newsletter</dt><dd>new works and prints reach subscribers first.<div id="nl-signup" class="nl-signup signup" data-cta="join" data-where="contact"></div></dd></div>
                 </dl>
             </div>
@@ -48,16 +61,19 @@
     </main>
 
     <footer class="foot">
+        <div class="foot-top grid">
+            <nav class="next" aria-label="Next"><a href="../"><span class="next-label">next</span><span class="next-name">home</span></a></nav>
+        </div>
         <div class="foot-row grid">
             <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
             <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
-            <span class="f3">© 2026, cracow</span>
+            <span class="f3"><a href="../privacy/">privacy</a><span>© 2026, cracow</span></span>
         </div>
     </footer>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261007r1"></script>
-    <script src="../js/site.js?v=20261007r1"></script>
-    <script src="../js/newsletter.js?v=20261007r1"></script>
+    <script src="../js/data.js?v=20261015a"></script>
+    <script src="../js/site.js?v=20261015a"></script>
+    <script src="../js/newsletter.js?v=20261015a"></script>
 </body>
 </html>

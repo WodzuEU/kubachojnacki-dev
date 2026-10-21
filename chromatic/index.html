@@ -1,63 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-order="2">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        /* the pages stand in a row: going on, the next one slides in from the
+           right; going back, from the left (the row itself: js/site.js) */
+        addEventListener('pagereveal', function (e) {
+            if (!e.viewTransition) return;
+            var me = +document.documentElement.dataset.order, dir, from;
+            try { dir = sessionStorage.getItem('kch-dir'); from = +sessionStorage.getItem('kch-from'); sessionStorage.removeItem('kch-dir'); } catch (x) {}
+            e.viewTransition.types.add(dir || (from > me ? 'back' : 'forward'));
+        });
+        addEventListener('pageswap', function () {
+            try { sessionStorage.setItem('kch-from', document.documentElement.dataset.order); } catch (x) {}
+        });
+    </script>
     <title>Chromatic | Kuba Chojnacki</title>
-    <meta name="description" content="Chromatic by Kuba Chojnacki: archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a...">
+    <meta name="description" content="Chromatic by Kuba Chojnacki: archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a…">
     <link rel="canonical" href="https://kubachojnacki.com/chromatic/">
     <meta property="og:title" content="Chromatic | Kuba Chojnacki">
-    <meta property="og:description" content="Chromatic by Kuba Chojnacki: archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a...">
+    <meta property="og:description" content="Chromatic by Kuba Chojnacki: archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a…">
     <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/20-chromatic-red-hero.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kubachojnacki.com/chromatic/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css?v=20261007r1">
+    <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="../css/style.css?v=20261015a">
 </head>
 <body>
 
+    <a class="skip" href="#main">skip to content</a>
+
     <header class="top">
         <a class="name" href="../">Kuba Chojnacki</a>
-        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../collections/" aria-current="true">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../atmosphere/" aria-current="true">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
     </header>
 
-    <main data-collection="chromatic">
+    <main id="main" data-collection="chromatic">
         <section class="col-head grid">
-            <div class="sub-row">
-                <nav class="sub" id="sub" aria-label="Collections"></nav>
-                <span class="density" id="density"></span>
-            </div>
-            <h1 class="col-title">chromatic</h1>
-            <p class="col-count">10 works</p>
+            <div class="col-line"><a href="../atmosphere/">atmosphere</a><h1 class="col-title">chromatic</h1><a href="../works-on-paper/">works on paper</a><a href="../prints/">prints</a></div>
             <p class="say-text note">archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.</p>
+            <span class="density" id="density"></span>
         </section>
         <section id="collection"></section>
-        <nav class="next grid" id="next" aria-label="Next collection"></nav>
     </main>
 
     <footer class="foot">
-        <div class="foot-nl grid">
-            <span class="fl">newsletter: subscribers see new works and prints first</span>
-            <div class="nl-signup" data-cta="join" data-where="footer"></div>
+        <div class="foot-top grid">
+            <div class="foot-nl">
+                <span class="fl">newsletter: subscribers see new works and prints first</span>
+                <div class="nl-signup" data-cta="join" data-where="footer"></div>
+            </div>
+            <nav class="next" aria-label="Next"><a href="../works-on-paper/"><span class="next-label">next</span><span class="next-name">works on paper</span></a></nav>
         </div>
         <div class="foot-row grid">
             <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
             <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
-            <span class="f3">© 2026, cracow</span>
+            <span class="f3"><a href="../privacy/">privacy</a><span>© 2026, cracow</span></span>
         </div>
     </footer>
 
     <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork detail">
         <button class="lightbox-btn lb-close" type="button" aria-label="Close">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
         <button class="lightbox-btn lb-prev" type="button" aria-label="Previous work">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
+            <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="">
@@ -80,13 +92,13 @@
             </div>
         </div>
         <button class="lightbox-btn lb-next" type="button" aria-label="Next work">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 18l6-6-6-6"/></svg>
+            <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 18l6-6-6-6"/></svg>
         </button>
     </div>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261007r1"></script>
-    <script src="../js/site.js?v=20261007r1"></script>
-    <script src="../js/newsletter.js?v=20261007r1"></script>
+    <script src="../js/data.js?v=20261015a"></script>
+    <script src="../js/site.js?v=20261015a"></script>
+    <script src="../js/newsletter.js?v=20261015a"></script>
 </body>
 </html>

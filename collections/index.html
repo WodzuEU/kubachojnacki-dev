@@ -4,53 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Collections | Kuba Chojnacki</title>
-    <meta name="description" content="Collections of paintings by Kuba Chojnacki: atmosphere, chromatic, works on paper, miniatures, prints.">
-    <link rel="canonical" href="https://kubachojnacki.com/collections/">
-    <meta property="og:title" content="Collections | Kuba Chojnacki">
-    <meta property="og:description" content="Collections of paintings by Kuba Chojnacki: atmosphere, chromatic, works on paper, miniatures, prints.">
-    <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kubachojnacki.com/collections/">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css?v=20261007r1">
+    <meta name="robots" content="noindex">
+    <link rel="canonical" href="https://kubachojnacki.com/atmosphere/">
+    <script src="../js/data.js?v=20261015a"></script>
+    <script>
+        /* collections open straight into the first one: old links to /works/ and
+           /collections/ go on to the right page. #chromatic -> /chromatic/,
+           #<slug> -> its collection with the work open, anything else -> the
+           first collection */
+        (function () {
+            var h = decodeURIComponent(location.hash.slice(1)), to = '../atmosphere/';
+            var page = function (c) { return '../' + c.name.toLowerCase().replace(/\s+/g, '-') + '/'; };
+            COLLECTIONS.forEach(function (c) {
+                if (page(c) === '../' + h + '/') to = page(c);
+                (c.works || []).forEach(function (w) { if (w.slug === h) to = page(c) + '#' + h; });
+            });
+            location.replace(to);
+        })();
+    </script>
+    <noscript><meta http-equiv="refresh" content="0; url=../atmosphere/"></noscript>
 </head>
-<body>
-
-    <header class="top">
-        <a class="name" href="../">Kuba Chojnacki</a>
-        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="./" aria-current="page">collections</a><a href="../about/">about</a><a href="../contact/">contact</a></nav>
-    </header>
-
-    <main>
-        <section class="page-head grid">
-            <h1 class="col-title">collections</h1>
-            <p class="col-count">5 collections</p>
-        </section>
-        <section class="covers grid" aria-label="Collections">
-            <div class="cover-grid" id="covers"></div>
-        </section>
-    </main>
-
-    <footer class="foot">
-        <div class="foot-nl grid">
-            <span class="fl">newsletter: subscribers see new works and prints first</span>
-            <div class="nl-signup" data-cta="join" data-where="footer"></div>
-        </div>
-        <div class="foot-row grid">
-            <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
-            <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
-            <span class="f3">© 2026, cracow</span>
-        </div>
-    </footer>
-
-    <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261007r1"></script>
-    <script src="../js/site.js?v=20261007r1"></script>
-    <script src="../js/newsletter.js?v=20261007r1"></script>
-</body>
+<body></body>
 </html>

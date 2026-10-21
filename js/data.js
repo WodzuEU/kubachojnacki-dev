@@ -31,7 +31,8 @@
      hero   1, 2, 3... = position in the homepage slideshow (omit otherwise)
 
    A collection may carry a short `note` (1-2 lowercase sentences)
-   shown under its heading, and a `cover`: the slug of the work whose
+   shown under its heading, a `line` (a few words) beside its name in the
+   list on the home page, and a `cover`: the slug of the work whose
    closeup (IMAGES/thumbs/<slug>-hero.webp) stands for it on the home page.
 
    Every collection has its own page, /<name>/ (e.g. /works-on-paper/).
@@ -39,8 +40,8 @@
         python scripts/build_collections.py
    which writes those pages and the sitemap from this file.
 
-   Two kinds of collection have their own layout:
-     kind: "soon"    announced, no photographs yet: `count` works
+   A collection with no works yet stays off the site until they are added.
+   Prints have their own layout:
      kind: "prints"  `prints`: the painting (slug) and its formats;
                      price null shows "price soon"
    ============================================================ */
@@ -61,17 +62,34 @@ const SITE = {
 
 // sizes the two paintings are printed in. A1-A3 prices: the artist's plan
 // (2026-10-05); A4 and A5 not decided yet.
+// each size is a limited edition of `edition` prints
 const PRINT_FORMATS = [
-  { size: "A1", cm: "59.4 × 84.1 cm", price: 450 },
-  { size: "A2", cm: "42 × 59.4 cm",   price: 250 },
-  { size: "A3", cm: "29.7 × 42 cm",   price: 150 },
-  { size: "A4", cm: "21 × 29.7 cm",   price: null },
-  { size: "A5", cm: "14.8 × 21 cm",   price: null },
+  { size: "A1", cm: "59.4 × 84.1 cm", price: 450, edition: 5 },
+  { size: "A2", cm: "42 × 59.4 cm",   price: 250, edition: 15 },
+  { size: "A3", cm: "29.7 × 42 cm",   price: 150, edition: 30 },
 ];
+
+// home: the selected works under the slideshow, four across, in this order:
+// one loop of colour, from blue through burgundy and khaki to umber and back
+// to blue. A work on the site is named by its slug; a painting not yet on the
+// site (no name, size or price yet) by its picture alone, shown unlinked.
+const HOME = {
+  selected: [
+    "40-atmosphere-blue",
+    "41-atmosphere-burgundy-blue-ii",
+    "02-atmosphere-burgundy-blue",
+    "03-atmosphere-maroon-khaki",
+    { img: "new-01", w: 1500, h: 2000, alt: "A new painting: maroon running down over khaki and white" },
+    "38-atmosphere-burgundy-khaki",
+    "39-atmosphere-brown-purple",
+    { img: "new-02", w: 1500, h: 2000, alt: "A new painting: umber running down over cream, with drops of blue" },
+  ],
+};
 
 const COLLECTIONS = [
   {
     name: "Atmosphere",
+    line: "main body of work, colors conformed to gravity in a single pursuit of gradient",
     cover: "44-atmosphere-lavender-green-ochre",
     note: "fields of thin acrylic on raw canvas. it moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. it studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
     works: [
@@ -110,6 +128,7 @@ const COLLECTIONS = [
   },
   {
     name: "Chromatic",
+    line: "archival works and experiments, each holding a single color",
     cover: "20-chromatic-red",
     note: "archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.",
     works: [
@@ -127,6 +146,7 @@ const COLLECTIONS = [
   },
   {
     name: "Works on paper",
+    line: "six unique studies, airbrushed on cold press paper",
     cover: "47-paper-purple-01",
     note: "six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). the series runs from deep purples into crimson reds.",
     works: [
@@ -138,18 +158,19 @@ const COLLECTIONS = [
       { ref: "52", slug: "52-paper-crimson-04", title: "Study in crimson 04", medium: "acrylic on cold press paper", size: "10 × 7.5 cm",  year: 2026, price: 80,  w: 202, h: 289, sold: true },
     ],
   },
-  // nine new small works; the page and the home closeup wait for photographs
+  // nine new small works: off the site until their photographs are added here
+  // (with a cover and a new note), then run build_collections.py
   {
     name: "Miniatures",
-    kind: "soon",
-    count: 9,
+    line: "one color, explored through different tonal shifts",
     note: "nine new small works. photographs soon.",
     works: [],
   },
   {
     name: "Prints",
+    line: "limited edition prints of two paintings",
     kind: "prints",
-    note: "two paintings in print, as fine art giclée with a white border. each size frames the painting a little closer. to order, write with the size.",
+    note: "limited edition prints of two paintings, giclée on fine art archival paper with a white border. each size frames the painting a little closer.",
     works: [],
     prints: [
       { work: "03-atmosphere-maroon-khaki",  formats: PRINT_FORMATS },

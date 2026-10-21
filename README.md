@@ -9,13 +9,15 @@ Design decisions, tokens, and workflow rules live in [DESIGN.md](DESIGN.md) — 
 A page per collection, one design system (see [DESIGN.md](DESIGN.md) §8):
 
 ```
-index.html            home: the slideshow, the sentence, one closeup per collection
-collections/          all collections as closeups      (written by
-<collection>/         one page per collection:           scripts/build_collections.py
-                      atmosphere, chromatic, works-on-paper, miniatures, prints)
+index.html            home: the slideshow, eight selected works, the collections
+<collection>/         one page per collection (atmosphere, chromatic, works-on-paper,
+                      prints), written by scripts/build_collections.py
 about/index.html      bio + artist statement (static prose)
 contact/index.html    inquiries + the newsletter
-works/index.html      forwards old /works/ links to the right collection page
+works/, collections/  forward old links to the right collection page
+privacy/index.html    what the site keeps (newsletter, inquiries, analytics, hosting)
+fonts/, css/fonts.css the typefaces, kept here rather than at Google
+js/explore.js         the effects lab, only with ?explore (to be removed)
 css/style.css         all styling
 js/data.js            ★ THE CATALOG: the only file to edit for new works
 js/site.js            page-aware: renders slideshow / closeups / grid / price tiles /
@@ -52,8 +54,8 @@ Add a new `{ name: "...", cover: "<slug>", note: "...", works: [...] }` block to
 `COLLECTIONS` in `js/data.js`, then run `python scripts/build_collections.py`.
 That writes the collection's page and the sitemap; its closeup on the home page,
 the line of collections, the grid and the price list follow from data.js. A
-collection without photographs yet can be announced with `kind: "soon"` and a
-`count`.
+collection with no works yet (`works: []`) stays off the site until its works
+are added.
 
 ## Marking a work as sold
 

@@ -1,8 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-order="0">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        /* the pages stand in a row: going on, the next one slides in from the
+           right; going back, from the left (the row itself: js/site.js) */
+        addEventListener('pagereveal', function (e) {
+            if (!e.viewTransition) return;
+            var me = +document.documentElement.dataset.order, dir, from;
+            try { dir = sessionStorage.getItem('kch-dir'); from = +sessionStorage.getItem('kch-from'); sessionStorage.removeItem('kch-dir'); } catch (x) {}
+            e.viewTransition.types.add(dir || (from > me ? 'back' : 'forward'));
+        });
+        addEventListener('pageswap', function () {
+            try { sessionStorage.setItem('kch-from', document.documentElement.dataset.order); } catch (x) {}
+        });
+    </script>
     <title>Kuba Chojnacki | Paintings</title>
     <!-- links from the one-page site still land where they meant to -->
     <script>
@@ -25,59 +38,69 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261007r1">
+    <link rel="preload" href="fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- the slideshow's first painting (hero: 1 in js/data.js): change both together -->
+    <link rel="preload" as="image" href="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp"
+          imagesrcset="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp 1600w, IMAGES/thumbs/03-atmosphere-maroon-khaki-hero-2400.webp 2400w"
+          imagesizes="100vw" fetchpriority="high">
+    <link rel="stylesheet" href="css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="css/style.css?v=20261015a">
 </head>
 <body>
 
+    <a class="skip" href="#main">skip to content</a>
+
     <header class="top">
         <h1 class="name"><a href="./" aria-current="page">Kuba Chojnacki</a></h1>
-        <nav class="menu" aria-label="Site"><a href="./" aria-current="page">home</a><a href="collections/">collections</a><a href="about/">about</a><a href="contact/">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="./" aria-current="page">home</a><a href="atmosphere/">collections</a><a href="about/">about</a><a href="contact/">contact</a></nav>
     </header>
 
-    <main>
-        <section class="hero-frame" aria-label="Selected works">
-            <div class="hero">
+    <main id="main">
+        <section class="hero-wrap" aria-label="Slideshow">
+            <div class="hero" id="hero">
                 <div class="slides" id="slides"></div>
+                <div class="slide-vignette"></div>
+                <div class="hero-cap" id="hero-cap" aria-live="off"></div>
+                <p class="hero-counter" id="hero-counter" aria-hidden="true"></p>
+                <div class="slide-dots" id="slide-dots"></div>
                 <button class="slider-btn prev-btn" type="button" aria-label="Previous slide">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M15 18l-6-6 6-6"/></svg>
+                    <svg aria-hidden="true" focusable="false" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
                 <button class="slider-btn next-btn" type="button" aria-label="Next slide">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" focusable="false" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>
-            <p class="hero-cap cols" id="hero-cap" aria-live="polite">
-                <span class="hc-title"></span><span class="hc-medium"></span><span class="hc-size"></span><span class="hc-count"></span>
-            </p>
         </section>
 
-        <section class="say grid">
-            <p class="say-text">Kuba Chojnacki is a painter working with color, gravity and diffusion. abstract paintings: color absorbed directly into unprimed canvas, from a studio in cracow.</p>
+        <section class="selected grid" aria-labelledby="selected-head">
+            <h2 class="sel-head" id="selected-head">selected works</h2>
+            <div class="sel-grid" id="selected"></div>
         </section>
 
-        <section class="covers grid" id="collections" aria-labelledby="collections-label">
-            <h2 class="covers-label" id="collections-label">collections</h2>
-            <div class="cover-grid" id="covers"></div>
+        <section class="col-list grid" id="collections" aria-labelledby="col-list-head">
+            <h2 class="cl-head" id="col-list-head">collections</h2>
+            <ul class="cl-rows" id="col-list"></ul>
         </section>
     </main>
 
     <footer class="foot">
-        <div class="foot-nl grid">
-            <span class="fl">newsletter: subscribers see new works and prints first</span>
-            <div class="nl-signup" data-cta="join" data-where="footer"></div>
+        <div class="foot-top grid">
+            <div class="foot-nl">
+                <span class="fl">newsletter: subscribers see new works and prints first</span>
+                <div class="nl-signup" data-cta="join" data-where="footer"></div>
+            </div>
+            <nav class="next" aria-label="Next"><a href="atmosphere/"><span class="next-label">next</span><span class="next-name">atmosphere</span></a></nav>
         </div>
         <div class="foot-row grid">
             <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
             <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
-            <span class="f3">© 2026, cracow</span>
+            <span class="f3"><a href="privacy/">privacy</a><span>© 2026, cracow</span></span>
         </div>
     </footer>
 
     <script>window.ROOT = '';</script>
-    <script src="js/data.js?v=20261007r1"></script>
-    <script src="js/site.js?v=20261007r1"></script>
-    <script src="js/newsletter.js?v=20261007r1"></script>
+    <script src="js/data.js?v=20261015a"></script>
+    <script src="js/site.js?v=20261015a"></script>
+    <script src="js/newsletter.js?v=20261015a"></script>
 </body>
 </html>

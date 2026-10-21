@@ -1,8 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-order="80">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        /* the pages stand in a row: going on, the next one slides in from the
+           right; going back, from the left (the row itself: js/site.js) */
+        addEventListener('pagereveal', function (e) {
+            if (!e.viewTransition) return;
+            var me = +document.documentElement.dataset.order, dir, from;
+            try { dir = sessionStorage.getItem('kch-dir'); from = +sessionStorage.getItem('kch-from'); sessionStorage.removeItem('kch-dir'); } catch (x) {}
+            e.viewTransition.types.add(dir || (from > me ? 'back' : 'forward'));
+        });
+        addEventListener('pageswap', function () {
+            try { sessionStorage.setItem('kch-from', document.documentElement.dataset.order); } catch (x) {}
+        });
+    </script>
     <title>About | Kuba Chojnacki</title>
     <meta name="description" content="Kuba Chojnacki is a painter, born 2001, working from a studio in Cracow.">
     <link rel="canonical" href="https://kubachojnacki.com/about/">
@@ -11,48 +24,50 @@
     <meta property="og:image" content="https://kubachojnacki.com/IMAGES/about/portrait-bw.jpg">
     <meta property="og:type" content="profile">
     <meta property="og:url" content="https://kubachojnacki.com/about/">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css?v=20261007r1">
+    <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
+    <link rel="stylesheet" href="../css/style.css?v=20261015a">
 </head>
-<body>
+<body class="fit">
+
+    <a class="skip" href="#main">skip to content</a>
 
     <header class="top">
         <a class="name" href="../">Kuba Chojnacki</a>
-        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../collections/">collections</a><a href="./" aria-current="page">about</a><a href="../contact/">contact</a></nav>
+        <nav class="menu" aria-label="Site"><a href="../">home</a><a href="../atmosphere/">collections</a><a href="./" aria-current="page">about</a><a href="../contact/">contact</a></nav>
     </header>
 
-    <main>
+    <main id="main">
+        <h1 class="vh">About</h1>
         <section class="about-page grid">
             <figure class="portrait">
                 <img src="../IMAGES/about/portrait-bw.jpg" alt="Kuba Chojnacki, Cracow" width="986" height="1314" decoding="async">
-                <figcaption>kuba chojnacki, cracow</figcaption>
             </figure>
             <div class="about-text">
-                <p class="say-text">Kuba Chojnacki is a painter, born 2001. an architect by training, with a bachelor from pozna&nacute; university of technology and an ongoing master&rsquo;s in cracow. he spent time in an architecture studio in italy before turning fully to painting. today he works from a studio in cracow, driven by a single pursuit: color and the gradient.</p>
-                <p class="say-text">i make abstract paintings: color absorbed directly into unprimed canvas. i&rsquo;m drawn to the moment before a color becomes a name, when it is still pure sensation. the pigment is poured and moved by gravity; what matters is what i leave alone. i want the viewer to slow down, and to feel without needing to explain.</p>
+                <p>Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in cracow.</p>
+                <p>i make abstract paintings: color absorbed directly into unprimed canvas. i&rsquo;m drawn to the moment before a color becomes a name, when it is still pure sensation. the pigment is poured and moved by gravity; what matters is what i leave alone. i want the viewer to slow down, and to feel without needing to explain.</p>
             </div>
+            <p class="about-line">color caught in a shift, transmission of one hue to another | gradient</p>
         </section>
     </main>
 
     <footer class="foot">
-        <div class="foot-nl grid">
-            <span class="fl">newsletter: subscribers see new works and prints first</span>
-            <div class="nl-signup" data-cta="join" data-where="footer"></div>
+        <div class="foot-top grid">
+            <nav class="next" aria-label="Next"><a href="../contact/"><span class="next-label">next</span><span class="next-name">contact</span></a></nav>
         </div>
         <div class="foot-row grid">
             <a class="f1" href="mailto:chojnacki.studio@gmail.com">chojnacki.studio@gmail.com</a>
             <a class="f2" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener">@chojnacki.studio</a>
-            <span class="f3">© 2026, cracow</span>
+            <span class="f3"><a href="../privacy/">privacy</a><span>© 2026, cracow</span></span>
         </div>
     </footer>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261007r1"></script>
-    <script src="../js/site.js?v=20261007r1"></script>
-    <script src="../js/newsletter.js?v=20261007r1"></script>
+    <script src="../js/data.js?v=20261015a"></script>
+    <script src="../js/site.js?v=20261015a"></script>
+    <script src="../js/newsletter.js?v=20261015a"></script>
 </body>
 </html>
