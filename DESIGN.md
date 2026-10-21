@@ -30,18 +30,18 @@ around. The rules:
   across is gone, twelve does not split into five).
 - **Two families, two jobs.** EB Garamond is the voice: the name and menu,
   the sentences (notes, collection texts), the names of works and
-  collections. Montserrat is information: sizes, prices, the price tiles,
+  collections. Inter is information (Montserrat until 2026-10-21): sizes, prices, the index,
   the about text and the contact rows (2026-10-10, his Canva).
 - **Sizes.** Garamond: `--m` (1.15rem, sentences and links), `--l` (≤2.2rem,
   names of collections and works, the slideshow caption, "selected works"), `--xl`
-  (≈2.75rem, the `next` link and the line on the about page). Montserrat:
+  (≈2.75rem, the `next` link and the line on the about page). Inter:
   `--s` (12px, small facts) and `--t` (1.0625rem, rows that are read). The
   lightbox keeps its original sizes; the phone header its smaller name/menu.
 - **EB Garamond 400 only**, roman and italic: the name in the header is
   regular since 2026-10-10 (he asked for it lighter), headings are set to
   400 so nothing is ever drawn as a fake bold.
 - **Fonts live on this site** (2026-10-11): `fonts/` holds the variable woff2
-  files (EB Garamond roman and italic, Montserrat; latin and latin-ext for
+  files (EB Garamond roman and italic, Inter; Montserrat only for /collector/; latin and latin-ext for
   the Polish letters), `css/fonts.css` declares them; nothing loads from
   Google, so no visitor's address goes there. The roman Garamond is preloaded.
 - **One line**, under the fixed header. Accents only: the underline on the
@@ -99,7 +99,7 @@ Two families, two jobs:
 - **EB Garamond (serif)** — identity and titles: logo, nav, collection
   headings, work titles, section headings, and the italic underlined
   *inquire* links.
-- **Montserrat (sans)** — information: specs, prices, captions, counts,
+- **Inter (sans)** — information (`cv05`, `ss01`: the l with a tail, open digits): specs, prices, captions, counts,
   contact details, footer.
 
 Casing: everything lowercase via `text-transform`, with three exceptions —
@@ -132,11 +132,10 @@ down, never a spec line in the sans. Because the size is relative, the pair
 holds the same proportion in the legend, in the lightbox, and in the
 condensed mobile legend, and there is only one rule to change.
 
-One deliberate exception: below 800px the legend drops to the original
-condensed catalogue density (titles 0.85rem, specs and price 8–9px sans).
-The artist prefers the old site's compact price tiles on mobile over long
-readable columns — the legend is scanned there, not read. The colour
-subtitle is not part of the exception: it scales with the title.
+(2026-10-21) The price tiles ("legend") are gone: names, sizes and prices
+now stand in the index beside the paintings (§8). Prose (the bio, the
+collection notes, the contact sentences) is in sentence case; names, menus
+and labels stay lowercase.
 
 ## 3. Layout & spacing
 
@@ -150,17 +149,12 @@ subtitle is not part of the exception: it scales with the title.
   divider between specs and inquiry links inside the lightbox panel. Do not
   reintroduce the others — if two blocks feel run together, the answer is
   more space.
-- **Works grid: the visitor picks the density**: 2, 4 or 6 across, from three
-  icons at the right of the collection head, each a small picture of its own
-  grid, as in a shop (2026-10-10, his request), the one in use dark. **6 across
-  to start**; a choice is remembered in `localStorage` (`kch-grid-cols`). On a
-  phone (≤800px) the grid is two across and the icons are hidden.
-  Uniform cells; the photos themselves communicate scale. Works on paper
-  render at half the cell width (`.col-<collection-slug>` modifier) so small
-  originals read as small.
-- Legend: 8 columns → 6 (≤1100px) → condensed 6 (≤800px) → condensed 4
-  (≤520px). Desktop keeps the readable sizes; mobile switches to the compact
-  catalogue tiles (see the typography exception above).
+- **A collection is seen two ways** (2026-10-21, replacing the 2/4/6 icons
+  and the price tiles): `index` (the paintings on columns 1–9 with number
+  and name under each, the index on 10–12) and `wall` (real scale). The
+  number of paintings across follows the collection's size, not a control:
+  6 for more than 12 works, 4 up to 12, 3 up to 6 (works on paper), so a
+  short collection fills its row. Phones: two across. See §8.
 - **Every section runs gutter-to-gutter**, like the works grid — no
   max-width on section containers. Line length stays readable via per-block
   measures or, where prose would run too wide (the statement), a two-column
@@ -228,14 +222,13 @@ subtitle is not part of the exception: it scales with the title.
 
 ## 6. Signature details (keep these)
 
-- Custom cursors, two only: a small solid black square (default, 9px) and
-  a solid black circle (anything clickable, 13px). Every interactive
-  selector must also cover its descendants (`.legend-item *` etc.) — the
-  pointer takes the cursor of the exact element under it, and the
-  universal square rule matches children directly, overriding the parent.
-  This is the site's fingerprint.
+- The pointer is the computer's own (since 2026-10-21; the square and circle
+  cursors are gone). Over a painting, on a device with a mouse, a small
+  Garamond italic word follows it a little behind and says what a click
+  does: "view", and on the lightbox picture "zoom" / "zoom out" (`.tip`,
+  site.js).
 - Sequential display numbers under every grid image: number, then name
-  ("07 burgundy blue"), Montserrat 12px. With a mouse they show on hover; on
+  ("07 burgundy blue"), Inter 12px. With a mouse they show on hover; on
   a touch screen (`hover: none`) they always stand under the painting.
 - Motion (2026-10-15 smoothness pass). Three lengths and two curves, as
   tokens in `:root` that site.js reads too: `--t-fast` 200ms (hover, press),
@@ -245,7 +238,15 @@ subtitle is not part of the exception: it scales with the title.
   is decoded before it fades in or replaces another. The slideshow crossfade
   keeps the leaving painting whole underneath (no grey dip), plays one
   round, and waits while hovered, focused, scrolled away or in a hidden tab.
-  Pages slide as one row (forward/back types); the header never moves.
+  Pages change in a short dissolve with a drift of a few pixels from the
+  side they lie on (forward/back types; 2026-10-21, no more full-width
+  slide); the header never moves. A painting pressed on the home page grows
+  into the lightbox on its collection page (cross-document view transition,
+  `view-transition-name: work`, the picture carried in `sessionStorage`
+  `kch-morph`; collection pages opened with a `#slug` hold their first frame
+  until the scripts at their end have run: `<link rel=expect href=#end>`).
+  Zoomed in the lightbox, the view follows the mouse or a dragging finger,
+  damped, never past the painting's edge.
   `scrollbar-gutter: stable` keeps every page the same width, so nothing
   shifts when the lightbox locks the page. ← → walk the pages only when no
   control has focus. Reduced motion: no page slide, no rises, instant fades.
@@ -313,10 +314,14 @@ right edge. `collections` is underlined on the collections page and on every
 collection page. All share `css/style.css`; `/collector/` keeps the old look
 through `css/legacy.css`.
 
-- **`/` home**: the original slideshow of the `hero: 1…n` works, edge to
-  edge across the first screen under the header (4:5 on a phone);
-  crossfade every 5 s, arrows, swipe; the work's name on the painting,
-  bottom left, white Garamond `--l`. Under it "selected works" at `--l` and
+- **`/` home**: the slideshow of the `hero: 1…n` works, edge to edge and
+  untouched (2026-10-21, critique round 1A: no dark gradient, no dots, no
+  arrows on the painting); the painting and one row of words under it fill
+  the first screen (4:5 + the row on a phone). The row: the work's name
+  (Garamond `--l`), medium, size and year (Inter, grey), and at the right
+  `← 01 / 06 →`. Crossfade every 5 s, one round, swipe; while a painting
+  rests it drifts very slowly down its closeup (`drift`, 26 s; the images
+  are 112% of the frame). Under it "selected works" at `--l` and
   the eight works of `HOME.selected` (data.js), whole, four across in 4:5
   boxes (two on a phone), no captions, each opening on its collection page.
   Then "collections" (`--m`) and the collections one to a row: the name at
@@ -336,16 +341,39 @@ through `css/legacy.css`.
   collections or the `next` chain.
 - **`/<collection>/`** (atmosphere, chromatic, works-on-paper, prints): one
   line of all collections in order, this one as the page's `h1` at `--l`,
-  the others at `--m`; the `note` under it on columns 1–6, `grid 2 4 6` at
-  the right edge. The grid shows **the paintings alone**, no captions (his
-  Canva); names, numbers and prices are in **the original site's grid of
-  small tiles** under it (number, name, medium / size / year, price,
-  status; 8 across, 6 under 1100px, the condensed 6 and 4 on phones).
-  `/<collection>/#<slug>` opens a work in the original lightbox; prev/next
+  the others at `--m`; the `note` under it on columns 1–6, `index · wall` at
+  the right edge (2026-10-21, critique round 2A; `js/collection.js`).
+  **index**: the paintings on columns 1–9 in upright 3:4 frames, number and
+  name under each (Inter), a faint box of the painting's own colour while
+  it loads (`js/colors.js`); the index on columns 10–12, sticky, every work
+  as an entry (number + name in Garamond, medium / size / year, price or
+  sold / not available), scrolling on its own and following the paintings.
+  At its head: sort number / color / size / price / year, filter color
+  (his colour words in six groups) / size (by the longer side) / available
+  only, kept in the address (`?sort=`, `?color=`, `?size=`,
+  `?available=1`). A painting and its entry mark each other, the rest step
+  back; an entry whose painting is off screen shows it small beside the
+  index. Re-ordering glides (FLIP). **wall** (`?view=wall`): every painting
+  as wide as it really is, softened (width ∝ cm^0.78, a 2 m canvas a
+  quarter of the page), largest first, hung on one middle line, number,
+  name and size under each. On a phone: the index's head on top, then the
+  paintings two across or the index in their place (`paintings / index`).
+  `/<collection>/#<slug>` opens a work in the original lightbox, grown out
+  of whichever of its pictures is on screen; prev/next
   stay in the collection; a slug from another collection forwards to its
   page. The pages, the line of collections and the `next` link are written
-  by `scripts/build_collections.py` from data.js (run it after adding or
-  renaming a collection; its STAMP must match the pages' `?v=`).
+  by `scripts/build_collections.py` from data.js (run it after ANY change
+  to data.js; its STAMP must match the pages' `?v=`). The same run writes
+  the structured data (schema.org: the artist on every page, each painting
+  as `VisualArtwork` with size in cm, year, price and sold/available, the
+  prints as `Product` with their editions) and then `scripts/prerender.py`,
+  which opens each page in headless Chrome and saves what site.js draws
+  (slideshow, selected works, collection list, grid and prices) into the
+  HTML with a fingerprint (`data-pre`). site.js leaves a block alone while
+  its fingerprint matches and draws it again when data.js changed since,
+  so a forgotten run only costs search engines, never visitors. Every block
+  site.js draws must go through `put()`. Without scripts the paintings
+  still show (the fade waits for `html.js`).
 - **`/prints/`** (`kind: "prints"`): one print to a row, the picture on
   columns 1–4 (an A-paper box over the print on its wall tone,
   `IMAGES/prints/`), its words from column 5: the name at `--l` with the
@@ -355,18 +383,18 @@ through `css/legacy.css`.
   `PRINT_FORMATS` in data.js); at the foot of the column, under a short
   line, the three sizes in cm. Clicking a size shows its framing (A2 to
   start) and underlines it. A4 and A5 are gone (his Canva).
-- **`/about/`**: the portrait on column 1; from column 7, in Montserrat
+- **`/about/`**: the portrait on column 1; from column 7, in Inter
   `--t`, the sentence that used to open the home page and the statement;
   then, across the page, centred, at `--xl`: "color caught in a shift,
   transmission of one hue to another | gradient". Footer row only.
 - **`/contact/`**: the sliding closeups of the two works in print, upright
   (A-paper proportions) on columns 2–5, no caption or dots; from column 7
-  the rows in Montserrat `--t`: email, instagram, studio, newsletter with
+  the rows in Inter `--t`: email, instagram, studio, newsletter with
   the signup. Footer row only.
 - **Footer** on home and every collection page: the newsletter
   on the left (label over the field, columns 1–4), and on the right the
-  way on, large: `next` (Montserrat, grey) and the next page in Garamond
-  `--xl` with an arrow. Home leads to `works` (atmosphere), each
+  way on, large: `next` (Inter, grey) and the next page in Garamond
+  `--xl` with an arrow. Home leads to `atmosphere`, each
   collection to the next, prints to `about`. Then
   email, instagram, city.
 - **The selected works** (2026-10-11) are the eight he sent, in colour order,

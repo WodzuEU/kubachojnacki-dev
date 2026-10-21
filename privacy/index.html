@@ -6,6 +6,7 @@
     <script>
         /* the pages stand in a row: going on, the next one slides in from the
            right; going back, from the left (the row itself: js/site.js) */
+        document.documentElement.classList.add('js');
         addEventListener('pagereveal', function (e) {
             if (!e.viewTransition) return;
             var me = +document.documentElement.dataset.order, dir, from;
@@ -22,8 +23,9 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
-    <link rel="stylesheet" href="../css/style.css?v=20261015a">
+    <link rel="preload" href="../fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261021b">
+    <link rel="stylesheet" href="../css/style.css?v=20261021b">
 </head>
 <body class="fit">
 
@@ -60,7 +62,7 @@
     </footer>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261015a"></script>
-    <script src="../js/site.js?v=20261015a"></script>
+    <script src="../js/data.js?v=20261021b"></script>
+    <script src="../js/site.js?v=20261021b"></script>
 </body>
 </html>

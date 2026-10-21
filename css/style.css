@@ -3,11 +3,11 @@
    The original site, cleared and put on one grid: its header, its slideshow
    and its lightbox, and a page for every collection. Twelve columns inside
    the margins. Two families: EB Garamond is the voice (the name, the menu,
-   names of works and collections, the sentences), Montserrat the
+   names of works and collections, the sentences), Inter the
    information (sizes, prices, contact rows). Garamond in three sizes:
    --m for sentences and links, --l for names of collections and works,
    --xl for the one line that leads on (next) and the line on the about
-   page. Montserrat in two: --s
+   page. Inter in two: --s
    for small facts, --t for rows that are read. One line, under the header;
    the page you are on and the email fields are underlined. Space does
    everything else: --near inside a block, --far between blocks. */
@@ -21,7 +21,7 @@
     --wait: #f1f1ef;   /* where a picture is still on its way */
 
     --serif: "EB Garamond", Georgia, serif;
-    --sans:  "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    --sans:  "Inter", "Helvetica Neue", Arial, sans-serif;
 
     --s:  12px;
     --t:  1.0625rem;
@@ -58,6 +58,8 @@ body {
     font-family: var(--sans);
     font-size: var(--s);
     line-height: 1.6;
+    letter-spacing: 0.005em;
+    font-feature-settings: "cv05", "ss01";   /* Inter as chosen: the l with a tail, open digits */
     -webkit-font-smoothing: antialiased;
 }
 /* EB Garamond is loaded in 400 roman and italic only: never let the
@@ -82,14 +84,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .skip:focus { top: 0.5rem; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* the two cursors: a square, and a circle over anything that can be clicked */
-*, *::before, *::after {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Crect width='9' height='9' fill='%23111'/%3E%3C/svg%3E") 4 4, auto !important;
+/* the pointer is the computer's own. Over a painting a small word follows
+   it, a little behind, and says what a click does: view, or in the lightbox
+   zoom (site.js). Only where there is a mouse */
+.tip {
+    position: fixed; left: 0; top: 0; z-index: 200;
+    pointer-events: none; will-change: transform;
+    font-family: var(--serif); font-style: italic; font-size: var(--m); line-height: 1.2;
+    padding: 0 0.35em; background: var(--bg); color: var(--ink);
+    opacity: 0; transition: opacity var(--t-fast) var(--ease);
 }
-a, a *, button, button *, input, [role="button"], [role="button"] *,
-.lightbox, .lightbox img {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13'%3E%3Ccircle cx='6.5' cy='6.5' r='6' fill='%23111'/%3E%3C/svg%3E") 6 6, pointer !important;
-}
+.tip.on { opacity: 1; }
+.lightbox img { cursor: zoom-in; }
+.lightbox img.is-zoomed { cursor: zoom-out; }
 
 /* the grid: .cols is the twelve columns, .grid the same inside the margins */
 .cols, .grid {
@@ -139,10 +146,13 @@ a, a *, button, button *, input, [role="button"], [role="button"] *,
 
 main { padding-top: var(--top); }
 
-/* ── home: the slideshow fills the first screen, edge to edge, the work's
-      name on the painting; under it the selected works, four across ── */
-.hero-wrap { height: calc(100vh - var(--top)); height: calc(100svh - var(--top)); }
-.hero { position: relative; height: 100%; overflow: hidden; background: var(--wait); }
+/* ── home: the slideshow fills the first screen, edge to edge and untouched:
+      no shade and no marks on the painting. Its words stand in one row under
+      it: the name, medium, size and year, then the count with its two
+      arrows. While a painting rests it drifts very slowly down its closeup.
+      Under it the selected works, four across ── */
+.hero-wrap { height: calc(100vh - var(--top)); height: calc(100svh - var(--top)); display: flex; flex-direction: column; }
+.hero { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--wait); }
 .slides { position: relative; width: 100%; height: 100%; }
 .slide {
     position: absolute;
@@ -155,64 +165,26 @@ main { padding-top: var(--top); }
 }
 .slide.active { opacity: 1; z-index: 1; pointer-events: auto; transition: opacity var(--t-slow) var(--ease); }
 .slide a { display: block; height: 100%; }
-.slide img { width: 100%; height: 100%; object-fit: cover; }
-.slider-btn {
-    position: absolute; top: 50%; z-index: 10;
-    transform: translateY(-50%);
-    color: #fff; mix-blend-mode: difference;
-    padding: 1rem; opacity: 0.55;
-    transition: opacity var(--t-fast) var(--ease);
-}
-.slider-btn:hover { opacity: 1; }
-.prev-btn { left: 0.5rem; }
-.next-btn { right: 0.5rem; }
-/* the work's name over the painting, medium, size and year under it, the
-   count at the right and the dots below: the live site's slideshow */
-.slide-vignette {
-    position: absolute; inset: 0; z-index: 5; pointer-events: none;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.42) 0%, transparent 42%);
-}
-.hero-cap {
-    position: absolute; z-index: 10;
-    left: var(--pad); right: calc(var(--pad) + 6rem); bottom: 2.6rem;
-    color: #fff;
-    pointer-events: none;
-}
-.hc-title {
-    display: block; width: fit-content;
-    font-family: var(--serif); font-size: var(--l); line-height: 1.1;
-    text-transform: lowercase;
-    pointer-events: auto;
-}
+/* a little taller than the window, so it can drift; a painting not on show
+   holds where it is */
+.slide img { width: 100%; height: 112%; object-fit: cover; animation: drift 26s ease-in-out infinite alternate; }
+.slide:not(.active) img { animation-play-state: paused; }
+@keyframes drift { to { transform: translateY(-10.7%); } }
+
+.hero-bar { flex: none; align-items: baseline; padding-block: 0.85rem 1rem; }
+.hero-cap { grid-column: 1 / 11; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.6rem; row-gap: 0.15rem; }
+.hc-title { font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; }
 .hc-title:hover { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.hc-specs {
-    display: block; margin-top: 0.5rem;
-    font-size: 11px; letter-spacing: 0.1em; text-transform: lowercase;
-    color: rgba(255, 255, 255, 0.7);
-}
-.hc-specs i { font-style: normal; margin-inline: 0.75em; }
+.hc-specs { font-size: var(--s); letter-spacing: 0.02em; text-transform: lowercase; color: var(--mid); }
+.hc-specs i { font-style: normal; margin-inline: 0.6em; }
 /* the words come with the painting, while it crosses in */
 .hero-cap.in .hc-title { animation: cap-rise var(--t-slow) var(--ease-out) 0.25s both; }
 .hero-cap.in .hc-specs { animation: cap-rise var(--t-slow) var(--ease-out) 0.33s both; }
 @keyframes cap-rise { from { opacity: 0; transform: translateY(10px); } }
-.hero-counter {
-    position: absolute; z-index: 10; right: var(--pad); bottom: 2.6rem;
-    font-size: 10px; letter-spacing: 0.2em; font-variant-numeric: tabular-nums;
-    color: rgba(255, 255, 255, 0.5);
-}
-.slide-dots {
-    position: absolute; z-index: 10; bottom: 0.5rem; left: 50%;
-    transform: translateX(-50%);
-    display: flex; gap: 2px;
-}
-.slide-dot { width: 15px; height: 15px; display: grid; place-items: center; }
-.slide-dot::before {
-    content: ""; width: 5px; height: 5px; border-radius: 50%;
-    background: rgba(255, 255, 255, 0.38);
-    transition: background var(--t-fast) var(--ease), transform var(--t-base) var(--ease-out);
-}
-.slide-dot:hover::before { background: rgba(255, 255, 255, 0.7); }
-.slide-dot.active::before { background: rgba(255, 255, 255, 0.92); transform: scale(1.25); }
+.hero-nav { grid-column: 11 / 13; justify-self: end; display: flex; align-items: baseline; gap: 0.7rem; }
+.hero-counter { font-size: var(--s); letter-spacing: 0.12em; color: var(--mid); font-variant-numeric: tabular-nums; }
+.hero-nav button { font-size: var(--m); line-height: 1; padding: 0.2rem 0.35rem; transition: opacity var(--t-fast) var(--ease); }
+@media (hover: hover) { .hero-nav button:hover { opacity: 0.45; } }
 
 .selected { padding-top: var(--near); row-gap: var(--near); }
 .sel-head { grid-column: 1 / -1; font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; }
@@ -227,13 +199,15 @@ main { padding-top: var(--top); }
 @media (hover: hover) { .sel-item:hover img { opacity: 0.85; } }
 
 /* paintings arrive: each fades in once its picture is loaded and decoded
-   (site.js). An animation, not a transition, so the hover keeps its own pace */
-.sel-item img.fade, .tile-img img.fade, .print-img img.fade { opacity: 0; }
-.sel-item img.fade.in, .tile-img img.fade.in, .print-img img.fade.in { opacity: 1; animation: arrive var(--t-slow) var(--ease-out) backwards; }
+   (site.js). An animation, not a transition, so the hover keeps its own pace.
+   Only where scripts run (html.js, set in each page's head); without them
+   the pictures simply show */
+.js img.fade { opacity: 0; }
+.js img.fade.in { opacity: 1; animation: arrive var(--t-slow) var(--ease-out) backwards; }
 @keyframes arrive { from { opacity: 0; } }
 
-/* on hover under a painting: its number, then its name, in Montserrat */
-.sel-item, .tile-img { position: relative; }
+/* on hover under a painting: its number, then its name, in Inter */
+.sel-item { position: relative; }
 .hl {
     position: absolute; left: 0; top: calc(100% + 0.55rem); z-index: 3;
     display: flex; gap: 1.2em;
@@ -244,15 +218,15 @@ main { padding-top: var(--top); }
     pointer-events: none;
 }
 .hl-no { color: var(--mid); font-variant-numeric: tabular-nums; }
-.sel-item:focus-visible > .hl, .tile-img:focus-visible > .hl { opacity: 1; transform: none; }
+.sel-item:focus-visible > .hl { opacity: 1; transform: none; }
 @media (hover: hover) {
-    .sel-item:hover > .hl, .tile-img:hover > .hl { opacity: 1; transform: none; }
+    .sel-item:hover > .hl { opacity: 1; transform: none; }
 }
 /* a phone cannot hover: the number and the name stay under every painting,
    as the numbers did on the old site */
 @media (hover: none) {
     .hl { opacity: 1; transform: none; right: 0; white-space: normal; gap: 0.8em; line-height: 1.35; }
-    .works-grid, .sel-grid { row-gap: 3.4rem; }
+    .sel-grid { row-gap: 3.4rem; }
 }
 
 /* then the collections, one to a row: the name large on columns 1-3, a
@@ -299,52 +273,119 @@ main { padding-top: var(--top); }
 }
 .col-line .col-title { margin-inline: 0.1em 0.15em; }
 .col-head .note { grid-column: 1 / 7; }
-/* the grid control, three icons as in a shop: the one in use dark */
-.density { grid-column: 7 / 13; justify-self: end; display: flex; align-items: center; gap: 0.6rem; }
-.density button { display: flex; padding: 0.35rem; color: var(--ink); opacity: 0.45; transition: opacity var(--t-fast) var(--ease); }
-.density button:hover { opacity: 0.8; }
-.density button[aria-pressed="true"] { opacity: 1; }
-.density button[aria-pressed="true"] rect { fill: currentColor; }
-#collection { padding-top: var(--far); }
+/* two ways to see a collection, as words at the right of its note: the
+   index (paintings + catalogue) and the wall (real scale). js/collection.js */
+.views { grid-column: 7 / 13; justify-self: end; display: flex; gap: 1.2em; font-family: var(--serif); font-size: var(--m); text-transform: lowercase; }
+.views button { transition: opacity var(--t-fast) var(--ease); }
+.views button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+#collection { padding-top: calc(var(--far) * 0.6); }
 
-.works-grid {
+/* ── the index view: the paintings on columns 1-9, small and close, each with
+      its number and name under it; on columns 10-12 the index, every work as
+      a catalogue entry, its order and filters at its head (after the
+      catalogue spreads, "Quiet Forces"). The index stands still while the
+      paintings pass and keeps their place ── */
+.sp-split { align-items: start; }
+.sp-field { grid-column: 1 / 10; min-width: 0; }
+.sp-plates {
+    --n: 6;
+    list-style: none;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(2rem, 4vw, 3.4rem) var(--gut);
-    padding-inline: var(--pad);
-    align-items: center;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    column-gap: var(--gut);
+    row-gap: clamp(1.6rem, 2.6vw, 2.6rem);
+    align-items: start;
 }
-.tile-img { display: flex; align-items: center; justify-content: center; }
-.tile-img img { width: 100%; height: auto; transition: opacity var(--t-fast) var(--ease); }
-@media (hover: hover) { .tile-img:hover img { opacity: 0.85; } }
-.col-works-on-paper .tile-img img { width: 50%; }
+.sp-plate > a { display: block; }
+/* every photograph in the same upright frame, so the names stand level; while
+   it arrives, the painting's own box in its own colour, faintly */
+.sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
+.sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+.sp-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.3; transition: opacity var(--t-slow) var(--ease); }
+.sp-frame:has(img.in) .sp-ph { opacity: 0; }
+/* the studies on paper are photographed close: shown smaller */
+.sp-frame.is-paper img { width: 62%; height: 62%; }
+.sp-frame.is-paper .sp-ph { transform: translate(-50%, -50%) scale(0.62); }
+/* under each painting its number, then its name, as on the old site */
+.sp-cap { display: grid; grid-template-columns: 2.1em minmax(0, 1fr); margin-top: 0.45rem; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
+.sp-no { color: var(--mid); font-variant-numeric: tabular-nums; }
+.sp-none { font-family: var(--serif); font-size: var(--m); }
 
-/* the prices: the original site's grid of small tiles, eight across.
-   Every second tile starts where a painting does in the four-across grid. */
-.legend-grid {
-    margin-top: var(--far);
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    row-gap: 0.85rem;
-}
-.legend-item {
+.sp-index {
+    grid-column: 10 / 13;
+    min-width: 0;
+    position: sticky;
+    top: calc(var(--top) + var(--near));
+    max-height: calc(100vh - var(--top) - 2 * var(--near));
+    max-height: calc(100svh - var(--top) - 2 * var(--near));
     display: flex;
     flex-direction: column;
-    gap: 0.05rem;
-    padding: 0.1rem 0.3rem;
-    margin-inline: -0.3rem;
 }
-.legend-item { transition: background-color var(--t-fast) var(--ease); }
-.legend-item:hover { background: rgba(26,26,24,0.04); }
-.legend-ref { font-weight: 500; letter-spacing: 0.08em; color: var(--mid); line-height: 1.15; }
-.legend-title { font-family: var(--serif); font-size: var(--m); text-transform: lowercase; line-height: 1.15; }
-.legend-specs { color: var(--mid); text-transform: lowercase; line-height: 1.4; margin-top: 0.2rem; }
-.legend-price { font-weight: 500; letter-spacing: 0.03em; margin-top: 0.15rem; font-variant-numeric: tabular-nums; }
-.legend-status { display: flex; align-items: flex-start; gap: 0.3rem; margin-top: 0.2rem; }
-.legend-status .status-dot { margin-top: 0.45em; }   /* level with the first line when the words wrap */
-.legend-status .status-text { font-size: var(--s); letter-spacing: 0.04em; }
-.status-dot.available { width: 5px; height: 5px; background: var(--ink); }
-.legend-item.is-unavailable .status-text { color: var(--mid); }
-.legend-item.is-sold > *, .legend-item.is-sold .status-text { color: var(--sold); }
+.sp-head { flex: none; padding-bottom: var(--near); }
+.sp-count { display: flex; align-items: baseline; gap: 1.1em; margin-bottom: 0.55rem; color: var(--mid); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.sp-clear { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.sp-views { display: none; margin-left: auto; gap: 1.1em; }
+/* sort and filters: the word in grey, then the choices; the one in use underlined */
+.sp-ctl { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); align-items: baseline; }
+.sp-lab { color: var(--mid); letter-spacing: 0.02em; }
+.sp-opts { display: flex; flex-wrap: wrap; column-gap: 0.85em; }
+.sp-opts button, .sp-views button { padding-block: 0.1rem; letter-spacing: 0.02em; white-space: nowrap; transition: opacity var(--t-fast) var(--ease); }
+.sp-opts button[aria-pressed="true"], .sp-views button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.sp-opts button:disabled { color: var(--mid); opacity: 0.45; }
+/* the entries scroll on their own and follow the paintings */
+.sp-list {
+    list-style: none;
+    position: relative;            /* the entries' offsetTop is measured from here */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(26, 26, 24, 0.18) transparent;
+    padding-right: 0.5rem;
+}
+.sp-list::-webkit-scrollbar { width: 2px; }
+.sp-list::-webkit-scrollbar-thumb { background: rgba(26, 26, 24, 0.18); }
+.sp-row > a { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); align-items: baseline; padding-block: 0.4rem 0.5rem; }
+.sp-rno, .sp-rnm { grid-row: 1; font-family: var(--serif); font-size: var(--m); line-height: 1.2; }
+.sp-rno { grid-column: 1; color: var(--mid); font-variant-numeric: tabular-nums; }
+.sp-rnm { grid-column: 2; text-transform: lowercase; text-wrap: pretty; }
+.sp-facts, .sp-st { grid-column: 2; font-size: var(--s); line-height: 1.5; letter-spacing: 0.02em; text-transform: lowercase; }
+.sp-facts { margin-top: 0.15rem; color: var(--mid); text-wrap: pretty; }
+.sp-st { display: flex; align-items: center; gap: 0.4em; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sp-st.is-sold { color: var(--sold); font-weight: 400; }
+.sp-st.is-off { color: var(--mid); font-weight: 400; }
+.sp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+/* a painting and its entry point at each other: the rest step back */
+.sp-plate, .sp-row, .wall-item { transition: opacity var(--t-fast) var(--ease); }
+.sp-split.is-pointing .sp-plate:not(.on), .sp-split.is-pointing .sp-row:not(.on) { opacity: 0.3; }
+/* an entry whose painting is out of sight shows it beside the index */
+.sp-peek {
+    position: fixed; z-index: 40; pointer-events: none;
+    height: auto; opacity: 0; transform: translateX(6px);
+    transition: opacity var(--t-fast) var(--ease), transform var(--t-base) var(--ease-out);
+}
+.sp-peek.on { opacity: 1; transform: none; }
+
+/* ── the wall: every painting as wide as it really is, softened, the largest
+      first, hung on one middle line with white around it ── */
+.sp-wall { padding-top: var(--near); }
+.wall-list {
+    grid-column: 1 / -1;
+    container-type: inline-size;
+    list-style: none;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: clamp(2.5rem, 5vw, 5rem) clamp(2rem, 4.5vw, 4.5rem);
+}
+.wall-item { flex: none; width: max(calc(var(--w) * 0.26cqw), 7.5rem); }
+.wall-item a { display: flex; flex-direction: column; gap: 0.5rem; }
+.wall-item img { width: calc(var(--w) * 0.26cqw); height: auto; }
+.wall-cap { display: flex; flex-wrap: wrap; column-gap: 0.6em; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
+.wall-cm { flex-basis: 100%; color: var(--mid); }
+@media (hover: hover) {
+    .views button:hover, .sp-opts button:not(:disabled):hover, .sp-views button:hover, .sp-clear:hover { opacity: 0.45; }
+    .wall-list:has(a:hover) .wall-item:not(:has(a:hover)) { opacity: 0.3; }
+}
 
 /* prints: one print to a row, the picture on columns 1-4, its words from
    column 5: each size a row (price, order, edition), the sizes at the foot */
@@ -503,7 +544,7 @@ body.lock .facts > div { font-size: clamp(0.85rem, 1.9vh, var(--t)); padding-blo
 }
 .lb-submit:hover { opacity: 0.42; }
 /* a press is felt: the buttons that do not hold their place by transform give a pixel */
-.density button:active, .fmt-pick:active, .nl-submit:active { transform: translateY(1px); }
+.fmt-pick:active, .nl-submit:active { transform: translateY(1px); }
 .nl-submit { display: inline-block; }
 
 /* ── footer: the newsletter on the left and the way on, large, on the
@@ -546,7 +587,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     transition: transform var(--t-base) var(--ease-out);
     transform-origin: center; position: relative; z-index: 1;
 }
-.lightbox img.is-zoomed { transform: scale(2.2); }
+.lightbox img.is-zoomed { transform: scale(2.2); touch-action: none; }
 .lightbox-info {
     width: 255px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center; gap: 1.3rem;
@@ -590,9 +631,9 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 /* ── moving between pages: they stand in a row, like rooms along a wall.
       Going on, the next page slides in from the right and pushes this one
       out to the left; going back, the other way (the head of each page sets
-      'back'; js/site.js keeps the row). The header stays where it is: its
-      new state shows at once, nothing of it moves. It starts quickly and
-      settles (--ease-out), so a click is answered at once. Without motion
+      'back'; js/site.js keeps the row). Not a slide across the whole screen:
+      a short dissolve with a drift of a few pixels. The header stays where
+      it is: its new state shows at once, nothing of it moves. Without motion
       wanted, the pages simply change. ── */
 @media (prefers-reduced-motion: no-preference) {
     @view-transition { navigation: auto; }
@@ -601,60 +642,68 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 ::view-transition-group(site-top) { animation: none; }
 ::view-transition-old(site-top) { display: none; }
 ::view-transition-new(site-top) { animation: none; }
+/* the page before fades quickly; the next one comes in with a drift of a few
+   pixels from the side it lies on (going on from the right, back from the left) */
 html:active-view-transition-type(forward, back)::view-transition-old(root),
-html:active-view-transition-type(forward, back)::view-transition-new(root) {
-    animation-duration: var(--t-base);
-    animation-timing-function: var(--ease-out);
-    animation-fill-mode: both;
-    mix-blend-mode: normal;
-}
-html:active-view-transition-type(forward)::view-transition-old(root) { animation-name: page-out-left; }
-html:active-view-transition-type(forward)::view-transition-new(root) { animation-name: page-in-right; }
-html:active-view-transition-type(back)::view-transition-old(root) { animation-name: page-out-right; }
-html:active-view-transition-type(back)::view-transition-new(root) { animation-name: page-in-left; }
-@keyframes page-out-left  { to   { transform: translateX(-100%); } }
-@keyframes page-in-right  { from { transform: translateX(100%); } }
-@keyframes page-out-right { to   { transform: translateX(100%); } }
-@keyframes page-in-left   { from { transform: translateX(-100%); } }
+html:active-view-transition-type(forward, back)::view-transition-new(root) { mix-blend-mode: normal; }
+html:active-view-transition-type(forward, back)::view-transition-old(root) { animation: page-out calc(var(--t-base) * 0.6) var(--ease) both; }
+html:active-view-transition-type(forward)::view-transition-new(root) { animation: page-in-right var(--t-base) var(--ease-out) 60ms both; }
+html:active-view-transition-type(back)::view-transition-new(root) { animation: page-in-left var(--t-base) var(--ease-out) 60ms both; }
+@keyframes page-out      { to   { opacity: 0; } }
+@keyframes page-in-right { from { opacity: 0; transform: translateX(12px); } }
+@keyframes page-in-left  { from { opacity: 0; transform: translateX(-12px); } }
+/* a painting pressed on one page grows into the lightbox of the next: the
+   picture it was stays whole underneath while the lightbox's comes over it */
+::view-transition-group(work) { animation-duration: calc(var(--t-base) * 1.25); animation-timing-function: var(--ease-out); }
+::view-transition-old(work), ::view-transition-new(work) { mix-blend-mode: normal; }
+::view-transition-old(work) { animation: none; }
+::view-transition-new(work) { animation: arrive var(--t-base) var(--ease) both; }
 
 @media (prefers-reduced-motion: reduce) {
     :root { --t-base: 1ms; --t-slow: 1ms; }
     html { scroll-behavior: auto; }
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
-    .hero-cap.in .hc-title, .hero-cap.in .hc-specs, .fade.in { animation: none; }
+    .hero-cap.in .hc-title, .hero-cap.in .hc-specs, .fade.in, .slide img { animation: none; }
     .slide, .slide.active, .preview-track, .lightbox, .lightbox img { transition: none; }
 }
 
 @media (max-width: 1100px) {
     .cl-name { grid-column: 1 / 5; }
     .cl-line { grid-column: 5 / 13; }
-    .legend-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .sp-field { grid-column: 1 / 9; }
+    .sp-plates { grid-template-columns: repeat(var(--n-mid, 4), minmax(0, 1fr)); }
+    .sp-index { grid-column: 9 / 13; }
     .print-text { grid-column: 5 / 13; }
 }
 
 /* ── narrow: one column, the same order ── */
 @media (max-width: 800px) {
     :root { --pad: clamp(1rem, 3vw, 2.5rem); }
-    .about-text, .col-head .note, .density { grid-column: 1 / -1; }
+    .about-text, .col-head .note, .views { grid-column: 1 / -1; }
+    .views { justify-self: start; }
     .portrait { grid-column: 1 / -1; }
     .hero-wrap { height: auto; }
-    .hero { aspect-ratio: 4 / 5; }
+    .hero { aspect-ratio: 4 / 5; flex: none; }
+    .hero-cap { grid-column: 1 / -1; }
+    .hero-nav { grid-column: 1 / -1; justify-self: start; margin-top: 0.35rem; }
     .sel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cl-row { padding-block: 0.5rem; }
     .cl-name, .cl-line { grid-column: 1 / -1; }
     .cl-name { font-size: var(--l); }
-    .works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .density { display: none; }
-    /* the original condensed price tiles: scanned on a phone, not read */
-    .legend-grid  { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.55rem 0.45rem; }
-    .legend-item  { padding: 0.25rem 0.3rem; }
-    .legend-ref   { font-size: 8.5px; letter-spacing: 0.04em; }
-    .legend-title { font-size: 0.85rem; }
-    .legend-specs { font-size: 8px; letter-spacing: 0.02em; line-height: 1.35; margin-top: 0.12rem; }
-    .legend-price { font-size: 9px; margin-top: 0.12rem; }
-    .legend-status .status-text { font-size: 8.5px; }
-    .legend-status .status-dot { width: 6px; height: 6px; }
-    .legend-status .status-dot.available { width: 4px; height: 4px; }
+    /* the collection: no split. The choices on top, then the paintings two
+       across, or the index in their place; the wall at a phone's scale */
+    #collection { padding-top: var(--near); }
+    .sp-field, .sp-index { grid-column: 1 / -1; }
+    .sp-index { order: -1; position: static; max-height: none; margin-bottom: var(--near); }
+    .sp-head { padding-bottom: 0; }
+    .sp-list { overflow: visible; padding: var(--near) 0 0; }
+    .sp-plates { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
+    .sp-views { display: flex; }
+    .sp-opts button, .sp-views button, .sp-clear { padding-block: 0.3rem; }
+    .sp-split[data-mode="paintings"] .sp-list { display: none; }
+    .sp-split[data-mode="index"] .sp-field { display: none; }
+    .wall-item { width: max(calc(var(--w) * 0.64cqw), 6rem); }
+    .wall-item img { width: calc(var(--w) * 0.64cqw); }
     .print-img, .print-text { grid-column: 1 / -1; }
     .print-text { padding: var(--near) 0 0; }
     .print-img { width: 78%; }
@@ -686,7 +735,6 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation-na
     :root { --top: 45px; }
     .name { font-size: 0.74rem; letter-spacing: 0.06em; }
     .menu a { font-size: 0.88rem; margin-left: 0.75rem; }
-    .legend-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem 0.4rem; }
     .col-line { font-size: 1rem; }
     .about-text, .facts > div { font-size: 0.95rem; }
 }

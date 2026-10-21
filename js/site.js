@@ -11,7 +11,7 @@
    themselves are written from data.js by scripts/build_collections.py.
    ROOT (set per page) prefixes paths: '' at the root, '../' in a folder. */
 
-document.addEventListener('DOMContentLoaded', () => {
+const siteBoot = () => {
     if (typeof COLLECTIONS === 'undefined') return;
     const ROOT = window.ROOT || '';
     const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,6 +21,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const EASE = cssVar('--ease') || 'ease', EASE_OUT = cssVar('--ease-out') || 'ease-out';
     // a picture is shown only once it can be drawn whole
     const decoded = im => (im.decode ? im.decode() : Promise.resolve()).catch(() => {});
+    // every block this file draws goes through put(). scripts/prerender.py
+    // saves the HTML into the page with its fingerprint (data-pre); while the
+    // fingerprint still matches, the block is left as it arrived, and when
+    // data.js has changed since, it is drawn again
+    const sum = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = (Math.imul(h, 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
+    const put = (el, html) => {
+        const h = sum(html);
+        if (window.__SNAP) window.__SNAP[el.id] = { h, html };
+        if (el.dataset.pre === h) return;
+        el.innerHTML = html;
+        el.dataset.pre = h;
+    };
+    // a painting fades in once its picture is loaded and decoded
+    const arrive = root => root.querySelectorAll('img.fade:not(.in)').forEach(im => {
+        if (im.dataset.arriving) return;
+        im.dataset.arriving = '1';
+        const show = () => decoded(im).then(() => im.classList.add('in'));
+        if (im.complete && im.naturalWidth) im.classList.add('in');
+        else {
+            im.addEventListener('load', show, { once: true });
+            im.addEventListener('error', () => im.classList.add('in'), { once: true });
+        }
+    });
+    // what js/collection.js borrows
+    window.KCH = { put, arrive, decoded, T, EASE, EASE_OUT };
 
     // analytics events (GoatCounter): sent only on the live domain
     const gcQueue = (window.__gcQueue = window.__gcQueue || []);
@@ -58,6 +83,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const hoverLabel = w => `<span class="hl" aria-hidden="true"><span class="hl-no">${noOf[w.slug]}</span><span class="hl-nm">${plain(w)}</span></span>`;
     // a click on a painting opens the lightbox out of it (see openWork)
     let clickedAt = 0;
+    let pressed = null;
+    document.addEventListener('click', e => {
+        if (!e.target.closest) return;
+        pressed = e.target.closest('[data-work]');
+        if (pressed || e.target.closest('.sp-row')) clickedAt = performance.now();
+    }, true);
+
+    // ── a painting carried across pages: the one pressed here and the open
+    //    lightbox on the next page share one name, so the browser grows one
+    //    into the other (a cross-document view transition). Its picture goes
+    //    along so the lightbox can start with it ──
+    let morphInto = () => {};
+    addEventListener('pageswap', e => {
+        if (!e.viewTransition || !e.activation || !pressed) return;
+        const to = new URL(e.activation.entry.url);
+        const slug = decodeURIComponent(to.hash.slice(1));
+        const im = pressed.dataset.work === slug && pressed.querySelector('img');
+        if (!im || to.pathname === location.pathname) return;
+        im.style.viewTransitionName = 'work';
+        try { sessionStorage.setItem('kch-morph', JSON.stringify({ slug, src: im.currentSrc || im.src })); } catch (x) {}
+    });
+    addEventListener('pageshow', () => document.querySelectorAll('img').forEach(im => { if (im.style.viewTransitionName) im.style.viewTransitionName = ''; }));
+    addEventListener('pagereveal', e => {
+        let m = null;
+        try { m = JSON.parse(sessionStorage.getItem('kch-morph') || 'null'); sessionStorage.removeItem('kch-morph'); } catch (x) {}
+        if (e.viewTransition && m) morphInto(e, m);
+    });
     // "Atmosphere | maroon khaki": the collection, the colours under it
     const titleHtml = w => {
         const [main, sub] = w.title.split('|').map(s => s.trim());
@@ -73,13 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // first painting loads at once (index.html preloads it); the others
         // wait until it is on screen, so they never compete with it.
         const heroSet = w => `${thumb(w, '-hero')} 1600w, ${thumb(w, '-hero-2400')} 2400w`;
-        slidesWrap.innerHTML = picks.map((w, i) =>
+        put(slidesWrap, picks.map((w, i) =>
             `<div class="slide">
                  <a href="${pageOf(colOf[w.slug])}#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
                      <img ${i ? `data-srcset="${heroSet(w)}"` : `src="${thumb(w, '-hero')}" srcset="${heroSet(w)}" fetchpriority="high"`}
                           sizes="100vw" alt="${altOf(w)}" decoding="async">
                  </a>
-             </div>`).join('');
+             </div>`).join(''));
 
         const slides = Array.from(slidesWrap.children);
         const pic = k => slides[k].querySelector('img');
@@ -93,11 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const cap = document.getElementById('hero-cap');
         const counter = document.getElementById('hero-counter');
-        const dotsWrap = document.getElementById('slide-dots');
         const N = slides.length, two = n => String(n).padStart(2, '0');
-        dotsWrap.innerHTML = picks.map((w, i) =>
-            `<button type="button" class="slide-dot" aria-label="Show ${plain(w)}"></button>`).join('');
-        const dots = Array.from(dotsWrap.children);
+        // no dots: the count and the two arrows in the row under the painting
+        const dots = [];
         // it plays one round and comes to rest on the first painting; it
         // waits while the pointer or the keyboard is on it
         let cur = 0, timer = null, shown = 1, held = false;
@@ -131,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.next-btn').addEventListener('click', () => { goTo(cur + 1); restart(); });
         dots.forEach((d, k) => d.addEventListener('click', () => { goTo(k); restart(); }));
 
-        const hero = slidesWrap.parentElement;
+        const hero = slidesWrap.closest('.hero-wrap');
         const hold = () => { held = true; stop(); };
         const release = () => { held = false; start(); };
         hero.addEventListener('mouseenter', hold);
@@ -158,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── home: the selected works, whole, four across ──
     const selected = document.getElementById('selected');
     if (selected && typeof HOME !== 'undefined') {
-        selected.innerHTML = (HOME.selected || []).map(x => {
+        put(selected, (HOME.selected || []).map(x => {
             // a painting not on the site yet: its picture, no link
             if (typeof x === 'object') {
                 const t = s => `${ROOT}IMAGES/thumbs/${x.img}${s}.webp`;
@@ -169,19 +219,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const w = bySlug[x];
             if (!w) return '';
-            return `<a class="sel-item" href="${pageOf(colOf[w.slug])}#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}">
+            return `<a class="sel-item" href="${pageOf(colOf[w.slug])}#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}">
                         <img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 50vw, 25vw"
                              alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
                         ${hoverLabel(w)}
                     </a>`;
-        }).join('');
+        }).join(''));
     }
 
     // ── home: the collections, a row each, the name and its line ──
     const colList = document.getElementById('col-list');
     if (colList) {
-        colList.innerHTML = COLS.map(c =>
-            `<li><a class="cl-row" href="${pageOf(c)}"><span class="cl-name">${c.name.toLowerCase()}</span><span class="cl-line">${c.line || ''}</span></a></li>`).join('');
+        put(colList, COLS.map(c =>
+            `<li><a class="cl-row" href="${pageOf(c)}"><span class="cl-name">${c.name.toLowerCase()}</span><span class="cl-line">${c.line || ''}</span></a></li>`).join(''));
     }
 
     // ── lightbox, as on the original site ───────────────────
@@ -192,6 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const info = lb.querySelector('.lightbox-info');
         const mail = document.getElementById('lb-inquire-mail');
         let idx = 0, back = null, scrollY = 0, full = false;
+        // zoomed: where the painting stands (x, y) and where it is going (tx, ty)
+        let pan = null, raf = 0, drag = null, moved = false;
+        // a work carried in from another page: its picture comes first
+        let arriving = null;
+        try { arriving = JSON.parse(sessionStorage.getItem('kch-morph') || 'null'); } catch (e) {}
 
         // hold the page still behind the lightbox, and put it back in one frame
         const lock = () => {
@@ -211,12 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // the painting a work opened from: on this page, loaded and on screen
-        const sourceOf = w => {
-            const el = document.querySelector(`.tile-img[href="#${w.slug}"] img`);
-            if (!el || !el.complete) return null;
+        const sourceOf = w => [...document.querySelectorAll(`[data-work="${w.slug}"] img`)].find(el => {
+            if (!el.complete || !el.naturalWidth) return false;
             const r = el.getBoundingClientRect();
-            return r.width && r.bottom > 0 && r.top < innerHeight ? el : null;
-        };
+            return r.width && r.bottom > 0 && r.top < innerHeight;
+        }) || null;
         // where the painting shows inside the lightbox picture (contained, not stretched)
         const shown = w => {
             const r = img.getBoundingClientRect(), ar = w.w / w.h;
@@ -265,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // stepping back: the painting shrinks into its place on the wall
             closing = true;
             img.style.transition = 'none';
+            pan = null; cancelAnimationFrame(raf); raf = 0; drag = null;
+            img.style.transform = '';
             img.classList.remove('is-zoomed');
             img.style.transformOrigin = 'center center';
             lb.classList.add('lb-flip');
@@ -275,17 +331,19 @@ document.addEventListener('DOMContentLoaded', () => {
                .onfinish = () => { img.style.transition = ''; finish(); };
         };
 
-        openWork = i => {
+        openWork = (i, instant) => {
             idx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[idx];
             const fresh = !lb.classList.contains('active');
             // stepping closer: grow out of the painting that was clicked, when it was
             const from = fresh && !REDUCE_MOTION && performance.now() - clickedAt < 900 ? sourceOf(w) : null;
             // stepping while zoomed: the next one does not shrink in, it is simply there
-            if (!fresh && img.classList.contains('is-zoomed')) {
+            if (!fresh && pan) {
                 img.style.transition = 'none';
                 requestAnimationFrame(() => requestAnimationFrame(() => { img.style.transition = ''; }));
             }
+            pan = null; cancelAnimationFrame(raf); raf = 0; drag = null;
+            img.style.transform = '';
             img.classList.remove('is-zoomed');
             img.setAttribute('aria-label', 'Zoom in');
             img.style.transformOrigin = 'center center';
@@ -295,6 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // the picture already on screen comes along at once; the sharp one
                 // takes its place when it is drawn and the painting has arrived
                 setPic(w, from);
+            } else if (fresh && arriving && arriving.slug === w.slug && arriving.src) {
+                // carried in from the page before: the same picture first, then the sharp one
+                setPic(w, { src: arriving.src });
+                arriving = null;
+                loading.then(m => { if (WORKS[idx] === w && !full) setPic(w, m); });
             } else if (fresh) {
                 setPic(w, { sizes: SIZES, srcset: srcset(w), src: thumb(w, '-1600') });
             } else {
@@ -332,6 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const grow = img.animate([{ transform: move }, { transform: 'none' }], { duration: T.base * 1.2, easing: EASE_OUT });
                     grow.onfinish = () => lb.classList.remove('lb-flip');
                     Promise.all([loading, grow.finished.catch(() => {})]).then(([m]) => { if (WORKS[idx] === w && !full) setPic(w, m); });
+                } else if (instant) {
+                    // arriving at a work's address: the lightbox is simply open
+                    lb.classList.add('lb-flip', 'active');
+                    requestAnimationFrame(() => requestAnimationFrame(() => lb.classList.remove('lb-flip')));
                 } else lb.classList.add('active');
                 lb.querySelector('.lb-close').focus({ preventScroll: true });
             }
@@ -358,21 +425,81 @@ document.addEventListener('DOMContentLoaded', () => {
         img.tabIndex = 0;
         img.setAttribute('role', 'button');
         img.setAttribute('aria-label', 'Zoom in');
-        const zoom = (ox, oy) => {
-            const on = img.classList.toggle('is-zoomed');
-            if (on) { fetchFull(); img.style.transformOrigin = `${ox}% ${oy}%`; }
-            img.setAttribute('aria-label', on ? 'Zoom out' : 'Zoom in');
+        // zoomed in, the painting at 2.2x with the point clicked kept under the
+        // pointer; then the view follows the mouse, or the finger as it drags,
+        // a little behind (damped), and never past the painting's edge
+        const S = 2.2;
+        const edge = (v, size) => { const m = (S - 1) * size / 2; return Math.max(-m, Math.min(m, v)); };
+        const place = () => { img.style.transform = `translate(${pan.x.toFixed(1)}px, ${pan.y.toFixed(1)}px) scale(${S})`; };
+        const glide = () => {
+            raf = 0;
+            if (!pan) return;
+            pan.x += (pan.tx - pan.x) * 0.16;
+            pan.y += (pan.ty - pan.y) * 0.16;
+            place();
+            if (Math.abs(pan.tx - pan.x) > 0.3 || Math.abs(pan.ty - pan.y) > 0.3) raf = requestAnimationFrame(glide);
         };
+        const aim = (tx, ty) => {
+            pan.tx = edge(tx, pan.w); pan.ty = edge(ty, pan.h);
+            if (REDUCE_MOTION) { pan.x = pan.tx; pan.y = pan.ty; place(); }
+            else if (!raf) raf = requestAnimationFrame(glide);
+        };
+        const zoomIn = (cx, cy) => {
+            const r = img.getBoundingClientRect();
+            pan = { w: r.width, h: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+            pan.x = pan.tx = edge(cx == null ? 0 : -(S - 1) * (cx - pan.cx), pan.w);
+            pan.y = pan.ty = edge(cy == null ? 0 : -(S - 1) * (cy - pan.cy), pan.h);
+            img.classList.add('is-zoomed');
+            img.style.transformOrigin = 'center center';
+            img.style.transition = REDUCE_MOTION ? 'none' : `transform ${T.base}ms ${EASE_OUT}`;
+            place();
+            setTimeout(() => { if (pan) img.style.transition = 'none'; }, T.base);
+            fetchFull();
+            img.setAttribute('aria-label', 'Zoom out');
+        };
+        const zoomOut = () => {
+            pan = null; cancelAnimationFrame(raf); raf = 0; drag = null;
+            img.classList.remove('is-zoomed');
+            img.style.transition = REDUCE_MOTION ? 'none' : `transform ${T.base}ms ${EASE_OUT}`;
+            img.style.transform = '';
+            setTimeout(() => { if (!pan) img.style.transition = ''; }, T.base);
+            img.setAttribute('aria-label', 'Zoom in');
+        };
+        img.addEventListener('pointerdown', e => {
+            moved = false;
+            if (pan && e.pointerType !== 'mouse') {
+                drag = { x: e.clientX, y: e.clientY, tx: pan.tx, ty: pan.ty };
+                img.setPointerCapture(e.pointerId);
+            }
+        });
+        img.addEventListener('pointermove', e => {
+            if (!pan) return;
+            if (e.pointerType === 'mouse') aim(-(S - 1) * (e.clientX - pan.cx), -(S - 1) * (e.clientY - pan.cy));
+            else if (drag) {
+                const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+                if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
+                aim(drag.tx + dx, drag.ty + dy);
+            }
+        });
+        img.addEventListener('pointerup', () => { drag = null; });
+        img.addEventListener('pointercancel', () => { drag = null; });
         img.addEventListener('click', e => {
             e.stopPropagation();
-            const r = img.getBoundingClientRect();
-            zoom(((e.clientX - r.left) / r.width * 100).toFixed(1), ((e.clientY - r.top) / r.height * 100).toFixed(1));
+            if (moved) { moved = false; return; }
+            if (pan) zoomOut(); else zoomIn(e.clientX, e.clientY);
         });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();
-            zoom(50, 50);
+            if (pan) zoomOut(); else zoomIn(null, null);
         });
+
+        // a painting carried in from the page before lands as this lightbox's picture
+        morphInto = (e, m) => {
+            if (!lb.classList.contains('active') || WORKS[idx].slug !== m.slug) return;
+            img.style.viewTransitionName = 'work';
+            e.viewTransition.finished.finally(() => { img.style.viewTransitionName = ''; });
+        };
         lb.querySelector('.lb-prev').addEventListener('click', e => { e.stopPropagation(); step(-1); });
         lb.querySelector('.lb-next').addEventListener('click', e => { e.stopPropagation(); step(1); });
         lb.querySelector('.lb-close').addEventListener('click', e => { e.stopPropagation(); closeLb(); });
@@ -400,11 +527,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (page) {
         const c = COLS.find(x => x.slug === page.dataset.collection) || COLS[0];
         const panel = document.getElementById('collection');
-        const density = document.getElementById('density');
 
         if (c.kind === 'prints') {
-            density.hidden = true;
-            panel.innerHTML = `<div class="prints grid">` + c.prints.map(p => {
+            put(panel, `<div class="prints grid">` + c.prints.map(p => {
                 const w = bySlug[p.work];
                 const first = p.formats.find(f => f.size === 'A2') || p.formats[0];
                 return `<article class="print" data-work="${p.work}">
@@ -428,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <p class="fmt-sizes">${p.formats.map(f => `<span><b>${f.size}</b>${nb(f.cm)}</span>`).join('')}</p>
                             </div>
                         </article>`;
-            }).join('') + `</div>`;
+            }).join('') + `</div>`);
 
             // a size shows its own framing of the painting; each has its order link
             panel.addEventListener('click', e => {
@@ -446,92 +571,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 im.alt = `Print of ${plain(bySlug[slug])}, ${size}`;
                 art.querySelectorAll('.fmt-pick').forEach(b => b.setAttribute('aria-pressed', b === pick));
             });
-        } else {
-            // 2 / 4 / 6 across on a wide screen, 6 to start, remembered; a phone
-            // keeps two. Each choice is an icon of its own grid, as in a shop.
-            const CHOICES = [2, 4, 6];
-            let cols = 6;
-            try { const v = parseInt(localStorage.getItem('kch-grid-cols'), 10); if (CHOICES.includes(v)) cols = v; } catch (e) {}
-            // each icon is the row it gives: two, four or six small framed
-            // paintings side by side, thinner as there are more
-            const gridIcon = n => {
-                const w = { 2: 7, 4: 5, 6: 4 }[n], g = 2, H = 14, W = n * w + (n - 1) * g + 1;
-                let r = '';
-                for (let x = 0; x < n; x++) r += `<rect x="${x * (w + g) + 0.5}" y="0.5" width="${w}" height="${H - 1}"/>`;
-                return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false">${r}</svg>`;
-            };
-            density.setAttribute('role', 'group');
-            density.setAttribute('aria-label', 'Paintings per row');
-            density.innerHTML = CHOICES.map(n =>
-                `<button type="button" data-cols="${n}" aria-pressed="${n === cols}" aria-label="${n} per row" title="${n} per row">${gridIcon(n)}</button>`).join('');
-            const applyCols = () => {
-                const g = panel.querySelector('.works-grid');
-                if (!g) return;
-                const n = window.innerWidth > 800 ? cols : 2;
-                g.style.gridTemplateColumns = n === 2 && window.innerWidth <= 800 ? '' : `repeat(${n}, minmax(0, 1fr))`;
-                g.dataset.cols = n;
-                // each picture is fetched at the size it is shown
-                const sz = `${Math.ceil(100 / n)}vw`;
-                g.querySelectorAll('img').forEach(im => { if (im.sizes !== sz) im.sizes = sz; });
-            };
-            density.addEventListener('click', e => {
-                const b = e.target.closest('button[data-cols]');
-                if (!b) return;
-                cols = parseInt(b.dataset.cols, 10);
-                try { localStorage.setItem('kch-grid-cols', cols); } catch (err) {}
-                density.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', parseInt(x.dataset.cols, 10) === cols));
-                applyCols();
-                track('grid/' + cols);
-            });
-            window.addEventListener('resize', applyCols);
-
-            // the paintings alone; under them the names and prices, in the
-            // original site's grid of small tiles
-            panel.className = `col-${c.slug}`;
-            panel.innerHTML =
-                `<div class="works-grid">` +
-                c.works.map(w =>
-                    `<a class="tile-img" href="#${w.slug}" aria-label="${plain(w)}, ${noOf[w.slug]}">
-                         <img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="${window.innerWidth > 800 ? Math.ceil(100 / cols) : 50}vw"
-                              alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
-                         ${hoverLabel(w)}
-                     </a>`).join('') +
-                `</div>
-                 <div class="legend-grid grid">` +
-                c.works.map(w =>
-                    `<a class="legend-item${w.sold ? ' is-sold' : (w.unavailable ? ' is-unavailable' : '')}" href="#${w.slug}">
-                         <span class="legend-ref">${noOf[w.slug]}</span>
-                         <span class="legend-title">${nameOf(w)}</span>
-                         <span class="legend-specs">${w.medium}<br>${nb(w.size)}<br>${w.year}</span>
-                         <span class="legend-price">${price(w)}</span>
-                         <span class="legend-status"><span class="status-dot${w.sold ? '' : (w.unavailable ? ' unavailable' : ' available')}"></span><span class="status-text">${status(w)}</span></span>
-                     </a>`).join('') +
-                `</div>`;
-            applyCols();
-            panel.addEventListener('click', e => { if (e.target.closest('.tile-img, .legend-item')) clickedAt = performance.now(); });
         }
+        // the other collections are drawn by js/collection.js: index and wall
 
         // #<slug>: a work of this collection opens; one of another goes to its page
-        const route = () => {
+        const route = first => {
             const h = decodeURIComponent(location.hash.slice(1));
             if (bySlug[h]) {
                 if (colOf[h] !== c) { location.replace(pageOf(colOf[h]) + '#' + h); return; }
-                openWork(WORKS.indexOf(bySlug[h]));
+                openWork(WORKS.indexOf(bySlug[h]), first === true);
             } else closeLb(true);
         };
         window.addEventListener('hashchange', route);
-        route();
+        route(true);
     }
 
     // ── paintings arrive: each fades in once its picture has loaded ──
-    document.querySelectorAll('img.fade').forEach(im => {
-        const show = () => decoded(im).then(() => im.classList.add('in'));
-        if (im.complete && im.naturalWidth) im.classList.add('in');
-        else {
-            im.addEventListener('load', show, { once: true });
-            im.addEventListener('error', () => im.classList.add('in'), { once: true });
-        }
-    });
+    arrive(document);
 
     // ── moving through the site. The pages stand in a row, like rooms along
     //    a wall: home, the collections, about, contact. Going on slides the
@@ -560,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const t = e.changedTouches[0];
         // not on the slideshow or the lightbox (they swipe their own pictures),
         // and not at the screen's edges (the browser's own back gesture)
-        touch = e.target.closest('.hero, .lightbox, .fx-lab, input') || t.clientX < 24 || t.clientX > innerWidth - 24
+        touch = e.target.closest('.hero-wrap, .lightbox, .fx-lab, input') || t.clientX < 24 || t.clientX > innerWidth - 24
             ? null : { x: t.clientX, y: t.clientY };
     }, { passive: true });
     document.addEventListener('touchend', e => {
@@ -576,10 +632,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
         if (sessionStorage.getItem('kch-explore')) {
             const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261015a`;
+            lab.src = `${ROOT}js/explore.js?v=20261021b`;
             document.body.appendChild(lab);
         }
     } catch (e) {}
+
+    // ── the pointer is the computer's own. Over a painting a small word follows
+    //    it, a little behind (damped), and says what a click does: "view",
+    //    and on the lightbox's picture "zoom" or "zoom out". Only with a mouse ──
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        const tip = document.createElement('span');
+        tip.className = 'tip';
+        tip.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(tip);
+        let x = 0, y = 0, tx = 0, ty = 0, raf = 0, word = '';
+        const follow = () => {
+            x += (tx - x) * 0.2; y += (ty - y) * 0.2;
+            tip.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+            raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.4 ? requestAnimationFrame(follow) : 0;
+        };
+        const wordFor = el => {
+            if (!el || !el.closest) return '';
+            const big = el.closest('#lightbox-img');
+            if (big) return big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
+            return el.closest('[data-work], .slide a, .sp-row a') ? 'view' : '';
+        };
+        document.addEventListener('pointermove', e => {
+            if (e.pointerType !== 'mouse') return;
+            tx = e.clientX + 14; ty = e.clientY + 18;
+            const w = wordFor(e.target);
+            if (w !== word) {
+                if (w && !word) { x = tx; y = ty; tip.style.transform = `translate(${x}px, ${y}px)`; }
+                word = w;
+                if (w) tip.textContent = w;
+                tip.classList.toggle('on', !!w);
+            }
+            if (REDUCE_MOTION) { x = tx; y = ty; tip.style.transform = `translate(${x}px, ${y}px)`; }
+            else if (!raf) raf = requestAnimationFrame(follow);
+        }, { passive: true });
+        // a click on the picture changes what the next click does
+        document.addEventListener('click', e => { if (word && e.target.closest && e.target.closest('#lightbox-img')) requestAnimationFrame(() => { word = wordFor(e.target); tip.textContent = word; }); });
+        document.documentElement.addEventListener('mouseleave', () => { word = ''; tip.classList.remove('on'); });
+    }
 
     // ── the next page is ready before it is opened: Chrome draws a page
     //    of this site while the pointer rests on its link, so the slide
@@ -587,8 +681,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
         const rules = document.createElement('script');
         rules.type = 'speculationrules';
-        rules.textContent = JSON.stringify({ prerender: [{ where: { href_matches: '/*' }, eagerness: 'moderate' }] });
+        const base = new URL(ROOT || './', location.href).pathname;
+        rules.textContent = JSON.stringify({ prerender: [{ where: { href_matches: base + '*' }, eagerness: 'moderate' }] });
         document.head.appendChild(rules);
+    }
+
+    // the staging copy on github.io is for looking at, not for search engines
+    if (/\.github\.io$/.test(location.hostname) && !document.querySelector('meta[name="robots"]')) {
+        const m = document.createElement('meta');
+        m.name = 'robots'; m.content = 'noindex';
+        document.head.appendChild(m);
     }
 
     // ── analytics (live domain only), counted when a page is really seen,
@@ -605,4 +707,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     if (document.prerendering) document.addEventListener('prerenderingchange', counted, { once: true });
     else counted();
-});
+};
+// the scripts stand at the end of each page, after everything they draw on,
+// so the page is ready before its first frame: a work opened by its address
+// is already open when a page change captures the new page
+if (document.getElementById('main')) siteBoot();
+else document.addEventListener('DOMContentLoaded', siteBoot);

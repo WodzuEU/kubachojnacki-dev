@@ -1,20 +1,23 @@
 """Writes a page for every collection in js/data.js, the /collections/ and
 /works/ forwarders (both go on to the first collection, or to the one a link
-names), and sitemap.xml. Run it after adding or renaming a collection:
+names), sitemap.xml, and the structured data search engines read (the
+artist, every painting with its size and price, the prints). Then it runs
+scripts/prerender.py, which saves what site.js draws into the pages. Run it
+after ANY change to js/data.js:
 
     python scripts/build_collections.py
 
-Each page carries its name, count and note as plain HTML (what search
-engines and link previews read); site.js fills in the grid, the price list
-and the line of collections. STAMP must match the ?v= stamp of the pages.
+STAMP must match the ?v= stamp of the pages.
 """
 import datetime
 import html
 import io
+import json
 import os
 import re
+import sys
 
-STAMP = "20261015a"
+STAMP = "20261021b"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -67,6 +70,29 @@ def field(obj, name):
     return m.group(1).replace('\\"', '"') if m else None
 
 
+def number(obj, name):
+    m = re.search(r'\b' + name + r':\s*(-?\d+(?:\.\d+)?)', obj)
+    return float(m.group(1)) if m else None
+
+
+def flag(obj, name):
+    return bool(re.search(r'\b' + name + r':\s*true', obj))
+
+
+def work(obj):
+    return {"slug": field(obj, "slug"), "title": field(obj, "title"), "medium": field(obj, "medium"),
+            "size": field(obj, "size"), "year": int(number(obj, "year") or 0), "price": number(obj, "price"),
+            "w": number(obj, "w"), "h": number(obj, "h"), "sold": flag(obj, "sold"),
+            "unavailable": flag(obj, "unavailable")}
+
+
+def print_formats():
+    src = io.open(os.path.join(REPO, "js", "data.js"), encoding="utf-8").read()
+    start = src.index("[", src.index("const PRINT_FORMATS"))
+    return [{"size": field(o, "size"), "cm": field(o, "cm"), "price": number(o, "price"),
+             "edition": number(o, "edition")} for o in objects(src[start + 1:matching(src, start, "[", "]")])]
+
+
 def array(obj, name):
     m = re.search(r'\b' + name + r':\s*\[', obj)
     if not m:
@@ -102,6 +128,8 @@ def collections():
             "cover": field(head, "cover"),
             "works": len(works),
             "prints": len(prints),
+            "items": [work(w) for w in works],
+            "print_works": re.findall(r'\bwork:\s*"([^"]+)"', array(obj, "prints")),
         })
     return cols
 
@@ -115,6 +143,10 @@ HEAD = """<!DOCTYPE html>
     <script>
         /* the pages stand in a row: going on, the next one slides in from the
            right; going back, from the left (the row itself: js/site.js) */
+        document.documentElement.classList.add('js');
+        /* a work opened by its address is open before the page shows: the first
+           frame waits for the scripts at the end of the page (#end) */
+        if (location.hash.length > 1) document.write('<link rel="expect" href="#end" blocking="render">');
         addEventListener('pagereveal', function (e) {{
             if (!e.viewTransition) return;
             var me = +document.documentElement.dataset.order, dir, from;
@@ -137,8 +169,10 @@ HEAD = """<!DOCTYPE html>
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../css/fonts.css?v={stamp}">
     <link rel="stylesheet" href="../css/style.css?v={stamp}">
+    {ld}
 </head>
 <body>
 
@@ -153,9 +187,9 @@ HEAD = """<!DOCTYPE html>
         <section class="col-head grid">
             <div class="col-line">{line}</div>
             <p class="say-text note">{note}</p>
-            <span class="density" id="density"></span>
+            {views}
         </section>
-        <section id="collection"></section>
+        <section id="collection" class="col-{slug}"></section>
     </main>
 
 """
@@ -213,8 +247,9 @@ LIGHTBOX = """
 TAIL = """
     <script>window.ROOT = '../';</script>
     <script src="../js/data.js?v={stamp}"></script>
-    <script src="../js/site.js?v={stamp}"></script>
+    <script src="../js/site.js?v={stamp}"></script>{extra}
     <script src="../js/newsletter.js?v={stamp}"></script>
+    <template id="end"></template>
 </body>
 </html>
 """
@@ -265,6 +300,89 @@ def og_image(c):
     return "IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg"
 
 
+# ── structured data (schema.org JSON-LD) ────────────────────────────────────
+ARTIST = {
+    "@type": "Person", "@id": f"{SITE}/#artist", "name": "Kuba Chojnacki", "jobTitle": "Painter",
+    "description": "Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.",
+    "url": f"{SITE}/", "image": f"{SITE}/IMAGES/about/portrait-bw.jpg",
+    "email": "mailto:chojnacki.studio@gmail.com",
+    "sameAs": ["https://instagram.com/chojnacki.studio"],
+    "address": {"@type": "PostalAddress", "addressLocality": "Cracow", "addressCountry": "PL"},
+}
+
+
+def ld(*nodes):
+    data = {"@context": "https://schema.org", "@graph": [ARTIST, *nodes]}
+    text = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{text}</script>'
+
+
+def cm(value):
+    return {"@type": "QuantitativeValue", "value": int(value) if value == int(value) else value, "unitCode": "CMT"}
+
+
+def artwork(w, c, no):
+    # the size string does not say which side is the height: the photo does
+    a, b = [float(x) for x in re.findall(r"\d+(?:\.\d+)?", w["size"])[:2]]
+    portrait = (w["h"] or 1) > (w["w"] or 1)
+    width, height = (min(a, b), max(a, b)) if portrait else (max(a, b), min(a, b))
+    medium, _, surface = w["medium"].partition(" on ")
+    url = f"{SITE}/{c['slug']}/#{w['slug']}"
+    state = "SoldOut" if w["sold"] else ("OutOfStock" if w["unavailable"] else "InStock")
+    item = {
+        "@type": "VisualArtwork", "@id": url, "url": url,
+        "name": w["title"].split("|")[-1].strip(), "alternateName": f"{c['name']} {no:02d}",
+        "artform": "Painting", "artMedium": medium, "width": cm(width), "height": cm(height),
+        "dateCreated": str(w["year"]), "creator": {"@id": ARTIST["@id"]},
+        "image": f"{SITE}/IMAGES/works/{w['slug']}.jpg",
+        "offers": {"@type": "Offer", "price": int(w["price"]), "priceCurrency": "EUR",
+                   "availability": "https://schema.org/" + state, "url": url},
+    }
+    if surface:
+        item["artworkSurface"] = surface
+    return item
+
+
+def page_ld(c, cols):
+    url = f"{SITE}/{c['slug']}/"
+    page = {"@type": "CollectionPage", "@id": url, "url": url, "name": f"{c['name']} by Kuba Chojnacki",
+            "description": c["note"], "author": {"@id": ARTIST["@id"]}}
+    if c["kind"] == "prints":
+        works = {w["slug"]: w for x in cols for w in x["items"]}
+        formats = [f for f in print_formats() if f["price"]]
+        page["hasPart"] = []
+        for slug in c["print_works"]:
+            w = works.get(slug)
+            if not w:
+                continue
+            name = w["title"].split("|")[-1].strip()
+            page["hasPart"].append({
+                "@type": "Product", "@id": f"{url}#{slug}", "name": f"{name}, limited edition print",
+                "description": f"Giclée print of the painting {name}, on fine art archival paper with a white border.",
+                "image": f"{SITE}/IMAGES/prints/{slug}-a2-1100.webp",
+                "offers": [{"@type": "Offer", "name": f"{f['size']}, {f['cm']}, edition of {int(f['edition'])}",
+                            "price": int(f["price"]), "priceCurrency": "EUR",
+                            "availability": "https://schema.org/InStock", "url": url} for f in formats],
+            })
+    else:
+        page["hasPart"] = [artwork(w, c, i + 1) for i, w in enumerate(c["items"])]
+    return ld(page)
+
+
+def put_ld(path, block):
+    """index.html and about/ are written by hand: their data goes between <!--ld--> marks."""
+    full = os.path.join(REPO, path)
+    src = io.open(full, encoding="utf-8").read()
+    mark = f"<!--ld-->{block}<!--/ld-->"
+    if "<!--ld-->" in src:
+        src = re.sub(r"<!--ld-->.*?<!--/ld-->", lambda m: mark, src, count=1, flags=re.S)
+    else:
+        src = src.replace("</head>", f"    {mark}\n</head>", 1)
+    with io.open(full, "w", encoding="utf-8", newline="\n") as f:
+        f.write(src)
+    print("wrote structured data into", path)
+
+
 def col_line(c, cols, esc):
     # every collection in one line, in order; this one is the page's title, large
     return "".join(f'<h1 class="col-title">{esc(x["name"].lower())}</h1>' if x is c
@@ -285,14 +403,21 @@ def main():
     for i, c in enumerate(cols):
         page = HEAD.format(
             title=esc(c["name"]), desc=esc(describe(c)), site=SITE, slug=c["slug"], og=og_image(c),
-            stamp=STAMP, line=col_line(c, cols, esc), note=esc(c["note"]), first=cols[0]["slug"], order=i + 1)
+            stamp=STAMP, line=col_line(c, cols, esc), note=esc(c["note"]), first=cols[0]["slug"], order=i + 1,
+            ld=page_ld(c, cols),
+            # a collection of paintings is seen two ways: index and wall (js/collection.js)
+            views='' if c["kind"] else ('<div class="views" id="views" role="group" aria-label="view">'
+                                        '<button type="button" data-view="index" aria-pressed="true">index</button>'
+                                        '<button type="button" data-view="wall" aria-pressed="false">wall</button></div>'))
         # the way on: the next collection, after the last one the about page
         nx = cols[i + 1] if i + 1 < len(cols) else None
         page += FOOT_NL.format(next_href=f"../{nx['slug']}/" if nx else "../about/",
                                next_name=esc(nx["name"].lower()) if nx else "about")
         if not c["kind"]:
             page += LIGHTBOX
-        page += TAIL.format(stamp=STAMP)
+        extra = '' if c["kind"] else (f'\n    <script src="../js/colors.js?v={STAMP}"></script>'
+                                       f'\n    <script src="../js/collection.js?v={STAMP}"></script>')
+        page += TAIL.format(stamp=STAMP, extra=extra)
         write(f"{c['slug']}/index.html", page)
 
     for path, title in (("collections", "Collections"), ("works", "Works")):
@@ -304,6 +429,16 @@ def main():
     xml += [f"  <url><loc>{SITE}/{u}</loc><lastmod>{today}</lastmod><changefreq>{f}</changefreq></url>" for u, f in urls]
     xml.append("</urlset>")
     write("sitemap.xml", "\n".join(xml) + "\n")
+
+    put_ld("index.html", ld({"@type": "WebSite", "@id": f"{SITE}/#site", "url": f"{SITE}/",
+                             "name": "Kuba Chojnacki", "inLanguage": "en", "author": {"@id": ARTIST["@id"]}}))
+    put_ld("about/index.html", ld({"@type": "AboutPage", "@id": f"{SITE}/about/", "url": f"{SITE}/about/",
+                                   "mainEntity": {"@id": ARTIST["@id"]}}))
+
+    # last: what site.js draws, saved into the pages
+    sys.path.insert(0, HERE)
+    import prerender
+    prerender.main()
 
 
 if __name__ == "__main__":

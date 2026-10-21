@@ -36,9 +36,12 @@
    closeup (IMAGES/thumbs/<slug>-hero.webp) stands for it on the home page.
 
    Every collection has its own page, /<name>/ (e.g. /works-on-paper/).
-   After adding or renaming a collection, run
+   After ANY change in this file, run
         python scripts/build_collections.py
-   which writes those pages and the sitemap from this file.
+   which writes those pages, the sitemap and the structured data from
+   this file, then saves what site.js draws into the pages themselves
+   (scripts/prerender.py, needs Chrome). Forgetting it is never wrong for
+   long: site.js sees the pages are out of date and draws them again.
 
    A collection with no works yet stays off the site until they are added.
    Prints have their own layout:
@@ -91,7 +94,7 @@ const COLLECTIONS = [
     name: "Atmosphere",
     line: "main body of work, colors conformed to gravity in a single pursuit of gradient",
     cover: "44-atmosphere-lavender-green-ochre",
-    note: "fields of thin acrylic on raw canvas. it moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. it studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
+    note: "Fields of thin acrylic on raw canvas. It moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. It studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
     works: [
       { ref: "44", slug: "44-atmosphere-lavender-green-ochre", title: "Atmosphere | lavender green ochre", medium: "acrylic on raw canvas", size: "200 × 150 cm", year: 2026, price: 2800, w: 2588, h: 3450, hero: 4 },
       { ref: "45", slug: "45-atmosphere-deep-violet",          title: "Atmosphere | deep violet",          medium: "acrylic on raw canvas", size: "150 × 130 cm", year: 2026, price: 1900, w: 2588, h: 3450, hero: 5 },
@@ -130,7 +133,7 @@ const COLLECTIONS = [
     name: "Chromatic",
     line: "archival works and experiments, each holding a single color",
     cover: "20-chromatic-red",
-    note: "archival works and experiments exploring hues and colors. earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.",
+    note: "Archival works and experiments exploring hues and colors. Earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.",
     works: [
       { ref: "19", slug: "19-chromatic-blue-orange",  title: "Chromatic | blue orange", medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032 },
       { ref: "18", slug: "18-chromatic-orange-ii",    title: "Chromatic | orange II",   medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2026, price: 1300, w: 2588, h: 3450 },
@@ -148,7 +151,7 @@ const COLLECTIONS = [
     name: "Works on paper",
     line: "six unique studies, airbrushed on cold press paper",
     cover: "47-paper-purple-01",
-    note: "six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). the series runs from deep purples into crimson reds.",
+    note: "Six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). The series runs from deep purples into crimson reds.",
     works: [
       { ref: "47", slug: "47-paper-purple-01",  title: "Study in purple 01",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 425, h: 578 },
       { ref: "48", slug: "48-paper-purple-02",  title: "Study in purple 02",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
@@ -163,14 +166,14 @@ const COLLECTIONS = [
   {
     name: "Miniatures",
     line: "one color, explored through different tonal shifts",
-    note: "nine new small works. photographs soon.",
+    note: "Nine new small works. Photographs soon.",
     works: [],
   },
   {
     name: "Prints",
     line: "limited edition prints of two paintings",
     kind: "prints",
-    note: "limited edition prints of two paintings, giclée on fine art archival paper with a white border. each size frames the painting a little closer.",
+    note: "Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.",
     works: [],
     prints: [
       { work: "03-atmosphere-maroon-khaki",  formats: PRINT_FORMATS },

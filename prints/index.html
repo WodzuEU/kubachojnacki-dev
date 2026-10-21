@@ -6,6 +6,10 @@
     <script>
         /* the pages stand in a row: going on, the next one slides in from the
            right; going back, from the left (the row itself: js/site.js) */
+        document.documentElement.classList.add('js');
+        /* a work opened by its address is open before the page shows: the first
+           frame waits for the scripts at the end of the page (#end) */
+        if (location.hash.length > 1) document.write('<link rel="expect" href="#end" blocking="render">');
         addEventListener('pagereveal', function (e) {
             if (!e.viewTransition) return;
             var me = +document.documentElement.dataset.order, dir, from;
@@ -17,10 +21,10 @@
         });
     </script>
     <title>Prints | Kuba Chojnacki</title>
-    <meta name="description" content="Prints by Kuba Chojnacki: limited edition prints of two paintings, giclée on fine art archival paper with a white border. each size frames the painting a…">
+    <meta name="description" content="Prints by Kuba Chojnacki: Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a…">
     <link rel="canonical" href="https://kubachojnacki.com/prints/">
     <meta property="og:title" content="Prints | Kuba Chojnacki">
-    <meta property="og:description" content="Prints by Kuba Chojnacki: limited edition prints of two paintings, giclée on fine art archival paper with a white border. each size frames the painting a…">
+    <meta property="og:description" content="Prints by Kuba Chojnacki: Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a…">
     <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kubachojnacki.com/prints/">
@@ -28,8 +32,10 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../css/fonts.css?v=20261015a">
-    <link rel="stylesheet" href="../css/style.css?v=20261015a">
+    <link rel="preload" href="../fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css?v=20261021b">
+    <link rel="stylesheet" href="../css/style.css?v=20261021b">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://kubachojnacki.com/#artist","name":"Kuba Chojnacki","jobTitle":"Painter","description":"Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.","url":"https://kubachojnacki.com/","image":"https://kubachojnacki.com/IMAGES/about/portrait-bw.jpg","email":"mailto:chojnacki.studio@gmail.com","sameAs":["https://instagram.com/chojnacki.studio"],"address":{"@type":"PostalAddress","addressLocality":"Cracow","addressCountry":"PL"}},{"@type":"CollectionPage","@id":"https://kubachojnacki.com/prints/","url":"https://kubachojnacki.com/prints/","name":"Prints by Kuba Chojnacki","description":"Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.","author":{"@id":"https://kubachojnacki.com/#artist"},"hasPart":[{"@type":"Product","@id":"https://kubachojnacki.com/prints/#03-atmosphere-maroon-khaki","name":"maroon khaki, limited edition print","description":"Giclée print of the painting maroon khaki, on fine art archival paper with a white border.","image":"https://kubachojnacki.com/IMAGES/prints/03-atmosphere-maroon-khaki-a2-1100.webp","offers":[{"@type":"Offer","name":"A1, 59.4 × 84.1 cm, edition of 5","price":450,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"},{"@type":"Offer","name":"A2, 42 × 59.4 cm, edition of 15","price":250,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"},{"@type":"Offer","name":"A3, 29.7 × 42 cm, edition of 30","price":150,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"}]},{"@type":"Product","@id":"https://kubachojnacki.com/prints/#02-atmosphere-burgundy-blue","name":"burgundy blue, limited edition print","description":"Giclée print of the painting burgundy blue, on fine art archival paper with a white border.","image":"https://kubachojnacki.com/IMAGES/prints/02-atmosphere-burgundy-blue-a2-1100.webp","offers":[{"@type":"Offer","name":"A1, 59.4 × 84.1 cm, edition of 5","price":450,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"},{"@type":"Offer","name":"A2, 42 × 59.4 cm, edition of 15","price":250,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"},{"@type":"Offer","name":"A3, 29.7 × 42 cm, edition of 30","price":150,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://kubachojnacki.com/prints/"}]}]}]}</script>
 </head>
 <body>
 
@@ -43,10 +49,60 @@
     <main id="main" data-collection="prints">
         <section class="col-head grid">
             <div class="col-line"><a href="../atmosphere/">atmosphere</a><a href="../chromatic/">chromatic</a><a href="../works-on-paper/">works on paper</a><h1 class="col-title">prints</h1></div>
-            <p class="say-text note">limited edition prints of two paintings, giclée on fine art archival paper with a white border. each size frames the painting a little closer.</p>
-            <span class="density" id="density"></span>
+            <p class="say-text note">Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.</p>
+            
         </section>
-        <section id="collection"></section>
+        <section id="collection" class="col-prints" data-pre="gopw21"><!--pre:collection--><div class="prints grid"><article class="print" data-work="03-atmosphere-maroon-khaki">
+                            <div class="print-img">
+                                <img class="fade" src="../IMAGES/prints/03-atmosphere-maroon-khaki-a2-1100.webp"
+                                     srcset="../IMAGES/prints/03-atmosphere-maroon-khaki-a2-600.webp 600w, ../IMAGES/prints/03-atmosphere-maroon-khaki-a2-1100.webp 1100w"
+                                     sizes="(max-width: 800px) 80vw, 30vw" width="1100" height="1375"
+                                     alt="Print of maroon khaki, A2" decoding="async">
+                            </div>
+                            <div class="print-text">
+                                <h2 class="print-name">maroon khaki<span class="print-orig">original 150 × 100 cm, sold</span></h2>
+                                
+                                <div class="formats"><button type="button" class="fmt-pick" data-size="A1" aria-pressed="false" aria-label="A1, 450 euro, show this size">
+                                         <span class="fs">A1</span><span class="fp">450 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A1" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20maroon%20khaki%2C%20A1" aria-label="Order the A1 print by email">order</a>
+                                     <span class="fmt-ed">edition of 5</span><button type="button" class="fmt-pick" data-size="A2" aria-pressed="true" aria-label="A2, 250 euro, show this size">
+                                         <span class="fs">A2</span><span class="fp">250 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A2" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20maroon%20khaki%2C%20A2" aria-label="Order the A2 print by email">order</a>
+                                     <span class="fmt-ed">edition of 15</span><button type="button" class="fmt-pick" data-size="A3" aria-pressed="false" aria-label="A3, 150 euro, show this size">
+                                         <span class="fs">A3</span><span class="fp">150 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A3" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20maroon%20khaki%2C%20A3" aria-label="Order the A3 print by email">order</a>
+                                     <span class="fmt-ed">edition of 30</span></div>
+                                <p class="fmt-sizes"><span><b>A1</b>59.4 × 84.1 cm</span><span><b>A2</b>42 × 59.4 cm</span><span><b>A3</b>29.7 × 42 cm</span></p>
+                            </div>
+                        </article><article class="print" data-work="02-atmosphere-burgundy-blue">
+                            <div class="print-img">
+                                <img class="fade" src="../IMAGES/prints/02-atmosphere-burgundy-blue-a2-1100.webp"
+                                     srcset="../IMAGES/prints/02-atmosphere-burgundy-blue-a2-600.webp 600w, ../IMAGES/prints/02-atmosphere-burgundy-blue-a2-1100.webp 1100w"
+                                     sizes="(max-width: 800px) 80vw, 30vw" width="1100" height="1375"
+                                     alt="Print of burgundy blue, A2" decoding="async">
+                            </div>
+                            <div class="print-text">
+                                <h2 class="print-name">burgundy blue<span class="print-orig">original 150 × 100 cm, sold</span></h2>
+                                
+                                <div class="formats"><button type="button" class="fmt-pick" data-size="A1" aria-pressed="false" aria-label="A1, 450 euro, show this size">
+                                         <span class="fs">A1</span><span class="fp">450 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A1" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20burgundy%20blue%2C%20A1" aria-label="Order the A1 print by email">order</a>
+                                     <span class="fmt-ed">edition of 5</span><button type="button" class="fmt-pick" data-size="A2" aria-pressed="true" aria-label="A2, 250 euro, show this size">
+                                         <span class="fs">A2</span><span class="fp">250 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A2" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20burgundy%20blue%2C%20A2" aria-label="Order the A2 print by email">order</a>
+                                     <span class="fmt-ed">edition of 15</span><button type="button" class="fmt-pick" data-size="A3" aria-pressed="false" aria-label="A3, 150 euro, show this size">
+                                         <span class="fs">A3</span><span class="fp">150 €</span>
+                                     </button>
+                                     <a class="fo lb-submit" data-size="A3" href="mailto:chojnacki.studio@gmail.com?subject=Print%20order%3A%20burgundy%20blue%2C%20A3" aria-label="Order the A3 print by email">order</a>
+                                     <span class="fmt-ed">edition of 30</span></div>
+                                <p class="fmt-sizes"><span><b>A1</b>59.4 × 84.1 cm</span><span><b>A2</b>42 × 59.4 cm</span><span><b>A3</b>29.7 × 42 cm</span></p>
+                            </div>
+                        </article></div><!--/pre:collection--></section>
     </main>
 
     <footer class="foot">
@@ -65,8 +121,9 @@
     </footer>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261015a"></script>
-    <script src="../js/site.js?v=20261015a"></script>
-    <script src="../js/newsletter.js?v=20261015a"></script>
+    <script src="../js/data.js?v=20261021b"></script>
+    <script src="../js/site.js?v=20261021b"></script>
+    <script src="../js/newsletter.js?v=20261021b"></script>
+    <template id="end"></template>
 </body>
 </html>
