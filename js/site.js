@@ -87,7 +87,7 @@ const siteBoot = () => {
     document.addEventListener('click', e => {
         if (!e.target.closest) return;
         pressed = e.target.closest('[data-work]');
-        if (pressed || e.target.closest('.sp-row')) clickedAt = performance.now();
+        if (pressed) clickedAt = performance.now();
     }, true);
 
     // ── a painting carried across pages: the one pressed here and the open
@@ -165,7 +165,7 @@ const siteBoot = () => {
             // new words each time, so they rise in again with each painting
             cap.innerHTML =
                 `<a class="hc-title" href="${pageOf(colOf[w.slug])}#${w.slug}" tabindex="-1">${roman(w.title)}</a>
-                 <span class="hc-specs">${w.medium}<i>·</i>${nb(w.size)}<i>·</i>${w.year}</span>`;
+                 <span class="hc-specs">${w.medium}<i>|</i>${nb(w.size)}<i>|</i>${w.year}</span>`;
             counter.textContent = `${two(cur + 1)} / ${two(N)}`;
             // the painting on show, and the next one drawn before its turn comes
             fill(cur);
@@ -205,33 +205,60 @@ const siteBoot = () => {
         start();
     }
 
-    // ── home: the selected works, whole, four across ──
+    // ── home: the selected works, whole, four across, the number and name
+    //    under each, as on the collection pages ──
     const selected = document.getElementById('selected');
     if (selected && typeof HOME !== 'undefined') {
         put(selected, (HOME.selected || []).map(x => {
             // a painting not on the site yet: its picture, no link
             if (typeof x === 'object') {
                 const t = s => `${ROOT}IMAGES/thumbs/${x.img}${s}.webp`;
-                return `<span class="sel-item">
+                return `<span class="sel-item"><span class="sel-frame">
                             <img class="fade" src="${t('')}" srcset="${t('')} 400w, ${t('-800')} 800w, ${t('-1600')} 1600w" sizes="(max-width: 800px) 50vw, 25vw"
-                                 alt="${x.alt}" width="${x.w}" height="${x.h}" loading="lazy" decoding="async">
+                                 alt="${x.alt}" width="${x.w}" height="${x.h}" loading="lazy" decoding="async"></span>
                         </span>`;
             }
             const w = bySlug[x];
             if (!w) return '';
             return `<a class="sel-item" href="${pageOf(colOf[w.slug])}#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}">
-                        <img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 50vw, 25vw"
-                             alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
-                        ${hoverLabel(w)}
+                        <span class="sel-frame"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 50vw, 25vw"
+                             alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async"></span>
+                        <span class="sp-cap"><span class="sp-no">${noOf[w.slug]}</span><span class="sp-nm">${nameOf(w)}</span></span>
                     </a>`;
         }).join(''));
     }
 
-    // ── home: the collections, a row each, the name and its line ──
+    // ── home: the collections (his Canva, 2026-10-21): the word and a numbered
+    //    list on column 1, the picked collection's note and facts on column 2, a
+    //    tile for each on columns 3-4 (the first large). The first is picked to
+    //    start; pointing at a row or a tile picks it (bold, whole), a click opens it ──
     const colList = document.getElementById('col-list');
     if (colList) {
-        put(colList, COLS.map(c =>
-            `<li><a class="cl-row" href="${pageOf(c)}"><span class="cl-name">${c.name.toLowerCase()}</span><span class="cl-line">${c.line || ''}</span></a></li>`).join(''));
+        const two = n => String(n).padStart(2, '0');
+        const tileImg = (c, big) => c.kind === 'prints'
+            ? `<img class="fade" src="${printImg(c.prints[0].work, 'A2', 600)}" alt="" width="600" height="750" loading="lazy" decoding="async">`
+            : (w => `<img class="fade" src="${thumb(w, '-800')}" srcset="${thumb(w)} 400w, ${thumb(w, '-800')} 800w${big ? `, ${thumb(w, '-1600')} 1600w` : ''}" sizes="(max-width: 800px) ${big ? 92 : 45}vw, ${big ? 23 : 11}vw" alt="" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">`)(bySlug[c.cover] || c.works[0]);
+        const facts = c => {
+            if (c.kind === 'prints') return `${c.prints.length} prints, giclée on archival paper, ${PRINT_FORMATS.map(f => f.size).join(', ')}.`;
+            const media = [...new Set(c.works.map(w => w.medium))].join(' and ');
+            const ys = c.works.map(w => w.year), y0 = Math.min(...ys), y1 = Math.max(...ys);
+            return `${c.works.length} ${c.works.length === 1 ? 'work' : 'works'}, ${media}, ${y0 === y1 ? y0 : `${y0}–${y1}`}.`;
+        };
+        const slot = i => i === 0 ? 'big' : `small s${i}`;
+        put(colList,
+            `<div class="cl-side"><h2 class="cl-head" id="cl-head">collections</h2><ol class="cl-index">` + COLS.map((c, i) =>
+                `<li><a href="${pageOf(c)}" data-col="${i}"${i ? '' : ' class="on"'}><span class="cl-no">${two(i + 1)}</span><span class="cl-nm">${c.name.toLowerCase()}</span></a></li>`).join('') +
+            `</ol></div><div class="cl-text">` + COLS.map((c, i) =>
+                `<div class="cl-about" data-about="${i}"${i ? ' hidden' : ''}><p class="cl-note">${c.note || ''}</p><p class="cl-facts">${facts(c)}</p></div>`).join('') +
+            `</div>` + COLS.map((c, i) =>
+                `<a class="cl-tile ${slot(i)}${i ? '' : ' on'}" href="${pageOf(c)}" data-col="${i}" aria-label="${c.name.toLowerCase()}"><span class="cl-img">${tileImg(c, i === 0)}</span><span class="cl-tn">${c.name.toLowerCase()}</span></a>`).join(''));
+        const pick = i => {
+            colList.querySelectorAll('[data-col]').forEach(el => el.classList.toggle('on', el.dataset.col === i));
+            colList.querySelectorAll('.cl-about').forEach(el => { el.hidden = el.dataset.about !== i; });
+        };
+        const at = e => { const m = e.target.closest && e.target.closest('[data-col]'); if (m) pick(m.dataset.col); };
+        colList.addEventListener('pointerover', at);
+        colList.addEventListener('focusin', at);
     }
 
     // ── lightbox, as on the original site ───────────────────
@@ -529,50 +556,46 @@ const siteBoot = () => {
         const panel = document.getElementById('collection');
 
         if (c.kind === 'prints') {
-            put(panel, `<div class="prints grid">` + c.prints.map(p => {
-                const w = bySlug[p.work];
-                const first = p.formats.find(f => f.size === 'A2') || p.formats[0];
-                return `<article class="print" data-work="${p.work}">
-                            <div class="print-img">
-                                <img class="fade" src="${printImg(p.work, first.size, 1100)}"
-                                     srcset="${printImg(p.work, first.size, 600)} 600w, ${printImg(p.work, first.size, 1100)} 1100w"
-                                     sizes="(max-width: 800px) 80vw, 30vw" width="1100" height="1375"
-                                     alt="Print of ${plain(w)}, ${first.size}" decoding="async">
-                            </div>
-                            <div class="print-text">
-                                <h2 class="print-name">${nameOf(w)}<span class="print-orig">original ${nb(w.size)}, ${w.sold ? 'sold' : status(w)}</span></h2>
-                                ${p.note ? `<p class="say-text print-note">${p.note}</p>` : ''}
-                                <div class="formats">` +
-                                p.formats.map(f =>
-                                    `<button type="button" class="fmt-pick" data-size="${f.size}" aria-pressed="${f === first}" aria-label="${f.size}, ${f.price ? f.price + ' euro' : 'price soon'}, show this size">
-                                         <span class="fs">${f.size}</span><span class="fp">${f.price ? f.price + '\u00a0€' : 'price soon'}</span>
-                                     </button>
-                                     <a class="fo lb-submit" data-size="${f.size}" href="${orderHref(w, f.size)}" aria-label="Order the ${f.size} print by email">order</a>
-                                     <span class="fmt-ed">${f.edition ? `edition of ${f.edition}` : ''}</span>`).join('') +
-                                `</div>
-                                <p class="fmt-sizes">${p.formats.map(f => `<span><b>${f.size}</b>${nb(f.cm)}</span>`).join('')}</p>
-                            </div>
-                        </article>`;
-            }).join('') + `</div>`);
+            // (his Canva, 2026-10-21) the print chosen on column 2; on column 3 its
+            // words: the two paintings, the sizes with the price, the measure and
+            // edition, the order link. The choice in use is bold and larger
+            const PR = c.prints, F = PR[0].formats;
+            const startF = F.find(f => f.size === 'A2') || F[0];
+            const pic = (p, f, px) => printImg(p.work, f.size, px);
+            put(panel,
+                `<div class="pr grid"><div class="pr-pic"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 23vw" width="1100" height="1375" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
+                `<div class="pr-info"><span class="pr-k">a print of</span>` +
+                PR.map((p, i) => `<button type="button" class="pr-opt" data-print="${i}" aria-pressed="${i === 0}">${nameOf(bySlug[p.work])}</button>`).join('') +
+                `<span class="pr-sizes" role="group" aria-label="size"><span class="pr-in">in</span>` +
+                F.map(f => `<button type="button" class="pr-opt" data-size="${f.size}" aria-pressed="${f === startF}">${f.size}</button>`).join('') + `</span>` +
+                `<span class="pr-price">${nb(startF.price + ' €')}</span>` +
+                `<span class="pr-facts">${nb(startF.cm)}, edition of ${startF.edition}</span>` +
+                `<a class="lb-submit pr-order" href="${orderHref(bySlug[PR[0].work], startF.size)}">order by email</a></div></div>`);
 
-            // a size shows its own framing of the painting; each has its order link
+            const st = { p: 0, f: startF };
+            const sync = () => {
+                const p = PR[st.p], w = bySlug[p.work], f = st.f, im = panel.querySelector('.pr-pic img');
+                im.src = pic(p, f, 1100);
+                im.srcset = `${pic(p, f, 600)} 600w, ${pic(p, f, 1100)} 1100w`;
+                im.alt = `Print of ${plain(w)}, ${f.size}`;
+                panel.querySelectorAll('.pr-opt[data-print]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.print === st.p));
+                panel.querySelectorAll('.pr-opt[data-size]').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === f.size));
+                panel.querySelector('.pr-facts').textContent = `${nb(f.cm)}, edition of ${f.edition}`;
+                panel.querySelector('.pr-price').textContent = nb(f.price + ' €');
+                const o = panel.querySelector('.pr-order');
+                o.href = orderHref(w, f.size);
+                o.setAttribute('aria-label', `Order the ${f.size} print of ${plain(w)} by email`);
+            };
             panel.addEventListener('click', e => {
-                const pick = e.target.closest('.fmt-pick');
-                const order = e.target.closest('.fo');
-                const art = e.target.closest('.print');
-                if (order && art) {
-                    const size = order.dataset.size;
-                    track(`order-print/${art.dataset.work}-${size.toLowerCase()}`, `Print order: ${plain(bySlug[art.dataset.work])}, ${size}`);
-                }
-                if (!pick || !art) return;
-                const size = pick.dataset.size, slug = art.dataset.work, im = art.querySelector('.print-img img');
-                im.src = printImg(slug, size, 1100);
-                im.srcset = `${printImg(slug, size, 600)} 600w, ${printImg(slug, size, 1100)} 1100w`;
-                im.alt = `Print of ${plain(bySlug[slug])}, ${size}`;
-                art.querySelectorAll('.fmt-pick').forEach(b => b.setAttribute('aria-pressed', b === pick));
+                if (e.target.closest('.pr-order')) { const w = bySlug[PR[st.p].work]; track(`order-print/${w.slug}-${st.f.size.toLowerCase()}`, `Print order: ${plain(w)}, ${st.f.size}`); return; }
+                const b = e.target.closest('[data-print], [data-size]');
+                if (!b) return;
+                if (b.dataset.print != null) st.p = +b.dataset.print;
+                if (b.dataset.size) st.f = F.find(f => f.size === b.dataset.size) || st.f;
+                sync();
             });
         }
-        // the other collections are drawn by js/collection.js: index and wall
+        // the other collections are drawn by js/collection.js: grid and wall
 
         // #<slug>: a work of this collection opens; one of another goes to its page
         const route = first => {
@@ -632,7 +655,7 @@ const siteBoot = () => {
         if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
         if (sessionStorage.getItem('kch-explore')) {
             const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261021b`;
+            lab.src = `${ROOT}js/explore.js?v=20261022c`;
             document.body.appendChild(lab);
         }
     } catch (e) {}
@@ -655,7 +678,7 @@ const siteBoot = () => {
             if (!el || !el.closest) return '';
             const big = el.closest('#lightbox-img');
             if (big) return big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
-            return el.closest('[data-work], .slide a, .sp-row a') ? 'view' : '';
+            return el.closest('[data-work], .slide a') ? 'view' : '';
         };
         document.addEventListener('pointermove', e => {
             if (e.pointerType !== 'mouse') return;

@@ -30,8 +30,8 @@
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../css/fonts.css?v=20261021b">
-    <link rel="stylesheet" href="../css/style.css?v=20261021b">
+    <link rel="stylesheet" href="../css/fonts.css?v=20261022c">
+    <link rel="stylesheet" href="../css/style.css?v=20261022c">
     <!--ld--><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://kubachojnacki.com/#artist","name":"Kuba Chojnacki","jobTitle":"Painter","description":"Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.","url":"https://kubachojnacki.com/","image":"https://kubachojnacki.com/IMAGES/about/portrait-bw.jpg","email":"mailto:chojnacki.studio@gmail.com","sameAs":["https://instagram.com/chojnacki.studio"],"address":{"@type":"PostalAddress","addressLocality":"Cracow","addressCountry":"PL"}},{"@type":"AboutPage","@id":"https://kubachojnacki.com/about/","url":"https://kubachojnacki.com/about/","mainEntity":{"@id":"https://kubachojnacki.com/#artist"}}]}</script><!--/ld-->
 </head>
 <body class="fit">
@@ -46,11 +46,17 @@
     <main id="main">
         <h1 class="vh">About</h1>
         <section class="about-page grid">
-            <figure class="portrait">
+            <div class="about-side">
                 <img src="../IMAGES/about/portrait-bw.jpg" alt="Kuba Chojnacki, Cracow" width="986" height="1314" decoding="async">
-            </figure>
+                <p class="about-lead">Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.</p>
+            </div>
+            <!-- draft from his own story (2026-09-28, 2026-10-17): his to rewrite -->
+            <div class="about-story">
+                <p>Before architecture I always wanted to study art. I studied architecture instead, in Poznań and now in Cracow, and it made it clearer what I want to pursue: color and the gradient.</p>
+                <p>I began with figure drawing. During the studies the interest moved to something more primary, color and emotion, and after moving to Cracow I could finally paint freely.</p>
+                <p>What holds me is transition: one color passing into another, one feeling into another. The gradient is a metaphor of change.</p>
+            </div>
             <div class="about-text">
-                <p>Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.</p>
                 <p>I make abstract paintings: color absorbed directly into unprimed canvas. I&rsquo;m drawn to the moment before a color becomes a name, when it is still pure sensation. The pigment is poured and moved by gravity; what matters is what I leave alone. I want the viewer to slow down, and to feel without needing to explain.</p>
             </div>
             <p class="about-line">color caught in a shift, transmission of one hue to another | gradient</p>
@@ -59,6 +65,10 @@
 
     <footer class="foot">
         <div class="foot-top grid">
+            <div class="foot-nl">
+                <span class="fl">newsletter: subscribers see new works and prints first</span>
+                <div class="nl-signup" data-cta="join" data-where="footer"></div>
+            </div>
             <nav class="next" aria-label="Next"><a href="../contact/"><span class="next-label">next</span><span class="next-name">contact</span></a></nav>
         </div>
         <div class="foot-row grid">
@@ -69,8 +79,8 @@
     </footer>
 
     <script>window.ROOT = '../';</script>
-    <script src="../js/data.js?v=20261021b"></script>
-    <script src="../js/site.js?v=20261021b"></script>
-    <script src="../js/newsletter.js?v=20261021b"></script>
+    <script src="../js/data.js?v=20261022c"></script>
+    <script src="../js/site.js?v=20261022c"></script>
+    <script src="../js/newsletter.js?v=20261022c"></script>
 </body>
 </html>

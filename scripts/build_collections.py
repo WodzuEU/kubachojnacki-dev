@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261021b"
+STAMP = "20261022c"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -405,9 +405,9 @@ def main():
             title=esc(c["name"]), desc=esc(describe(c)), site=SITE, slug=c["slug"], og=og_image(c),
             stamp=STAMP, line=col_line(c, cols, esc), note=esc(c["note"]), first=cols[0]["slug"], order=i + 1,
             ld=page_ld(c, cols),
-            # a collection of paintings is seen two ways: index and wall (js/collection.js)
-            views='' if c["kind"] else ('<div class="views" id="views" role="group" aria-label="view">'
-                                        '<button type="button" data-view="index" aria-pressed="true">index</button>'
+            # a collection of paintings is seen two ways: grid and wall (js/collection.js)
+            views='' if True else ('<div class="views" id="views" role="group" aria-label="view">'
+                                        '<button type="button" data-view="grid" aria-pressed="true">grid</button>'
                                         '<button type="button" data-view="wall" aria-pressed="false">wall</button></div>'))
         # the way on: the next collection, after the last one the about page
         nx = cols[i + 1] if i + 1 < len(cols) else None

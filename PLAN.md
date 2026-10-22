@@ -42,3 +42,19 @@ Choices made on the comparison page https://claude.ai/artifact/LAC5ryfYcybPE8mFT
       with no console errors; push to dev (`dev-redesign` + CNAME removal).
 
 Done 2026-10-21. alt/split is now the collection page (folder removed). Not decided: whether alt/canvas stays as a page; the effects lab (?explore); whether Instagram, prints and documents move to Inter too.
+
+## Round 2, same day (his corrections, LOCAL ONLY, not on dev)
+
+- [x] Collection page back to a grid (number + name under each, no price
+      list, no index column); `grid · wall`.
+- [x] Home collections as an index (his reference): list + tiles + the word.
+- [x] Hero words back on the painting; the painting moves through its frame
+      while scrolling (CSS scroll timeline).
+- [x] Prints: two pictures, one line of choices (painting, size), order.
+
+## Round 3 (2026-10-21/22): his Canva draft, LOCAL ONLY
+
+- [x] Read DAHYqlXfsXo; site on 8 half-column tracks; every page rebuilt to
+      the draft and measured on the grid lines (all on grid, stamps 20261022a).
+- [ ] Archive tab: his plans later (slot left in the menu order).
+- [ ] About story paragraphs: draft from his own story, his to rewrite.

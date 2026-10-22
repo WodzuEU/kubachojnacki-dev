@@ -66,7 +66,7 @@ body {
    browser draw a fake bold */
 h1, h2, h3 { font-weight: 400; }
 /* Garamond at display sizes sits a hair tighter */
-.col-title, .sel-head, .cl-name, .next a, .about-line, .print-name, .hc-title, .lb-title { letter-spacing: -0.01em; }
+.col-title, .sel-head, .cl-word, .next a, .about-line, .print-name, .hc-title, .lb-title { letter-spacing: -0.01em; }
 /* the roman numerals in a name stay capitals in a lowercase line */
 .rn { text-transform: none; }
 img { display: block; max-width: 100%; }
@@ -98,29 +98,34 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .lightbox img { cursor: zoom-in; }
 .lightbox img.is-zoomed { cursor: zoom-out; }
 
-/* the grid: .cols is the twelve columns, .grid the same inside the margins */
+/* the grid (his Canva, 2026-10-21): four columns inside the margins, each
+   split in half. .grid is those eight half-columns and everything starts on
+   one of them: 1-2 is column 1, 3-4 column 2, 5-6 column 3, 7-8 column 4 */
 .cols, .grid {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     column-gap: var(--gut);
 }
 .grid { padding-inline: var(--pad); }
 
-/* ── header, as on the original site: the name in capitals, the menu at
-      the edge, the current page underlined, one black line ── */
+/* ── header: the name in capitals on column 1, the menu on the half-columns
+      of columns 3 and 4; the page you are on bold and a little larger ("when
+      something is picked it is made bold and slightly bigger"), one line ── */
 .top {
     position: fixed;
     inset: 0 0 auto;
     z-index: 50;
     height: var(--top);
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: var(--gut);
     align-items: center;
-    justify-content: space-between;
     padding-inline: var(--pad);
     background: var(--bg);
     border-bottom: 1px solid var(--ink);
 }
 .name {
+    grid-column: 1 / 5; justify-self: start;
     font-family: var(--serif);
     font-size: var(--m);
     font-weight: 400;
@@ -129,30 +134,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
     line-height: 1;
     white-space: nowrap;
 }
-.menu { display: flex; }
+.menu { grid-column: 5 / 9; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline; }
 .menu a {
+    justify-self: start;
     font-family: var(--serif);
     font-size: var(--m);
     letter-spacing: 0.01em;
-    margin-left: 2.5rem;
+    white-space: nowrap;
     transition: opacity var(--t-fast) var(--ease);
 }
 .menu a:hover { opacity: 0.45; }
-.menu a[aria-current] {
-    text-decoration: underline;
-    text-underline-offset: 5px;
-    text-decoration-thickness: 1px;
-}
+.menu a[aria-current] { font-weight: 600; font-size: calc(var(--m) * 1.145); }
 
 main { padding-top: var(--top); }
 
-/* ── home: the slideshow fills the first screen, edge to edge and untouched:
-      no shade and no marks on the painting. Its words stand in one row under
-      it: the name, medium, size and year, then the count with its two
-      arrows. While a painting rests it drifts very slowly down its closeup.
-      Under it the selected works, four across ── */
-.hero-wrap { height: calc(100vh - var(--top)); height: calc(100svh - var(--top)); display: flex; flex-direction: column; }
-.hero { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--wait); }
+/* ── home: the slideshow fills the first screen, edge to edge, the work's
+      name on the painting as on the live site (back 2026-10-21 at his
+      request), a soft shade under the words so white reads on any painting;
+      the count and its two arrows at the right. While a painting rests it
+      drifts very slowly; as the page scrolls it moves a little further
+      through its frame, so more of the closeup is seen. Under it the
+      selected works, four across ── */
+.hero-wrap { height: calc(100vh - var(--top)); height: calc(100svh - var(--top)); }
+.hero { position: relative; height: 100%; overflow: hidden; background: var(--wait); }
 .slides { position: relative; width: 100%; height: 100%; }
 .slide {
     position: absolute;
@@ -164,39 +168,55 @@ main { padding-top: var(--top); }
     pointer-events: none;
 }
 .slide.active { opacity: 1; z-index: 1; pointer-events: auto; transition: opacity var(--t-slow) var(--ease); }
-.slide a { display: block; height: 100%; }
-/* a little taller than the window, so it can drift; a painting not on show
-   holds where it is */
-.slide img { width: 100%; height: 112%; object-fit: cover; animation: drift 26s ease-in-out infinite alternate; }
+.slide a { position: relative; display: block; height: 100%; }
+/* the closeup at its full height (the frame shows its top part): while a
+   painting is on show it pans slowly down it, starting at the top each time
+   it comes; the one not on show holds where it is. Scrolling the page carries
+   it further down (2026-10-22, his request: "scroll down the painting") */
+.hero { --hero-h: calc(100svh - var(--top)); }
+.slide img { position: absolute; left: 0; top: 0; width: 100%; height: auto; min-height: 100%; object-fit: cover; animation: pan 24s cubic-bezier(.45, 0, .55, 1) infinite alternate; }
 .slide:not(.active) img { animation-play-state: paused; }
-@keyframes drift { to { transform: translateY(-10.7%); } }
-
-.hero-bar { flex: none; align-items: baseline; padding-block: 0.85rem 1rem; }
-.hero-cap { grid-column: 1 / 11; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.6rem; row-gap: 0.15rem; }
-.hc-title { font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; }
+@keyframes pan { to { transform: translateY(calc((-100% + var(--hero-h)) * 0.7)); } }
+@keyframes hero-scroll { to { translate: 0 -14%; } }
+@supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) and (min-width: 801px) and (min-aspect-ratio: 1/1) {
+        .slides { animation: hero-scroll linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+    }
+}
+.slide-vignette {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.36) 0%, transparent 38%);
+}
+.hero-bar {
+    position: absolute; z-index: 10; left: var(--pad); right: var(--pad); bottom: 2.4rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: var(--gut);
+    color: #fff; pointer-events: none;
+}
+.hero-cap { min-width: 0; }
+.hc-title { display: block; width: fit-content; font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; pointer-events: auto; }
 .hc-title:hover { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.hc-specs { font-size: var(--s); letter-spacing: 0.02em; text-transform: lowercase; color: var(--mid); }
+.hc-specs { display: block; margin-top: 0.45rem; font-size: var(--s); letter-spacing: 0.04em; text-transform: lowercase; color: rgba(255, 255, 255, 0.78); }
 .hc-specs i { font-style: normal; margin-inline: 0.6em; }
 /* the words come with the painting, while it crosses in */
 .hero-cap.in .hc-title { animation: cap-rise var(--t-slow) var(--ease-out) 0.25s both; }
 .hero-cap.in .hc-specs { animation: cap-rise var(--t-slow) var(--ease-out) 0.33s both; }
 @keyframes cap-rise { from { opacity: 0; transform: translateY(10px); } }
-.hero-nav { grid-column: 11 / 13; justify-self: end; display: flex; align-items: baseline; gap: 0.7rem; }
-.hero-counter { font-size: var(--s); letter-spacing: 0.12em; color: var(--mid); font-variant-numeric: tabular-nums; }
-.hero-nav button { font-size: var(--m); line-height: 1; padding: 0.2rem 0.35rem; transition: opacity var(--t-fast) var(--ease); }
-@media (hover: hover) { .hero-nav button:hover { opacity: 0.45; } }
+.hero-nav { display: flex; align-items: baseline; gap: 0.7rem; pointer-events: auto; flex: none; }
+.hero-counter { font-size: var(--s); letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.7); font-variant-numeric: tabular-nums; }
+.hero-nav button { color: #fff; font-size: var(--m); line-height: 1; padding: 0.2rem 0.35rem; transition: opacity var(--t-fast) var(--ease); }
+@media (hover: hover) { .hero-nav button:hover { opacity: 0.55; } }
 
 .selected { padding-top: var(--near); row-gap: var(--near); }
-.sel-head { grid-column: 1 / -1; font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; }
+.sel-head { grid-column: 1 / -1; font-family: var(--serif); font-size: clamp(1.8rem, 2.77vw, 2.5rem); line-height: 1.1; text-transform: lowercase; }
 .sel-grid {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(2rem, 3.5vw, 3.2rem) var(--gut);
 }
-.sel-item { display: block; aspect-ratio: 4 / 5; }
-.sel-item img { width: 100%; height: 100%; object-fit: contain; transition: opacity var(--t-fast) var(--ease); }
-@media (hover: hover) { .sel-item:hover img { opacity: 0.85; } }
+.sel-item { display: block; }
+.sel-frame { display: block; aspect-ratio: 4 / 5; }
+.sel-frame img { width: 100%; height: 100%; object-fit: contain; }
 
 /* paintings arrive: each fades in once its picture is loaded and decoded
    (site.js). An animation, not a transition, so the hover keeps its own pace.
@@ -229,21 +249,36 @@ main { padding-top: var(--top); }
     .sel-grid { row-gap: 3.4rem; }
 }
 
-/* then the collections, one to a row: the name large on columns 1-3, a
-   line about it from column 4; the whole row opens the collection */
-.col-list { padding-top: var(--far); scroll-margin-top: var(--top); }
-.cl-head { grid-column: 1 / -1; font-family: var(--serif); font-size: var(--m); text-transform: lowercase; margin-bottom: var(--near); }
-.cl-rows { grid-column: 1 / -1; list-style: none; }
-.cl-row {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gut);
-    align-items: baseline;
-    padding-block: 0.25rem;
-}
-.cl-name { grid-column: 1 / 4; font-family: var(--serif); font-size: var(--xl); line-height: 1.2; text-transform: lowercase; white-space: nowrap; }
-.cl-line { grid-column: 4 / 11; font-family: var(--serif); font-size: var(--m); line-height: 1.4; text-wrap: pretty; }
-.cl-row:hover .cl-name { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+/* then the collections (his Canva, 2026-10-21): on column 1 the word and the
+   numbered list; on column 2 the picked collection's note and its facts,
+   justified; a tile for each on columns 3 and 4, the first large on column 3,
+   the others small on half-columns. The picked one (the first to start, then
+   whichever is pointed at) is bold and whole, the others light. js: site.js */
+.cl { padding-top: var(--far); scroll-margin-top: var(--top); }
+.cl-in { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: var(--gut); row-gap: 2.6rem; align-items: start; }
+.cl-side { grid-column: 1 / 3; grid-row: 1 / 3; }
+.cl-head { font-family: var(--serif); font-weight: 400; font-size: var(--l); line-height: 0.9; letter-spacing: -0.015em; text-transform: lowercase; }
+.cl-index { list-style: none; margin-top: 0.9rem; }
+.cl-index a { display: grid; grid-template-columns: 2.25em minmax(0, 1fr); align-items: baseline; font-family: var(--serif); font-size: var(--l); line-height: 1.12; text-transform: lowercase; }
+.cl-no { font-size: 0.93em; font-variant-numeric: tabular-nums; }
+.cl-text { grid-column: 3 / 5; grid-row: 1 / 3; }
+.cl-note { font-family: var(--serif); font-size: 1.25rem; line-height: 1.4; text-align: justify; hyphens: auto; }
+.cl-facts { margin-top: 2.6rem; width: calc((100% - var(--gut)) / 2); font-family: var(--serif); font-size: var(--t); line-height: 1.4; }
+.cl-tile { display: grid; gap: 0.35rem; align-content: start; }
+.cl-img { display: block; overflow: hidden; background: var(--wait); }
+.cl-img img { width: 100%; height: 100%; object-fit: cover; }
+.cl-tn { font-family: var(--serif); font-size: calc(var(--m) * 1.2); line-height: 1.15; text-transform: lowercase; }
+.cl-tile.big { grid-column: 5 / 7; grid-row: 1; }
+.cl-tile.big .cl-img { aspect-ratio: 2 / 1; }
+.cl-tile.small .cl-img { aspect-ratio: 5 / 6; }
+.cl-tile.small .cl-tn { order: -1; }                  /* a small one's name stands above it */
+.cl-tile.s1 { grid-column: 8; grid-row: 1; padding-top: 1.3rem; }
+.cl-tile.s1 .cl-tn { text-align: end; }
+.cl-tile.s2 { grid-column: 5; grid-row: 2; }
+.cl-tile.s3 { grid-column: 7; grid-row: 2; }
+.cl-in [data-col] { transition: opacity var(--t-fast) var(--ease); }
+.cl-in [data-col]:not(.on) { opacity: 0.5; }
+.cl-in .on .cl-no, .cl-in .on .cl-nm, .cl-in .on .cl-tn { font-weight: 600; }
 
 /* ── the sentence: from column 7 ── */
 .say-text {
@@ -254,15 +289,19 @@ main { padding-top: var(--top); }
 }
 .say-text + .say-text { margin-top: 1.1em; }
 
-/* ── a collection: its name in the line of all of them, its note, the
-      grid, the price tiles; next one in the footer ── */
-.col-head { padding-top: var(--near); align-items: end; row-gap: var(--near); }
+/* ── a collection (his Canva, 2026-10-21): the line of all collections on
+      the half-columns of columns 1 and 2, this one bold and larger; the note
+      justified across columns 1 and 2; then the paintings four across, each
+      centred in its column in an upright frame, its number at the column's
+      left edge and its name at its right, in small bold Garamond ── */
+.col-head { padding-top: 1.25rem; row-gap: 1.4rem; align-items: baseline; }
 .col-line {
     grid-column: 1 / -1;
-    display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.75em;
+    display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline;
     font-family: var(--serif); font-size: var(--m);
     text-transform: lowercase;
 }
+.col-line > * { white-space: nowrap; }
 .col-line a { transition: opacity var(--t-fast) var(--ease); }
 .col-line a:hover { opacity: 0.45; }
 .col-title {
@@ -271,34 +310,24 @@ main { padding-top: var(--top); }
     line-height: 1.1;
     text-transform: lowercase;
 }
-.col-line .col-title { margin-inline: 0.1em 0.15em; }
-.col-head .note { grid-column: 1 / 7; }
-/* two ways to see a collection, as words at the right of its note: the
-   index (paintings + catalogue) and the wall (real scale). js/collection.js */
-.views { grid-column: 7 / 13; justify-self: end; display: flex; gap: 1.2em; font-family: var(--serif); font-size: var(--m); text-transform: lowercase; }
-.views button { transition: opacity var(--t-fast) var(--ease); }
-.views button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
-#collection { padding-top: calc(var(--far) * 0.6); }
+.col-line .col-title { font-size: calc(var(--m) * 1.55); font-weight: 600; }
+.col-head .note { grid-column: 1 / 5; columns: 2; column-gap: var(--gut); font-size: var(--t); line-height: 1.45; text-align: justify; hyphens: auto; }
+main[data-collection="prints"] .col-head .note { grid-column: 1 / 3; columns: auto; }
+#collection { padding-top: 2.5rem; }
 
-/* ── the index view: the paintings on columns 1-9, small and close, each with
-      its number and name under it; on columns 10-12 the index, every work as
-      a catalogue entry, its order and filters at its head (after the
-      catalogue spreads, "Quiet Forces"). The index stands still while the
-      paintings pass and keeps their place ── */
-.sp-split { align-items: start; }
-.sp-field { grid-column: 1 / 10; min-width: 0; }
-.sp-plates {
-    --n: 6;
+.cg-grid {
+    --n: 4;
+    grid-column: 1 / -1;
     list-style: none;
     display: grid;
     grid-template-columns: repeat(var(--n), minmax(0, 1fr));
     column-gap: var(--gut);
-    row-gap: clamp(1.6rem, 2.6vw, 2.6rem);
+    row-gap: 2.4rem;
     align-items: start;
 }
-.sp-plate > a { display: block; }
-/* every photograph in the same upright frame, so the names stand level; while
-   it arrives, the painting's own box in its own colour, faintly */
+.cg-item > a { display: block; }
+.cg-item .sp-frame { width: 64.5%; margin-inline: auto; }
+/* while it arrives, the painting's own box in its own colour, faintly */
 .sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
 .sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
 .sp-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.3; transition: opacity var(--t-slow) var(--ease); }
@@ -306,66 +335,18 @@ main { padding-top: var(--top); }
 /* the studies on paper are photographed close: shown smaller */
 .sp-frame.is-paper img { width: 62%; height: 62%; }
 .sp-frame.is-paper .sp-ph { transform: translate(-50%, -50%) scale(0.62); }
-/* under each painting its number, then its name, as on the old site */
-.sp-cap { display: grid; grid-template-columns: 2.1em minmax(0, 1fr); margin-top: 0.45rem; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
+.sp-cap { display: grid; grid-template-columns: 2.1em minmax(0, 1fr); margin-top: 0.5rem; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
 .sp-no { color: var(--mid); font-variant-numeric: tabular-nums; }
-.sp-none { font-family: var(--serif); font-size: var(--m); }
-
-.sp-index {
-    grid-column: 10 / 13;
-    min-width: 0;
-    position: sticky;
-    top: calc(var(--top) + var(--near));
-    max-height: calc(100vh - var(--top) - 2 * var(--near));
-    max-height: calc(100svh - var(--top) - 2 * var(--near));
-    display: flex;
-    flex-direction: column;
-}
-.sp-head { flex: none; padding-bottom: var(--near); }
-.sp-count { display: flex; align-items: baseline; gap: 1.1em; margin-bottom: 0.55rem; color: var(--mid); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-.sp-clear { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.sp-views { display: none; margin-left: auto; gap: 1.1em; }
-/* sort and filters: the word in grey, then the choices; the one in use underlined */
-.sp-ctl { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); align-items: baseline; }
-.sp-lab { color: var(--mid); letter-spacing: 0.02em; }
-.sp-opts { display: flex; flex-wrap: wrap; column-gap: 0.85em; }
-.sp-opts button, .sp-views button { padding-block: 0.1rem; letter-spacing: 0.02em; white-space: nowrap; transition: opacity var(--t-fast) var(--ease); }
-.sp-opts button[aria-pressed="true"], .sp-views button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.sp-opts button:disabled { color: var(--mid); opacity: 0.45; }
-/* the entries scroll on their own and follow the paintings */
-.sp-list {
-    list-style: none;
-    position: relative;            /* the entries' offsetTop is measured from here */
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(26, 26, 24, 0.18) transparent;
-    padding-right: 0.5rem;
-}
-.sp-list::-webkit-scrollbar { width: 2px; }
-.sp-list::-webkit-scrollbar-thumb { background: rgba(26, 26, 24, 0.18); }
-.sp-row > a { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); align-items: baseline; padding-block: 0.4rem 0.5rem; }
-.sp-rno, .sp-rnm { grid-row: 1; font-family: var(--serif); font-size: var(--m); line-height: 1.2; }
-.sp-rno { grid-column: 1; color: var(--mid); font-variant-numeric: tabular-nums; }
-.sp-rnm { grid-column: 2; text-transform: lowercase; text-wrap: pretty; }
-.sp-facts, .sp-st { grid-column: 2; font-size: var(--s); line-height: 1.5; letter-spacing: 0.02em; text-transform: lowercase; }
-.sp-facts { margin-top: 0.15rem; color: var(--mid); text-wrap: pretty; }
-.sp-st { display: flex; align-items: center; gap: 0.4em; font-weight: 500; font-variant-numeric: tabular-nums; }
-.sp-st.is-sold { color: var(--sold); font-weight: 400; }
-.sp-st.is-off { color: var(--mid); font-weight: 400; }
-.sp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
-/* a painting and its entry point at each other: the rest step back */
-.sp-plate, .sp-row, .wall-item { transition: opacity var(--t-fast) var(--ease); }
-.sp-split.is-pointing .sp-plate:not(.on), .sp-split.is-pointing .sp-row:not(.on) { opacity: 0.3; }
-/* an entry whose painting is out of sight shows it beside the index */
-.sp-peek {
-    position: fixed; z-index: 40; pointer-events: none;
-    height: auto; opacity: 0; transform: translateX(6px);
-    transition: opacity var(--t-fast) var(--ease), transform var(--t-base) var(--ease-out);
-}
-.sp-peek.on { opacity: 1; transform: none; }
+/* under a painting its number, then its name beside it (his correction,
+   2026-10-22), the same on home; the one pointed at turns bold, nothing else
+   moves or dims (the dimming flickered) */
+.cg-item .sp-cap, .sel-item .sp-cap { display: flex; justify-content: flex-start; gap: 0.9em; margin-top: 0.35rem; font-family: var(--serif); font-weight: 400; }
+.cg-item .sp-no, .sel-item .sp-no { color: var(--ink); }
+.cg-item a:hover .sp-cap, .cg-item a:focus-visible .sp-cap,
+.sel-item:hover .sp-cap, .sel-item:focus-visible .sp-cap,
+.wall-item a:hover .wall-cap, .wall-item a:focus-visible .wall-cap { font-weight: 600; }
+/* the painting pointed at stays, the rest step back */
+.cg-item, .wall-item { transition: opacity var(--t-fast) var(--ease); }
 
 /* ── the wall: every painting as wide as it really is, softened, the largest
       first, hung on one middle line with white around it ── */
@@ -383,42 +364,31 @@ main { padding-top: var(--top); }
 .wall-cap { display: flex; flex-wrap: wrap; column-gap: 0.6em; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
 .wall-cm { flex-basis: 100%; color: var(--mid); }
 @media (hover: hover) {
-    .views button:hover, .sp-opts button:not(:disabled):hover, .sp-views button:hover, .sp-clear:hover { opacity: 0.45; }
-    .wall-list:has(a:hover) .wall-item:not(:has(a:hover)) { opacity: 0.3; }
 }
 
-/* prints: one print to a row, the picture on columns 1-4, its words from
-   column 5: each size a row (price, order, edition), the sizes at the foot */
-.prints { row-gap: var(--far); }
-.print {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gut);
+/* prints (his Canva, 2026-10-21): the print chosen on column 2 in its
+   A-paper box; on column 3 its words: "a print of", the two paintings, the
+   sizes with the price beside them, the measure and edition, the order link.
+   The choice in use is bold and larger */
+.pr { align-items: start; }
+.pr-pic { grid-column: 3 / 5; aspect-ratio: 1 / 1.414; overflow: hidden; background: var(--wait); }
+.pr-pic img { width: 100%; height: 100%; object-fit: cover; }
+.pr-info {
+    grid-column: 5 / 7;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gut); row-gap: 0.55rem; align-items: baseline;
+    padding-top: 2.2rem;
+    font-family: var(--serif); font-size: var(--m); text-transform: lowercase;
 }
-.print-img { grid-column: 1 / 5; aspect-ratio: 1 / 1.414; overflow: hidden; background: var(--wait); }
-.print-img img { width: 100%; height: 100%; object-fit: cover; }
-.print-text { grid-column: 5 / 11; display: flex; flex-direction: column; padding-left: var(--gut); }
-.print-name { font-family: var(--serif); font-size: var(--l); line-height: 1.1; text-transform: lowercase; text-wrap: balance; }
-.print-orig { font-family: var(--sans); font-size: var(--s); color: var(--mid); margin-left: 0.6rem; text-transform: none; }
-.print-note { margin-top: var(--near); max-width: 34em; }
-.formats { margin-top: var(--near); display: grid; grid-template-columns: auto auto 1fr; column-gap: 1.6rem; align-items: baseline; justify-content: start; }
-.fmt-pick {
-    display: grid;
-    grid-template-columns: 2.6rem 4.6rem;
-    font-size: var(--t);
-    padding-block: 0.25rem;
-    transition: opacity var(--t-fast) var(--ease);
-    font-variant-numeric: tabular-nums;
-}
-.fmt-pick:hover { opacity: 0.45; }
-/* the size whose framing is on show */
-.fmt-pick[aria-pressed="true"] .fs { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
-.fmt-ed { font-size: var(--t); }
-.fmt-sizes { margin-top: auto; padding-top: var(--near); color: var(--mid); }
-.fmt-sizes::before { content: ""; display: block; width: 7rem; border-top: 1px solid rgba(26,26,24,0.35); margin-bottom: 0.6rem; }
-.fmt-sizes span { display: block; }
-.fmt-sizes b { font-weight: 400; display: inline-block; width: 1.9rem; }
+.pr-k { grid-column: 1 / -1; }
+.pr-opt { justify-self: start; transition: opacity var(--t-fast) var(--ease); }
+.pr-opt[aria-pressed="true"] { font-weight: 600; font-size: 1.29em; }
+.pr-sizes { display: flex; align-items: baseline; gap: 0.9rem; }
+.pr-in, .pr-sizes .pr-opt[aria-pressed="false"] { color: var(--mid); }
+.pr-sizes .pr-opt[aria-pressed="true"] { font-size: 1.22em; }
+.pr-price { font-family: var(--sans); font-size: var(--t); font-variant-numeric: tabular-nums; }
+.pr-facts { grid-column: 1 / -1; font-size: 0.8em; color: var(--mid); }
+.pr-order { grid-column: 1 / -1; margin-top: 0.8rem; font-size: 1.39em; }
+@media (hover: hover) { .pr-opt:hover { opacity: 0.6; } }
 
 /* ── about: the portrait on column 1, the words from column 7, then the
       one line, across ── */
@@ -428,68 +398,41 @@ body.fit main { flex: 1; display: flex; flex-direction: column; }
 body.fit main > section { flex: 1; }
 body.fit .foot { margin-top: 0; padding-top: var(--near); }
 
-.about-page {
-    align-items: start; align-content: stretch;
-    grid-template-rows: auto 1fr;
-    padding-block: clamp(3rem, 9vh, 7rem) var(--near);
-    row-gap: var(--near);
-}
-.portrait { grid-column: 1 / 4; }
-.portrait img { width: 100%; max-width: clamp(170px, 15vw, 290px); height: auto; }
-.about-text { grid-column: 7 / 13; font-size: var(--t); line-height: 1.6; text-wrap: pretty; }
-.about-text p + p { margin-top: 1em; }
-.about-line {
-    grid-column: 1 / -1;
-    align-self: center;
-    font-family: var(--serif);
-    font-size: var(--xl);
-    line-height: 1.2;
-    text-align: center;
-    text-wrap: balance;
-}
+/* (his Canva, 2026-10-21) the portrait on column 1 with the opening sentence
+   in bold under it; the story on column 2; the statement on column 3, lower,
+   level with the portrait's foot; the one line large on column 4; all justified */
+.about-page { container-type: inline-size; align-items: start; padding-block: 2.6rem var(--near); }
+.about-side { grid-column: 1 / 3; }
+.about-side img { width: 100%; aspect-ratio: 306.6 / 331; object-fit: cover; height: auto; }
+.about-lead { margin-top: 1.4rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; line-height: 1.6; text-align: justify; hyphens: auto; }
+.about-story { grid-column: 3 / 5; display: grid; gap: 1.35rem; font-family: var(--serif); font-size: 1.25rem; line-height: 1.6; text-align: justify; hyphens: auto; }
+.about-text { grid-column: 5 / 7; margin-top: calc((100cqw - 3 * var(--gut)) / 4 * 1.01); font-family: var(--serif); font-size: 1.42rem; line-height: 1.6; text-align: justify; hyphens: auto; }
+.about-line { grid-column: 7 / 9; margin-top: 1rem; font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.6rem); line-height: 1.2; text-align: justify; hyphens: none; }
 
 /* ── privacy: the name on column 1, the rows from column 7 ── */
 .privacy-page { align-items: start; padding-top: var(--far); }
-.privacy-page .col-title { grid-column: 1 / 7; }
-.privacy-page .facts { grid-column: 7 / 13; }
+.privacy-page .col-title { grid-column: 1 / 5; }
+.privacy-page .facts { grid-column: 5 / 9; }
 .privacy-page .facts > div { grid-template-columns: 7.5rem minmax(0, 1fr); padding-block: 0.55rem; }
 .privacy-page .facts dd { text-wrap: pretty; overflow-wrap: anywhere; }
 
 /* ── 404: the number on column 1, one sentence from column 7 ── */
 .nf-page { align-items: baseline; padding-top: var(--far); }
-.nf-no { grid-column: 1 / 7; }
-.nf-text { grid-column: 7 / 13; }
+.nf-no { grid-column: 1 / 5; }
+.nf-text { grid-column: 5 / 9; }
 .nf-text a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
-/* ── contact: one painting, upright, beside the rows ── */
-.contact-page {
-    min-height: calc(100vh - var(--top));
-    min-height: calc(100svh - var(--top));
-    align-items: center;
-    padding-block: var(--near);
-}
-.contact-media {
-    grid-column: 2 / 6;
-    position: relative;
-    aspect-ratio: 1 / 1.414;
-    max-height: calc(100svh - var(--top) - 2 * var(--near));
-    overflow: hidden;
-    background: var(--dark);
-}
+/* ── contact (his Canva, 2026-10-21): the sliding closeups on column 2; on
+      column 3 the labels and from its second half the values; the field runs
+      into column 4, "join" on its second half ── */
+.contact-page { align-items: start; padding-block: 8.8rem var(--near); }
+.contact-media { grid-column: 3 / 5; position: relative; aspect-ratio: 1 / 1.464; overflow: hidden; background: var(--dark); }
 .contact-media .preview-caption,
 .contact-media .preview-dots,
 .contact-media .preview-slide::after { display: none; }
-.contact-text { grid-column: 7 / 13; }
-body.lock { height: 100vh; height: 100svh; overflow: hidden; }
-body.lock main { min-height: 0; }
-body.lock .contact-page {
-    min-height: 0; flex: 1;
-    grid-template-rows: minmax(0, 1fr);
-    padding-block: clamp(1rem, 4vh, 3rem);
-}
-body.lock .contact-media { height: 100%; max-height: none; width: auto; max-width: 100%; justify-self: start; align-self: stretch; }
-body.lock .contact-text { align-self: center; }
-body.lock .facts > div { font-size: clamp(0.85rem, 1.9vh, var(--t)); padding-block: clamp(0.12rem, 0.45vh, 0.3rem); }
+.contact-text { grid-column: 5 / 9; margin-top: 7rem; }
+.contact-text .facts > div { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gut); padding-block: 0.25rem; }
+.contact-text .facts dd { grid-column: 2 / 5; }
 
 .facts > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--gut); padding-block: 0.3rem; font-size: var(--t); }
 .facts a { text-decoration: underline; text-underline-offset: 3px; }
@@ -544,26 +487,32 @@ body.lock .facts > div { font-size: clamp(0.85rem, 1.9vh, var(--t)); padding-blo
 }
 .lb-submit:hover { opacity: 0.42; }
 /* a press is felt: the buttons that do not hold their place by transform give a pixel */
-.fmt-pick:active, .nl-submit:active { transform: translateY(1px); }
+.pr-opt:active, .nl-submit:active { transform: translateY(1px); }
 .nl-submit { display: inline-block; }
 
-/* ── footer: the newsletter on the left and the way on, large, on the
-      right; then email, instagram, city ── */
+/* ── footer (his Canva, 2026-10-21): the newsletter field on column 1, "join"
+      on the half-column after it; the way on, large, at the right edge; then
+      email (column 1), instagram (column 3), privacy and the year at the right ── */
 .foot { margin-top: var(--far); padding-bottom: 1.6rem; }
 .foot-top { align-items: end; padding-bottom: var(--near); }
-.foot-nl { grid-column: 1 / 5; }
-.foot-nl .fl { display: block; color: var(--mid); margin-bottom: 0.2rem; }
-.foot-nl .newsletter-form { max-width: none; }
-.next { grid-column: 7 / 13; justify-self: end; }
+.foot-nl { grid-column: 1 / 4; }
+.foot-nl .fl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.foot-nl .newsletter-form, .contact-text .newsletter-form {
+    max-width: none;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline;
+}
+.foot-nl .newsletter-form input, .contact-text .newsletter-form input { grid-column: 1 / 3; }
+.foot-nl .nl-submit, .contact-text .nl-submit { grid-column: 3; justify-self: start; }
+.next { grid-column: 5 / 9; justify-self: end; }
 .next a { display: inline-flex; align-items: baseline; font-family: var(--serif); font-size: var(--xl); line-height: 1; text-transform: lowercase; }
 .next a::after { content: "\2192"; margin-left: 0.45em; transition: transform var(--t-base) var(--ease-out); }
 @media (hover: hover) { .next a:hover::after { transform: translateX(0.2em); } }
 .next a:hover .next-name { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
 .next-label { font-family: var(--sans); font-size: 0.62em; color: var(--mid); margin-right: 0.7em; }
 .foot-row { align-items: baseline; padding-top: 0.4rem; }
-.foot .f1 { grid-column: 1 / 7; }
-.foot .f2 { grid-column: 7 / 10; }
-.foot .f3 { grid-column: 10 / 13; justify-self: end; display: flex; gap: 1.4rem; color: var(--mid); }
+.foot .f1 { grid-column: 1 / 5; }
+.foot .f2 { grid-column: 5 / 7; }
+.foot .f3 { grid-column: 7 / 9; justify-self: end; display: flex; gap: 1.4rem; color: var(--mid); }
 .foot-row a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── lightbox, as on the original site (its own sizes) ── */
@@ -668,61 +617,56 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
 }
 
 @media (max-width: 1100px) {
-    .cl-name { grid-column: 1 / 5; }
-    .cl-line { grid-column: 5 / 13; }
-    .sp-field { grid-column: 1 / 9; }
-    .sp-plates { grid-template-columns: repeat(var(--n-mid, 4), minmax(0, 1fr)); }
-    .sp-index { grid-column: 9 / 13; }
-    .print-text { grid-column: 5 / 13; }
+    .cg-grid { grid-template-columns: repeat(var(--n-mid, 3), minmax(0, 1fr)); }
+    .about-line { font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+    .menu a[aria-current] { font-size: var(--m); }
 }
 
 /* ── narrow: one column, the same order ── */
 @media (max-width: 800px) {
     :root { --pad: clamp(1rem, 3vw, 2.5rem); }
-    .about-text, .col-head .note, .views { grid-column: 1 / -1; }
-    .views { justify-self: start; }
-    .portrait { grid-column: 1 / -1; }
+    .top { display: flex; justify-content: space-between; }
+    .menu { display: flex; }
+    .menu a { margin-left: 1.2rem; }
+    .col-line { display: flex; flex-wrap: wrap; column-gap: 0.9em; }
+    .col-line .col-title { font-size: var(--l); }
+    .col-head .note, main[data-collection="prints"] .col-head .note { grid-column: 1 / -1; columns: auto; }
     .hero-wrap { height: auto; }
-    .hero { aspect-ratio: 4 / 5; flex: none; }
-    .hero-cap { grid-column: 1 / -1; }
-    .hero-nav { grid-column: 1 / -1; justify-self: start; margin-top: 0.35rem; }
+    .hero { aspect-ratio: 4 / 5; --hero-h: 125vw; }
+    .hero-bar { bottom: 1.4rem; }
     .sel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .cl-row { padding-block: 0.5rem; }
-    .cl-name, .cl-line { grid-column: 1 / -1; }
-    .cl-name { font-size: var(--l); }
-    /* the collection: no split. The choices on top, then the paintings two
-       across, or the index in their place; the wall at a phone's scale */
+    .cl-in { row-gap: var(--near); }
+    .cl-side, .cl-text, .cl-tile.big { grid-column: 1 / -1; grid-row: auto; }
+    .cl-tile.s1, .cl-tile.s2, .cl-tile.s3 { grid-row: auto; padding-top: 0; }
+    .cl-tile.s1, .cl-tile.s3 { grid-column: 1 / 5; }
+    .cl-tile.s2 { grid-column: 5 / 9; }
+    .cl-tile.s1 .cl-tn { text-align: start; }
+    .cl-facts { width: auto; margin-top: var(--near); }
     #collection { padding-top: var(--near); }
-    .sp-field, .sp-index { grid-column: 1 / -1; }
-    .sp-index { order: -1; position: static; max-height: none; margin-bottom: var(--near); }
-    .sp-head { padding-bottom: 0; }
-    .sp-list { overflow: visible; padding: var(--near) 0 0; }
-    .sp-plates { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
-    .sp-views { display: flex; }
-    .sp-opts button, .sp-views button, .sp-clear { padding-block: 0.3rem; }
-    .sp-split[data-mode="paintings"] .sp-list { display: none; }
-    .sp-split[data-mode="index"] .sp-field { display: none; }
+    .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
+    .cg-item .sp-frame { width: 82%; }
     .wall-item { width: max(calc(var(--w) * 0.64cqw), 6rem); }
     .wall-item img { width: calc(var(--w) * 0.64cqw); }
-    .print-img, .print-text { grid-column: 1 / -1; }
-    .print-text { padding: var(--near) 0 0; }
-    .print-img { width: 78%; }
-    .contact-page { min-height: 0; row-gap: var(--far); padding-top: var(--near); }
+    .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
+    .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
+    .about-side, .about-story, .about-text, .about-line { grid-column: 1 / -1; }
+    .about-side img { max-width: 78%; }
+    .about-story, .about-text { margin-top: var(--near); }
+    .about-line { font-size: var(--xl); margin-top: var(--far); }
+    .contact-page { padding-top: var(--near); row-gap: var(--far); }
     .contact-media { grid-column: 1 / -1; width: 78%; justify-self: center; }
-    .contact-text { grid-column: 1 / -1; }
+    .contact-text { grid-column: 1 / -1; margin-top: 0; }
+    .contact-text .facts > div, .facts > div { grid-template-columns: 6.5rem minmax(0, 1fr); }
+    .contact-text .facts dd { grid-column: auto; }
     .privacy-page .col-title, .privacy-page .facts { grid-column: 1 / -1; }
     .nf-no, .nf-text { grid-column: 1 / -1; }
     .nf-text { margin-top: var(--near); }
     .privacy-page .facts { margin-top: var(--near); }
-    body.lock { height: auto; overflow: visible; }
-    body.lock .contact-page { grid-template-rows: auto; }
-    body.lock .contact-media { height: 40svh; width: auto; justify-self: center; }
-    .facts > div { grid-template-columns: 6.5rem minmax(0, 1fr); }
     .foot-nl, .next { grid-column: 1 / -1; }
     .next { justify-self: start; margin-top: var(--far); }
     .foot .f1 { grid-column: 1 / -1; }
-    .foot .f2 { grid-column: 1 / 7; }
-    .foot .f3 { grid-column: 7 / 13; }
+    .foot .f2 { grid-column: 1 / 5; }
+    .foot .f3 { grid-column: 5 / 9; }
     .lightbox-content {
         flex-direction: column; align-items: center; gap: 2rem;
         padding: 5rem 1.5rem 2rem; max-height: 100vh; overflow-y: auto;
@@ -735,8 +679,9 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     :root { --top: 45px; }
     .name { font-size: 0.74rem; letter-spacing: 0.06em; }
     .menu a { font-size: 0.88rem; margin-left: 0.75rem; }
+    .menu a[aria-current] { font-size: 0.95rem; }
     .col-line { font-size: 1rem; }
-    .about-text, .facts > div { font-size: 0.95rem; }
+    .facts > div { font-size: 0.95rem; }
 }
 @media (max-width: 360px) {
     .name { font-size: 0.72rem; letter-spacing: 0.04em; }

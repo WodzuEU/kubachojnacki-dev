@@ -302,6 +302,38 @@ and labels stay lowercase.
 
 ## 8. Site structure
 
+**2026-10-21/22, his Canva draft ("kubachojnacki-website-2026-10-21.pptx", design
+DAHYqlXfsXo) is the layout now and overrides the page notes below where they
+differ.** The grid: four columns inside the margins (`--pad`), each split in
+half, `--gut` between all: `.grid` has EIGHT tracks (1-2 column 1, 3-4 column
+2, 5-6 column 3, 7-8 column 4; at 1440 the lines are 57.6, 223.8, 390, 556.3,
+722.5, 888.7, 1054.9, 1221.1 px). Every element starts on one of them. "When
+something is picked it is made bold and slightly bigger": the menu's current
+page, the current collection in the collection line, the picked collection
+on home, the chosen print and size (no underlines for these).
+- Header: name tracks 1-4; home, collections, about, contact on tracks 5-8
+  (track order leaves room for "archive", his plan for later).
+- Home: hero words on the painting, specs separated by "|"; "selected works"
+  4 across; collections: word + numbered list on column 1, the picked one's
+  note + facts on column 2, the first collection's tile large (2:1) on
+  column 3, the others small (5:6) on tracks 8, 5 and 7, names above them;
+  pointing at a row or tile picks it, others at half opacity.
+- Collection pages: line of collections on tracks 1-4; note justified in two
+  columns over tracks 1-4 (prints: one column); paintings 4 across, each
+  centred in its column at 64.5% width in a 3:4 frame, the number at the
+  column's left edge and the name beside it, Garamond 12px (2026-10-22: name
+  next to the number; the same caption under the selected works on home).
+  Pointing at a painting makes only its caption bold; nothing dims. No grid/wall
+  switch (?view=wall still works).
+- Prints: one picture on column 2; words on column 3 (options bold + larger).
+- About: portrait + bold lead on column 1, story on column 2 (a draft from
+  his own story, his to rewrite), statement on column 3 level with the
+  portrait's foot, the big line on column 4; all justified.
+- Contact: closeups on column 2; labels on track 5, values from track 6;
+  field to track 7, "join" on track 8.
+- Footer: field on column 1, "join" on track 3, next at the right edge;
+  email track 1, instagram track 5, privacy + year at the right edge.
+
 Rebuilt 2026-10-10 from his Canva design ("Copy of Copy of Website redesign",
 DAHXg-DmNi0): home page 2 of his four (page 3, a scroll scene opening the
 slideshow onto a turning row of works and then the collections, was built
@@ -314,19 +346,25 @@ right edge. `collections` is underlined on the collections page and on every
 collection page. All share `css/style.css`; `/collector/` keeps the old look
 through `css/legacy.css`.
 
-- **`/` home**: the slideshow of the `hero: 1…n` works, edge to edge and
-  untouched (2026-10-21, critique round 1A: no dark gradient, no dots, no
-  arrows on the painting); the painting and one row of words under it fill
-  the first screen (4:5 + the row on a phone). The row: the work's name
-  (Garamond `--l`), medium, size and year (Inter, grey), and at the right
-  `← 01 / 06 →`. Crossfade every 5 s, one round, swipe; while a painting
-  rests it drifts very slowly down its closeup (`drift`, 26 s; the images
-  are 112% of the frame). Under it "selected works" at `--l` and
+- **`/` home**: the slideshow of the `hero: 1…n` works, edge to edge across
+  the first screen (4:5 on a phone), the work's name on the painting as on
+  the live site (he asked for it back over the painting, 2026-10-21, after
+  trying the row under it): white Garamond `--l`, medium / size / year
+  under it, a soft shade under the words, `← 01 / 06 →` at the right; no
+  dots. Crossfade every 5 s, one round, swipe. The images are 130% of the
+  frame: while a painting rests it drifts very slowly (`drift`, 26 s), and
+  as the page scrolls the slides move down through the frame (`translate`
+  0 → 11%, a CSS scroll timeline over the first 100vh; browsers without
+  scroll timelines keep it still). Under it "selected works" at `--l` and
   the eight works of `HOME.selected` (data.js), whole, four across in 4:5
   boxes (two on a phone), no captions, each opening on its collection page.
-  Then "collections" (`--m`) and the collections one to a row: the name at
-  `--xl` on columns 1-3, its `line` (data.js, a few words) at `--m` from
-  column 4; the row opens the collection (stacked on a phone). His Canva
+  Then the collections as an index, after his reference (2026-10-21): on
+  columns 1–4 a short sentence (Inter `--s`) and a numbered list (number,
+  name in Garamond `--m`, count); on columns 6–12 a square tile for each
+  collection (its `cover` painting, or the first print) with its name under
+  it; a row and its tile point at each other; both open the collection.
+  Under them the word `collections`, large, at the left edge (the one big
+  word, anchored, as in his reference). His Canva
   also lists "studio notes" last: not built, no page for it yet. Then the
   footer with `next works`.
 - **`collections` goes straight in** (2026-10-10, his call: "show already
@@ -342,18 +380,15 @@ through `css/legacy.css`.
 - **`/<collection>/`** (atmosphere, chromatic, works-on-paper, prints): one
   line of all collections in order, this one as the page's `h1` at `--l`,
   the others at `--m`; the `note` under it on columns 1–6, `index · wall` at
-  the right edge (2026-10-21, critique round 2A; `js/collection.js`).
-  **index**: the paintings on columns 1–9 in upright 3:4 frames, number and
-  name under each (Inter), a faint box of the painting's own colour while
-  it loads (`js/colors.js`); the index on columns 10–12, sticky, every work
-  as an entry (number + name in Garamond, medium / size / year, price or
-  sold / not available), scrolling on its own and following the paintings.
-  At its head: sort number / color / size / price / year, filter color
-  (his colour words in six groups) / size (by the longer side) / available
-  only, kept in the address (`?sort=`, `?color=`, `?size=`,
-  `?available=1`). A painting and its entry mark each other, the rest step
-  back; an entry whose painting is off screen shows it small beside the
-  index. Re-ordering glides (FLIP). **wall** (`?view=wall`): every painting
+  the right edge as `grid · wall` (`js/collection.js`). **grid** (back at
+  his request the same day, 2026-10-21: "as previously, without the list of
+  prices"): the paintings across the whole width in upright 3:4 frames, 6
+  across (4 for up to 12 works, 3 for up to 6; 4/3 under 1100px, 2 on a
+  phone), number and name under each (Inter), a faint box of the
+  painting's own colour while it loads (`js/colors.js`); the one pointed at
+  stays, the rest step back. No price list: prices are in the lightbox. (The
+  index column with sort and filters, built that morning, is gone.)
+  **wall** (`?view=wall`): every painting
   as wide as it really is, softened (width ∝ cm^0.78, a 2 m canvas a
   quarter of the page), largest first, hung on one middle line, number,
   name and size under each. On a phone: the index's head on top, then the
@@ -374,15 +409,14 @@ through `css/legacy.css`.
   so a forgotten run only costs search engines, never visitors. Every block
   site.js draws must go through `put()`. Without scripts the paintings
   still show (the fade waits for `html.js`).
-- **`/prints/`** (`kind: "prints"`): one print to a row, the picture on
-  columns 1–4 (an A-paper box over the print on its wall tone,
-  `IMAGES/prints/`), its words from column 5: the name at `--l` with the
-  original's size and status; an optional per-print `note`; a row per
-  format, A1 450 €, A2 250 €, A3 150 €, each with its own `order` link (an
-  email with the size in the subject) and its edition (5, 15, 30;
-  `PRINT_FORMATS` in data.js); at the foot of the column, under a short
-  line, the three sizes in cm. Clicking a size shows its framing (A2 to
-  start) and underlines it. A4 and A5 are gone (his Canva).
+- **`/prints/`** (`kind: "prints"`; streamlined 2026-10-21 at his request):
+  the two prints side by side, each in its A-paper box on the wall tone
+  (`IMAGES/prints/`), the chosen one whole, the other stepped back; under
+  them one line: `a print of [maroon khaki | burgundy blue] in [A1 | A2 |
+  A3]`, the size in cm and the edition (5, 15, 30), the price (450 / 250 /
+  150 €, `PRINT_FORMATS` in data.js) and `order by email` (the painting and
+  size in the subject). A picture or a word chooses; both pictures show the
+  chosen size's framing; A2 and the first print to start.
 - **`/about/`**: the portrait on column 1; from column 7, in Inter
   `--t`, the sentence that used to open the home page and the statement;
   then, across the page, centred, at `--xl`: "color caught in a shift,
