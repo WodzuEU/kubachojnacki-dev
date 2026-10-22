@@ -311,6 +311,7 @@ main { padding-top: var(--top); }
     text-transform: lowercase;
 }
 .col-line .col-title { font-size: calc(var(--m) * 1.55); font-weight: 600; }
+.col-line .col-title.wide { grid-column: span 2; }
 .col-head .note { grid-column: 1 / 5; columns: 2; column-gap: var(--gut); font-size: var(--t); line-height: 1.45; text-align: justify; hyphens: auto; }
 main[data-collection="prints"] .col-head .note { grid-column: 1 / 3; columns: auto; }
 #collection { padding-top: 2.5rem; }
@@ -625,9 +626,10 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
 /* ── narrow: one column, the same order ── */
 @media (max-width: 800px) {
     :root { --pad: clamp(1rem, 3vw, 2.5rem); }
-    .top { display: flex; justify-content: space-between; }
-    .menu { display: flex; }
+    .top { display: flex; justify-content: space-between; column-gap: 0; }
+    .menu { display: flex; column-gap: 0; }
     .menu a { margin-left: 1.2rem; }
+    .menu a[aria-current] { font-size: var(--m); }
     .col-line { display: flex; flex-wrap: wrap; column-gap: 0.9em; }
     .col-line .col-title { font-size: var(--l); }
     .col-head .note, main[data-collection="prints"] .col-head .note { grid-column: 1 / -1; columns: auto; }

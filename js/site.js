@@ -655,7 +655,7 @@ const siteBoot = () => {
         if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
         if (sessionStorage.getItem('kch-explore')) {
             const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261022c`;
+            lab.src = `${ROOT}js/explore.js?v=20261022d`;
             document.body.appendChild(lab);
         }
     } catch (e) {}

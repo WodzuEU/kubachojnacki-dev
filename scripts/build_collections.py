@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261022c"
+STAMP = "20261022d"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -385,7 +385,8 @@ def put_ld(path, block):
 
 def col_line(c, cols, esc):
     # every collection in one line, in order; this one is the page's title, large
-    return "".join(f'<h1 class="col-title">{esc(x["name"].lower())}</h1>' if x is c
+    # a long name, bold and larger, takes two half-columns so the next one never touches it
+    return "".join(f'<h1 class="col-title{" wide" if len(x["name"]) > 11 else ""}">{esc(x["name"].lower())}</h1>' if x is c
                    else f'<a href="../{x["slug"]}/">{esc(x["name"].lower())}</a>' for x in cols)
 
 
