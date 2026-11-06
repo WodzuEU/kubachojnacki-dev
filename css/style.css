@@ -262,6 +262,9 @@ main { padding-top: var(--top); }
 .cl-tile.t2, .cl-tile.t4 { width: var(--u); }
 .cl-tile.t1 .cl-img, .cl-tile.t3 .cl-img { height: var(--u); }
 .cl-tile.t2 .cl-img, .cl-tile.t4 .cl-img { height: calc(var(--u) * 1.414); }
+/* pointing at a row or a tile, the other tiles step back a little; at rest all whole */
+.cl-tile { --tile-fade: 0.65; transition: opacity var(--t-base) var(--ease); }
+.cl-in:has(.cl-index a:hover, .cl-index a:focus-visible, .cl-tile:hover, .cl-tile:focus-visible) .cl-tile:not(.on) { opacity: var(--tile-fade); }
 .cl-tile:not(.on) .sp-cap { color: var(--mid); }
 .cl-tile .sp-cap { transition: color var(--t-fast) var(--ease); }
 

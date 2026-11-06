@@ -79,7 +79,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106m`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106n`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -654,7 +654,7 @@ const siteBoot = () => {
         if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
         if (sessionStorage.getItem('kch-explore')) {
             const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261106m`;
+            lab.src = `${ROOT}js/explore.js?v=20261106n`;
             document.body.appendChild(lab);
         }
     } catch (e) {}

@@ -34,6 +34,7 @@ lives only in git history (`aeefb41`).
 - **About, from his draft:** portrait and sentence on 1-2; the line in large
   capitals on 5-8; story on 5-6, statement on 7-8.
 - **Contact:** the live newsletter page's split, closeups full bleed on the left.
+- **Home collections on hover:** the tiles not picked fade to 65% (`--tile-fade`); the only dimming on the site.
 - **Prints** sell by email or Instagram only, no Stripe on the site. The sheet
   lies on white with a soft shadow, the only shadow on the site.
 - **Footer on a wide screen (1280 px and up):** the way on above, then one line
