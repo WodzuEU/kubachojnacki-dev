@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261106p"
+STAMP = "20261106r"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -173,7 +173,7 @@ HEAD = """<!DOCTYPE html>
     <link rel="stylesheet" href="../css/style.css?v={stamp}">
     {ld}
 </head>
-<body>
+<body{body_class}>
 
     <a class="skip" href="#main">skip to content</a>
 
@@ -429,7 +429,7 @@ def main():
         page = HEAD.format(
             title=esc(c["name"]), desc=esc(describe(c)), site=SITE, slug=c["slug"], og=og_image(c),
             stamp=STAMP, line=col_line(c, cols, esc), note=esc(c["note"]), first=cols[0]["slug"], order=i + 1,
-            ld=page_ld(c, cols))
+            ld=page_ld(c, cols), body_class=' class="fit"' if c["kind"] else '')
         # the way on: the next collection, after the last one the about page
         nx = cols[i + 1] if i + 1 < len(cols) else None
         page += FOOT_NL.format(next_href=f"../{nx['slug']}/" if nx else "../about/",

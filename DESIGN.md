@@ -10,6 +10,12 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**Prints open 2026-11-07, 18:00 Cracow.** Until then `SITE.printsOpen` in data.js
+keeps /prints/ blurred with a countdown. To open them, delete that line and run
+build_collections.py; then the block in site.js and the `.gate` CSS can go too.
+The prints page fits the window; A1 450, A2 300, A3 200 EUR. Phones show no words
+under the selected works, and the "next" link is at the right.
+
 **2026-11-06, after the audit (these win over anything older below).** Five type
 sizes (14, 18, 21, 34, 43 px at 1440; the about capitals are set by their width).
 On the main page the caption is collection + name, shown only under the mouse.

@@ -224,8 +224,8 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .js img.fade.in { opacity: 1; animation: arrive var(--t-slow) var(--ease-out) backwards; }
 @keyframes arrive { from { opacity: 0; } }
 
-/* a phone cannot hover: a little more air between the rows */
-@media (hover: none) { .sel-grid { row-gap: 3.4rem; } }
+/* a phone cannot hover: no words under the selected works, only the paintings */
+@media (hover: none) { .sel-item .sp-cap { display: none; } }
 
 /* then the collections (2026-11-06, his corrections): on half-columns 1-2 the
    word, the numbered list and the picked collection's note. The tiles stand in
@@ -328,8 +328,8 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .sp-no { flex: none; font-variant-numeric: tabular-nums; }
 .sp-nm { text-align: end; }
 .cg-item .sp-cap, .sel-item .sp-cap { width: 64.5%; }
-/* on the main page the words show only under the mouse; a phone, with no mouse,
-   always shows them. The place is kept, so nothing moves */
+/* on the main page the words show only under the mouse. The place is kept, so
+   nothing moves */
 @media (hover: hover) {
     .sel-item .sp-cap { opacity: 0; transition: opacity var(--t-fast) var(--ease); }
     .sel-item .sp-cap > * { pointer-events: none; }
@@ -357,14 +357,14 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
    The choice in use is black and larger, the others grey. The print on white
    with a soft shadow, the only shadow on the site (his call, 2026-11-06) */
 .pr { align-items: start; }
-.pr-pic { grid-column: 2 / 5; --a2: 0.8; --a3: 0.62; }
+body.fit main > .col-head { flex: none; }
+.pr-pic { grid-column: 2 / 5; justify-self: end; width: min(100%, calc((100svh - 27.5rem) / 1.414)); min-width: 9rem; --a2: 0.8; --a3: 0.62; }
 .pr-pic[data-size="A2"] img { transform: scale(var(--a2)); }
 .pr-pic[data-size="A3"] img { transform: scale(var(--a3)); }
 .pr-pic img { width: 100%; height: auto; transform-origin: right top; transition: transform var(--t-base) var(--ease-out); box-shadow: 0 2px 6px rgba(26, 26, 24, 0.10), 0 14px 34px rgba(26, 26, 24, 0.16); }
 .pr-info {
     grid-column: 6 / 8;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gut); row-gap: 0.55rem; align-items: baseline;
-    padding-top: 2.2rem;
     font-family: var(--serif); font-size: var(--m); text-transform: lowercase;
 }
 .pr-k { grid-column: 1 / -1; }
@@ -377,6 +377,16 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .pr-order, .pr-ask { grid-column: 1 / -1; font-size: var(--h); }
 .pr-order { margin-top: 0.8rem; }
 @media (hover: hover) { .pr-opt:hover { color: var(--ink); } }
+/* until the prints open: the page blurred, the countdown where the words will be */
+.gated { position: relative; }
+.gated .note { filter: blur(5px); user-select: none; }
+.gated #collection { filter: blur(16px); user-select: none; }
+.gated .pr-info { visibility: hidden; }
+.gate { position: absolute; inset: 0; align-items: center; pointer-events: none; }
+.gate-in { grid-column: 6 / 9; text-transform: lowercase; }
+.gate-k { font-size: var(--m); }
+.gate-t { font-size: var(--xl); line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gate-when { margin-top: 0.3rem; font-size: var(--s); color: var(--mid); }
 
 /* ── about: the portrait on column 1, the words from column 7, then the
       one line, across ── */
@@ -651,6 +661,9 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
     .cg-item .sp-frame, .cg-item .sp-cap, .sel-frame, .sel-item .sp-cap { width: 82%; }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
+    .gated .pr-info { display: none; }
+    .gate { position: static; padding-top: var(--near); }
+    .gate-in { grid-column: 1 / -1; text-align: center; }
     .pr-pic img { transform-origin: center top; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
     .about-page { padding-top: var(--near); row-gap: var(--near); grid-template-rows: none; }
@@ -668,7 +681,7 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .nf-text { margin-top: var(--near); }
     .privacy-page .facts { margin-top: var(--near); }
     .foot-nl, .next { grid-column: 1 / -1; }
-    .next { justify-self: start; margin-top: var(--far); }
+    .next { justify-self: end; margin-top: var(--far); }
     .foot .f1 { grid-column: 1 / -1; }
     .foot .f2 { grid-column: 1 / 5; }
     .foot .f3 { grid-column: 5 / 9; }
@@ -696,6 +709,7 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .nl-submit { padding: 0.6rem; margin: -0.6rem; }
     .menu a { padding-block: 0.6rem; }
     .foot-row a { padding-block: 0.4rem; margin-block: -0.4rem; }
+    .next a { padding-block: 0.8rem; margin-block: -0.8rem; }
 }
 @media (max-width: 360px) {
     .name { font-size: 12.5px; }

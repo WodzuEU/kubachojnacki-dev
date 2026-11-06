@@ -79,7 +79,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106p`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106r`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -574,7 +574,7 @@ const siteBoot = () => {
             const startF = F.find(f => f.size === 'A2') || F[0];
             const pic = (p, f, px) => printImg(p.work, f.size, px);
             put(panel,
-                `<div class="pr grid"><div class="pr-pic" data-size="${startF.size}"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 34vw" width="1100" height="1556" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
+                `<div class="pr grid"><div class="pr-pic" data-size="${startF.size}"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 24vw" width="1100" height="1556" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
                 `<div class="pr-info"><span class="pr-k">a print of</span>` +
                 PR.map((p, i) => `<button type="button" class="pr-opt" data-print="${i}" aria-pressed="${i === 0}">${nameOf(bySlug[p.work])}</button>`).join('') +
                 `<span class="pr-sizes" role="group" aria-label="size"><span class="pr-in">in</span>` +
@@ -602,6 +602,25 @@ const siteBoot = () => {
             // arriving from a sold painting's "see the print": that painting's print
             const asked = PR.findIndex(p => p.work === new URLSearchParams(location.search).get('work'));
             if (asked > 0) { st.p = asked; sync(); }
+
+            // until the prints open (SITE.printsOpen): the page blurred, a countdown
+            // beside the print, nothing to press. At zero it waits for the update
+            if (SITE.printsOpen) {
+                const at = new Date(SITE.printsOpen);
+                const when = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }).format(at);
+                page.classList.add('gated');
+                panel.inert = true;
+                page.insertAdjacentHTML('beforeend', `<div class="gate grid"><div class="gate-in"><p class="gate-k">prints open in</p><p class="gate-t" id="gate-t" role="timer"></p><p class="gate-when">${when}, cracow time</p></div></div>`);
+                const out = document.getElementById('gate-t');
+                let timer = 0;
+                const tick = () => {
+                    const s = Math.floor((at.getTime() - Date.now()) / 1000);
+                    if (s <= 0) { clearInterval(timer); out.textContent = 'opening now'; return; }
+                    out.textContent = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(two).join(' : ');
+                };
+                tick();
+                timer = setInterval(tick, 1000);
+            }
             panel.addEventListener('click', e => {
                 if (e.target.closest('.pr-order')) { const w = bySlug[PR[st.p].work]; track(`order-print/${w.slug}-${st.f.size.toLowerCase()}`, `Print order: ${plain(w)}, ${st.f.size}`); return; }
                 const b = e.target.closest('[data-print], [data-size]');

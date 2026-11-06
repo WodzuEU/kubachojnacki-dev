@@ -55,6 +55,10 @@ const SITE = {
   instagram: "https://instagram.com/chojnacki.studio",
   instagramHandle: "@chojnacki.studio",
 
+  // the prints page stays blurred with a countdown to this moment. It stays
+  // blurred after it too: delete this line to open the prints
+  printsOpen: "2026-11-07T18:00:00+01:00",
+
   // optional integrations — fill in to activate (see README)
   goatcounter: "kubachojnacki",   // analytics code from goatcounter.com (loads on the live domain only)
   newsletter: {
@@ -68,8 +72,8 @@ const SITE = {
 // each size is a limited edition of `edition` prints
 const PRINT_FORMATS = [
   { size: "A1", cm: "59.4 × 84.1 cm", price: 450, edition: 5 },
-  { size: "A2", cm: "42 × 59.4 cm",   price: 250, edition: 15 },
-  { size: "A3", cm: "29.7 × 42 cm",   price: 150, edition: 30 },
+  { size: "A2", cm: "42 × 59.4 cm",   price: 300, edition: 15 },
+  { size: "A3", cm: "29.7 × 42 cm",   price: 200, edition: 30 },
 ];
 
 // home: the selected works under the slideshow, four across, in this order:
