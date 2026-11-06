@@ -2,10 +2,10 @@
 
      /              the slideshow (hero: 1…n in data.js) across the first
                     screen, the selected works (HOME.selected), four across,
-                    then the collections as a list, each with its line
-     /<collection>/ one collection: the grid, the price tiles. /<collection>/#<slug>
-                    opens that work in the original lightbox. Prints have
-                    their own layout.
+                    then the collections: the list and tiles. /#<slug> opens
+                    that work in the lightbox, here on the same page
+     /<collection>/ one collection: the grid. /<collection>/#<slug> opens that
+                    work in the lightbox. Prints have their own layout.
 
    No artwork data lives in HTML: edit data.js only. The collection pages
    themselves are written from data.js by scripts/build_collections.py.
@@ -44,8 +44,19 @@ const siteBoot = () => {
             im.addEventListener('error', () => im.classList.add('in'), { once: true });
         }
     });
+    // the painting's place in its photograph (js/boxes.js). Nothing is cropped:
+    // only this part of a picture answers the pointer, the white around it does
+    // nothing. a = the photograph's proportion, f = its frame's, s = how much of
+    // the frame the picture takes
+    const boxOf = w => (typeof BOXES !== 'undefined' && BOXES[w.slug]) || [0, 0, 1, 1];
+    const hit = (w, f, s = 1) => {
+        const b = boxOf(w), a = (w.w || 3) / (w.h || 4);
+        const pw = s * (a < f ? a / f : 1), ph = s * (a < f ? 1 : f / a);
+        const pc = v => `${(v * 100).toFixed(1)}%`;
+        return `<span class="hit" style="left:${pc(0.5 + (b[0] - 0.5) * pw)};top:${pc(0.5 + (b[1] - 0.5) * ph)};width:${pc((b[2] - b[0]) * pw)};height:${pc((b[3] - b[1]) * ph)}"></span>`;
+    };
     // what js/collection.js borrows
-    window.KCH = { put, arrive, decoded, T, EASE, EASE_OUT };
+    window.KCH = { put, arrive, decoded, hit, T, EASE, EASE_OUT };
 
     // analytics events (GoatCounter): sent only on the live domain
     const gcQueue = (window.__gcQueue = window.__gcQueue || []);
@@ -68,7 +79,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106m`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -79,55 +90,31 @@ const siteBoot = () => {
     const nb      = s => String(s).replace(/ /g, '\u00a0');
     const price   = w => `${w.price}\u00a0€`;
     const status  = w => w.sold ? 'sold' : (w.unavailable ? 'currently not available' : 'available');
-    // on hover under a painting: its number, then its name, spaced apart
-    const hoverLabel = w => `<span class="hl" aria-hidden="true"><span class="hl-no">${noOf[w.slug]}</span><span class="hl-nm">${plain(w)}</span></span>`;
-    // a click on a painting opens the lightbox out of it (see openWork)
-    let clickedAt = 0;
-    let pressed = null;
+    const two     = n => String(n).padStart(2, '0');
+    // a click on a painting opens the lightbox out of it, on the same page
+    // (see openWork); from the slideshow it simply fades in
+    let clickedAt = -Infinity, navAt = -Infinity, fromHero = false;
     document.addEventListener('click', e => {
         if (!e.target.closest) return;
-        pressed = e.target.closest('[data-work]');
-        if (pressed) clickedAt = performance.now();
+        const now = performance.now();
+        fromHero = !!e.target.closest('.hero-wrap');
+        if (e.target.closest('[data-work]')) clickedAt = navAt = now;
+        else if (fromHero && e.target.closest('a')) navAt = now;
     }, true);
-
-    // ── a painting carried across pages: the one pressed here and the open
-    //    lightbox on the next page share one name, so the browser grows one
-    //    into the other (a cross-document view transition). Its picture goes
-    //    along so the lightbox can start with it ──
-    let morphInto = () => {};
-    addEventListener('pageswap', e => {
-        if (!e.viewTransition || !e.activation || !pressed) return;
-        const to = new URL(e.activation.entry.url);
-        const slug = decodeURIComponent(to.hash.slice(1));
-        const im = pressed.dataset.work === slug && pressed.querySelector('img');
-        if (!im || to.pathname === location.pathname) return;
-        im.style.viewTransitionName = 'work';
-        try { sessionStorage.setItem('kch-morph', JSON.stringify({ slug, src: im.currentSrc || im.src })); } catch (x) {}
-    });
-    addEventListener('pageshow', () => document.querySelectorAll('img').forEach(im => { if (im.style.viewTransitionName) im.style.viewTransitionName = ''; }));
-    addEventListener('pagereveal', e => {
-        let m = null;
-        try { m = JSON.parse(sessionStorage.getItem('kch-morph') || 'null'); sessionStorage.removeItem('kch-morph'); } catch (x) {}
-        if (e.viewTransition && m) morphInto(e, m);
-    });
-    // "Atmosphere | maroon khaki": the collection, the colours under it
-    const titleHtml = w => {
-        const [main, sub] = w.title.split('|').map(s => s.trim());
-        return main + (sub ? `<span class="color-subtitle">${roman(sub)}</span>` : '');
-    };
+    let heroList = [];
 
     // ── home: the slideshow, as on the live site: the name over the painting,
     //    medium, size and year under it, the count and the dots ──
     const slidesWrap = document.getElementById('slides');
     if (slidesWrap) {
-        const picks = WORKS.filter(w => w.hero).sort((a, b) => a.hero - b.hero);
+        const picks = heroList = WORKS.filter(w => w.hero).sort((a, b) => a.hero - b.hero);
         // WebP at 1600 and 2400 px (the JPEG masters stay for zooming). The
         // first painting loads at once (index.html preloads it); the others
         // wait until it is on screen, so they never compete with it.
         const heroSet = w => `${thumb(w, '-hero')} 1600w, ${thumb(w, '-hero-2400')} 2400w`;
         put(slidesWrap, picks.map((w, i) =>
             `<div class="slide">
-                 <a href="${pageOf(colOf[w.slug])}#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
+                 <a href="#${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name}">
                      <img ${i ? `data-srcset="${heroSet(w)}"` : `src="${thumb(w, '-hero')}" srcset="${heroSet(w)}" fetchpriority="high"`}
                           sizes="100vw" alt="${altOf(w)}" decoding="async">
                  </a>
@@ -145,7 +132,7 @@ const siteBoot = () => {
         });
         const cap = document.getElementById('hero-cap');
         const counter = document.getElementById('hero-counter');
-        const N = slides.length, two = n => String(n).padStart(2, '0');
+        const N = slides.length;
         // no dots: the count and the two arrows in the row under the painting
         const dots = [];
         // it plays one round and comes to rest on the first painting; it
@@ -164,7 +151,7 @@ const siteBoot = () => {
             const w = picks[cur];
             // new words each time, so they rise in again with each painting
             cap.innerHTML =
-                `<a class="hc-title" href="${pageOf(colOf[w.slug])}#${w.slug}" tabindex="-1">${roman(w.title)}</a>
+                `<a class="hc-title" href="#${w.slug}" tabindex="-1">${roman(w.title)}</a>
                  <span class="hc-specs">${w.medium}<i>|</i>${nb(w.size)}<i>|</i>${w.year}</span>`;
             counter.textContent = `${two(cur + 1)} / ${two(N)}`;
             // the painting on show, and the next one drawn before its turn comes
@@ -206,74 +193,72 @@ const siteBoot = () => {
     }
 
     // ── home: the selected works, whole, four across, the number and name
-    //    under each, as on the collection pages ──
+    //    under each, as on the collection pages. They open here, on this page ──
+    const selWorks = (typeof HOME !== 'undefined' ? HOME.selected || [] : []).map(s => bySlug[s]).filter(Boolean);
     const selected = document.getElementById('selected');
-    if (selected && typeof HOME !== 'undefined') {
-        put(selected, (HOME.selected || []).map(x => {
-            // a painting not on the site yet: its picture, no link
-            if (typeof x === 'object') {
-                const t = s => `${ROOT}IMAGES/thumbs/${x.img}${s}.webp`;
-                return `<span class="sel-item"><span class="sel-frame">
-                            <img class="fade" src="${t('')}" srcset="${t('')} 400w, ${t('-800')} 800w, ${t('-1600')} 1600w" sizes="(max-width: 800px) 50vw, 25vw"
-                                 alt="${x.alt}" width="${x.w}" height="${x.h}" loading="lazy" decoding="async"></span>
-                        </span>`;
-            }
-            const w = bySlug[x];
-            if (!w) return '';
-            return `<a class="sel-item" href="${pageOf(colOf[w.slug])}#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}">
-                        <span class="sel-frame"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 50vw, 25vw"
-                             alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async"></span>
-                        <span class="sp-cap"><span class="sp-no">${noOf[w.slug]}</span><span class="sp-nm">${nameOf(w)}</span></span>
-                    </a>`;
-        }).join(''));
+    if (selected) {
+        put(selected, selWorks.map(w =>
+            `<a class="sel-item" href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}${w.sold ? ', sold' : ''}">
+                        <span class="sel-frame"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 41vw, 17vw"
+                             alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">${hit(w, 3 / 4)}</span>
+                        <span class="sp-cap${w.sold ? ' sold' : ''}"><span class="sp-no">${noOf[w.slug]}</span><span class="sp-nm">${nameOf(w)}</span></span>
+                    </a>`).join(''));
     }
 
-    // ── home: the collections (his Canva, 2026-10-21): the word and a numbered
-    //    list on column 1, the picked collection's note and facts on column 2, a
-    //    tile for each on columns 3-4 (the first large). The first is picked to
-    //    start; pointing at a row or a tile picks it (bold, whole), a click opens it ──
+    // ── home: the collections. On the left the word, the numbered list and the
+    //    picked collection's note; on the right the tiles, all one size, some
+    //    upright and some on their side, in ordered disorder: each starts on a
+    //    half-column of the page and they end at the foot of the words. The first
+    //    is picked to start; pointing at a row or a tile picks it, a click opens it ──
     const colList = document.getElementById('col-list');
     if (colList) {
-        const two = n => String(n).padStart(2, '0');
-        const tileImg = (c, big) => c.kind === 'prints'
-            ? `<img class="fade" src="${printImg(c.prints[0].work, 'A2', 600)}" alt="" width="600" height="750" loading="lazy" decoding="async">`
-            : (w => `<img class="fade" src="${thumb(w, '-800')}" srcset="${thumb(w)} 400w, ${thumb(w, '-800')} 800w${big ? `, ${thumb(w, '-1600')} 1600w` : ''}" sizes="(max-width: 800px) ${big ? 92 : 45}vw, ${big ? 23 : 11}vw" alt="" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">`)(bySlug[c.cover] || c.works[0]);
+        const tileImg = c => `<img class="fade" src="${thumb(bySlug[c.cover], '-hero')}" alt="" width="1600" height="1200" loading="lazy" decoding="async">`;
         const facts = c => {
             if (c.kind === 'prints') return `${c.prints.length} prints, giclée on archival paper, ${PRINT_FORMATS.map(f => f.size).join(', ')}.`;
             const media = [...new Set(c.works.map(w => w.medium))].join(' and ');
             const ys = c.works.map(w => w.year), y0 = Math.min(...ys), y1 = Math.max(...ys);
             return `${c.works.length} ${c.works.length === 1 ? 'work' : 'works'}, ${media}, ${y0 === y1 ? y0 : `${y0}–${y1}`}.`;
         };
-        const slot = i => i === 0 ? 'big' : `small s${i}`;
         put(colList,
             `<div class="cl-side"><h2 class="cl-head" id="cl-head">collections</h2><ol class="cl-index">` + COLS.map((c, i) =>
                 `<li><a href="${pageOf(c)}" data-col="${i}"${i ? '' : ' class="on"'}><span class="cl-no">${two(i + 1)}</span><span class="cl-nm">${c.name.toLowerCase()}</span></a></li>`).join('') +
-            `</ol></div><div class="cl-text">` + COLS.map((c, i) =>
-                `<div class="cl-about" data-about="${i}"${i ? ' hidden' : ''}><p class="cl-note">${c.note || ''}</p><p class="cl-facts">${facts(c)}</p></div>`).join('') +
-            `</div>` + COLS.map((c, i) =>
-                `<a class="cl-tile ${slot(i)}${i ? '' : ' on'}" href="${pageOf(c)}" data-col="${i}" aria-label="${c.name.toLowerCase()}"><span class="cl-img">${tileImg(c, i === 0)}</span><span class="cl-tn">${c.name.toLowerCase()}</span></a>`).join(''));
+            `</ol><div class="cl-text">` + COLS.map((c, i) =>
+                `<div class="cl-about${i ? '' : ' on'}" data-about="${i}"><p class="cl-note">${c.note || ''}</p><p class="cl-facts">${facts(c)}</p></div>`).join('') +
+            `</div></div><div class="cl-tiles">` + COLS.map((c, i) =>
+                `<a class="cl-tile t${i + 1}${i ? '' : ' on'}" href="${pageOf(c)}" data-col="${i}" aria-label="${c.name.toLowerCase()}"><span class="cl-img">${tileImg(c)}</span><span class="sp-cap"><span class="sp-no">${two(i + 1)}</span><span class="sp-nm">${c.name.toLowerCase()}</span></span></a>`).join('') +
+            `</div>`);
         const pick = i => {
             colList.querySelectorAll('[data-col]').forEach(el => el.classList.toggle('on', el.dataset.col === i));
-            colList.querySelectorAll('.cl-about').forEach(el => { el.hidden = el.dataset.about !== i; });
+            colList.querySelectorAll('.cl-about').forEach(el => el.classList.toggle('on', el.dataset.about === i));
         };
         const at = e => { const m = e.target.closest && e.target.closest('[data-col]'); if (m) pick(m.dataset.col); };
         colList.addEventListener('pointerover', at);
         colList.addEventListener('focusin', at);
     }
 
-    // ── lightbox, as on the original site ───────────────────
-    let openWork = () => {}, closeLb = () => {};
+    // ── lightbox ─────────────────────────────────────────────
+    let openWork = () => {}, closeLb = () => {}, onPaint = () => true;
     const lb = document.getElementById('lightbox');
     if (lb) {
         const img = document.getElementById('lightbox-img');
         const info = lb.querySelector('.lightbox-info');
         const mail = document.getElementById('lb-inquire-mail');
+        const insta = document.getElementById('lb-inquire-ig');
+        const printLink = document.getElementById('lb-print');
+        const inPrint = new Set(COLS.flatMap(c => (c.prints || []).map(p => p.work)));
         let idx = 0, back = null, scrollY = 0, full = false;
+        // the works the arrows walk through, and whether a click put us here
+        // (then closing goes one step back in the browser's history too)
+        let list = [], entered = false;
         // zoomed: where the painting stands (x, y) and where it is going (tx, ty)
         let pan = null, raf = 0, drag = null, moved = false;
-        // a work carried in from another page: its picture comes first
-        let arriving = null;
-        try { arriving = JSON.parse(sessionStorage.getItem('kch-morph') || 'null'); } catch (e) {}
+        // on the main page the arrows stay with what was clicked: the slideshow's
+        // works or the selected works; anywhere else with the work's collection
+        const listOf = w => {
+            if (slidesWrap && fromHero && heroList.includes(w)) return heroList;
+            if (slidesWrap && selWorks.includes(w)) return selWorks;
+            return colOf[w.slug].works;
+        };
 
         // hold the page still behind the lightbox, and put it back in one frame
         const lock = () => {
@@ -316,7 +301,14 @@ const siteBoot = () => {
             catch (e) { return null; }
         };
         const chrome = () => lb.querySelectorAll('.lightbox-info, .lightbox-btn');
-        const SIZES = '(max-width: 800px) 88vw, 58vw';
+        // is the pointer on the painting, or on the white of its photograph?
+        onPaint = e => {
+            if (pan) return true;
+            const w = WORKS[idx], b = boxOf(w), s = shown(w), h = s.w / (w.w / w.h);
+            const x = (e.clientX - s.x) / s.w + 0.5, y = (e.clientY - s.y) / h + 0.5;
+            return x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+        };
+        const SIZES = '(max-width: 800px) 88vw, 50vw';
         let stepFade = null;
         // the sharp picture of a work, loaded and drawn off screen, then put in place
         const setPic = (w, from) => {
@@ -338,7 +330,11 @@ const siteBoot = () => {
                 requestAnimationFrame(() => lb.classList.remove('lb-flip'));
                 closing = false;
                 unlock();
-                if (!keepHash) history.replaceState(null, '', location.pathname + location.search);
+                if (!keepHash) {
+                    if (entered) history.back();
+                    else history.replaceState(null, '', location.pathname + location.search);
+                }
+                entered = false;
                 if (back) { back.focus({ preventScroll: true }); back = null; }
             };
             const w = WORKS[idx], to = REDUCE_MOTION ? null : sourceOf(w);
@@ -362,6 +358,7 @@ const siteBoot = () => {
             idx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[idx];
             const fresh = !lb.classList.contains('active');
+            if (fresh) { list = listOf(w); entered = performance.now() - navAt < 900; }
             // stepping closer: grow out of the painting that was clicked, when it was
             const from = fresh && !REDUCE_MOTION && performance.now() - clickedAt < 900 ? sourceOf(w) : null;
             // stepping while zoomed: the next one does not shrink in, it is simply there
@@ -380,11 +377,6 @@ const siteBoot = () => {
                 // the picture already on screen comes along at once; the sharp one
                 // takes its place when it is drawn and the painting has arrived
                 setPic(w, from);
-            } else if (fresh && arriving && arriving.slug === w.slug && arriving.src) {
-                // carried in from the page before: the same picture first, then the sharp one
-                setPic(w, { src: arriving.src });
-                arriving = null;
-                loading.then(m => { if (WORKS[idx] === w && !full) setPic(w, m); });
             } else if (fresh) {
                 setPic(w, { sizes: SIZES, srcset: srcset(w), src: thumb(w, '-1600') });
             } else {
@@ -400,15 +392,22 @@ const siteBoot = () => {
             }
             img.alt = altOf(w);
 
-            document.getElementById('lb-title').innerHTML = titleHtml(w);
+            document.getElementById('lb-title').innerHTML = nameOf(w);
+            document.getElementById('lb-col').textContent = colOf[w.slug].name;
             document.getElementById('lb-price').textContent = price(w);
-            document.getElementById('lb-specs').innerHTML = `${w.medium}<br>${nb(w.size)}<br>${w.year}`;
+            document.getElementById('lb-specs').innerHTML = `${w.medium}<br>${nb(w.size)}, ${w.year}`;
+            document.getElementById('lb-count').textContent = `${two(list.indexOf(w) + 1)} / ${two(list.length)}`;
             const st = document.getElementById('lb-status');
             st.hidden = !(w.sold || w.unavailable);
-            st.innerHTML = st.hidden ? '' : `<span class="status-dot${w.sold ? '' : ' unavailable'}"></span><span class="status-text">${status(w)}</span>`;
+            st.innerHTML = st.hidden ? '' : `<span class="status-text">${status(w)}</span>`;
             info.classList.toggle('is-sold', !!w.sold);
             info.classList.toggle('is-unavailable', !w.sold && !!w.unavailable);
-            mail.href = `mailto:${SITE.email}?subject=` + encodeURIComponent(`Inquiry: ${noOf[w.slug]}, ${label(w)}`);
+            // a sold work cannot be inquired about: a similar one can, and its print
+            mail.textContent = w.sold ? 'ask about a similar work' : 'inquire via email';
+            mail.href = `mailto:${SITE.email}?subject=` + encodeURIComponent(`${w.sold ? 'A work like' : 'Inquiry:'} ${noOf[w.slug]}, ${label(w)}`);
+            insta.hidden = !!w.sold;
+            printLink.hidden = !(w.sold && inPrint.has(w.slug));
+            printLink.href = `${ROOT}prints/`;
 
             if (fresh) {
                 back = document.activeElement !== document.body ? document.activeElement : null;
@@ -433,9 +432,7 @@ const siteBoot = () => {
             track('open/' + w.slug, label(w));
         };
 
-        // prev / next stay inside the work's collection
         const step = d => {
-            const list = colOf[WORKS[idx].slug].works;
             const j = list.indexOf(WORKS[idx]);
             openWork(WORKS.indexOf(list[(j + d + list.length) % list.length]));
         };
@@ -513,27 +510,23 @@ const siteBoot = () => {
         img.addEventListener('click', e => {
             e.stopPropagation();
             if (moved) { moved = false; return; }
+            // the white around the painting closes, as the white beyond it does
+            if (!onPaint(e)) { closeLb(); return; }
             if (pan) zoomOut(); else zoomIn(e.clientX, e.clientY);
         });
+        img.addEventListener('pointermove', e => { img.style.cursor = onPaint(e) ? '' : 'default'; });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();
             if (pan) zoomOut(); else zoomIn(null, null);
         });
 
-        // a painting carried in from the page before lands as this lightbox's picture
-        morphInto = (e, m) => {
-            if (!lb.classList.contains('active') || WORKS[idx].slug !== m.slug) return;
-            img.style.viewTransitionName = 'work';
-            e.viewTransition.finished.finally(() => { img.style.viewTransitionName = ''; });
-        };
         lb.querySelector('.lb-prev').addEventListener('click', e => { e.stopPropagation(); step(-1); });
         lb.querySelector('.lb-next').addEventListener('click', e => { e.stopPropagation(); step(1); });
         lb.querySelector('.lb-close').addEventListener('click', e => { e.stopPropagation(); closeLb(); });
         lb.addEventListener('click', e => { if (!e.target.closest('.lightbox-info, .lightbox-btn') && e.target !== img) closeLb(); });
         mail.addEventListener('click', () => track('inquire-email/' + WORKS[idx].slug, label(WORKS[idx])));
-        lb.querySelector('.lb-inquiry-section a[href*="instagram"]')
-          .addEventListener('click', () => track('inquire-instagram/' + WORKS[idx].slug, label(WORKS[idx])));
+        insta.addEventListener('click', () => track('inquire-instagram/' + WORKS[idx].slug, label(WORKS[idx])));
         document.addEventListener('keydown', e => {
             if (!lb.classList.contains('active')) return;
             if (e.key === 'Escape') closeLb();
@@ -563,14 +556,15 @@ const siteBoot = () => {
             const startF = F.find(f => f.size === 'A2') || F[0];
             const pic = (p, f, px) => printImg(p.work, f.size, px);
             put(panel,
-                `<div class="pr grid"><div class="pr-pic"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 23vw" width="1100" height="1375" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
+                `<div class="pr grid"><div class="pr-pic" data-size="${startF.size}"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 34vw" width="1100" height="1556" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
                 `<div class="pr-info"><span class="pr-k">a print of</span>` +
                 PR.map((p, i) => `<button type="button" class="pr-opt" data-print="${i}" aria-pressed="${i === 0}">${nameOf(bySlug[p.work])}</button>`).join('') +
                 `<span class="pr-sizes" role="group" aria-label="size"><span class="pr-in">in</span>` +
                 F.map(f => `<button type="button" class="pr-opt" data-size="${f.size}" aria-pressed="${f === startF}">${f.size}</button>`).join('') + `</span>` +
                 `<span class="pr-price">${nb(startF.price + ' €')}</span>` +
                 `<span class="pr-facts">${nb(startF.cm)}, edition of ${startF.edition}</span>` +
-                `<a class="lb-submit pr-order" href="${orderHref(bySlug[PR[0].work], startF.size)}">order by email</a></div></div>`);
+                `<a class="lb-submit pr-order" href="${orderHref(bySlug[PR[0].work], startF.size)}">order by email</a>` +
+                `<a class="lb-submit pr-ask" href="${SITE.instagram}" target="_blank" rel="noopener">inquire via instagram</a></div></div>`);
 
             const st = { p: 0, f: startF };
             const sync = () => {
@@ -578,6 +572,7 @@ const siteBoot = () => {
                 im.src = pic(p, f, 1100);
                 im.srcset = `${pic(p, f, 600)} 600w, ${pic(p, f, 1100)} 1100w`;
                 im.alt = `Print of ${plain(w)}, ${f.size}`;
+                panel.querySelector('.pr-pic').dataset.size = f.size;
                 panel.querySelectorAll('.pr-opt[data-print]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.print === st.p));
                 panel.querySelectorAll('.pr-opt[data-size]').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === f.size));
                 panel.querySelector('.pr-facts').textContent = `${nb(f.cm)}, edition of ${f.edition}`;
@@ -596,12 +591,16 @@ const siteBoot = () => {
             });
         }
         // the other collections are drawn by js/collection.js: grid and wall
+    }
 
-        // #<slug>: a work of this collection opens; one of another goes to its page
+    // #<slug>: on the main page any work opens right there; on a collection page a
+    // work of this collection opens, one of another goes to its page
+    if (lb || page) {
+        const here = page && (COLS.find(x => x.slug === page.dataset.collection) || COLS[0]);
         const route = first => {
             const h = decodeURIComponent(location.hash.slice(1));
             if (bySlug[h]) {
-                if (colOf[h] !== c) { location.replace(pageOf(colOf[h]) + '#' + h); return; }
+                if (here && colOf[h] !== here) { location.replace(pageOf(colOf[h]) + '#' + h); return; }
                 openWork(WORKS.indexOf(bySlug[h]), first === true);
             } else closeLb(true);
         };
@@ -655,7 +654,7 @@ const siteBoot = () => {
         if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
         if (sessionStorage.getItem('kch-explore')) {
             const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261022d`;
+            lab.src = `${ROOT}js/explore.js?v=20261106m`;
             document.body.appendChild(lab);
         }
     } catch (e) {}
@@ -674,16 +673,16 @@ const siteBoot = () => {
             tip.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
             raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.4 ? requestAnimationFrame(follow) : 0;
         };
-        const wordFor = el => {
+        const wordFor = (el, e) => {
             if (!el || !el.closest) return '';
             const big = el.closest('#lightbox-img');
-            if (big) return big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
+            if (big) return !onPaint(e) ? '' : big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
             return el.closest('[data-work], .slide a') ? 'view' : '';
         };
         document.addEventListener('pointermove', e => {
             if (e.pointerType !== 'mouse') return;
             tx = e.clientX + 14; ty = e.clientY + 18;
-            const w = wordFor(e.target);
+            const w = wordFor(e.target, e);
             if (w !== word) {
                 if (w && !word) { x = tx; y = ty; tip.style.transform = `translate(${x}px, ${y}px)`; }
                 word = w;
@@ -694,7 +693,7 @@ const siteBoot = () => {
             else if (!raf) raf = requestAnimationFrame(follow);
         }, { passive: true });
         // a click on the picture changes what the next click does
-        document.addEventListener('click', e => { if (word && e.target.closest && e.target.closest('#lightbox-img')) requestAnimationFrame(() => { word = wordFor(e.target); tip.textContent = word; }); });
+        document.addEventListener('click', e => { if (word && e.target.closest && e.target.closest('#lightbox-img')) requestAnimationFrame(() => { word = wordFor(e.target, e); tip.textContent = word; }); });
         document.documentElement.addEventListener('mouseleave', () => { word = ''; tip.classList.remove('on'); });
     }
 

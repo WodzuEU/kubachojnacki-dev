@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const panel = document.getElementById('collection');
     const main = document.querySelector('main[data-collection]');
     if (!panel || !main || typeof COLLECTIONS === 'undefined' || !window.KCH) return;
-    const { put, arrive, T, EASE, EASE_OUT } = window.KCH;
+    const { put, arrive, hit, T, EASE, EASE_OUT } = window.KCH;
     const ROOT = window.ROOT || '../';
     const REDUCE = matchMedia('(prefers-reduced-motion: reduce)');
     const moving = () => !REDUCE.matches;
@@ -56,20 +56,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const cellHtml = it => {
         const w = it.w, paper = /paper/.test(w.medium);
-        return `<li class="cg-item"><a href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${it.no}">` +
+        return `<li class="cg-item"><a href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${it.no}${w.sold ? ', sold' : ''}">` +
             `<span class="sp-frame${paper ? ' is-paper' : ''}"><span class="sp-ph" style="${ph(w)};background:${it.hex}"></span>` +
             `<img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 41vw, 17vw" ` +
-            `width="${w.w}" height="${w.h}" alt="" loading="lazy" decoding="async"></span>` +
-            `<span class="sp-cap"><span class="sp-no">${it.no}</span><span class="sp-nm">${roman(plain(w))}</span></span></a></li>`;
+            `width="${w.w}" height="${w.h}" alt="" loading="lazy" decoding="async">${hit(w, 3 / 4, paper ? 0.62 : 1)}</span>` +
+            `<span class="sp-cap${w.sold ? ' sold' : ''}"><span class="sp-no">${it.no}</span><span class="sp-nm">${roman(plain(w))}</span></span></a></li>`;
     };
     // the wall: a 2 m canvas a quarter of the page wide, the rest in proportion
     const wallW = it => (Math.pow(it.wide / 200, 0.78) * 100).toFixed(2);
     const wallHtml = it => {
         const w = it.w;
-        return `<li class="wall-item" style="--w:${wallW(it)}"><a href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${it.no}, ${w.size}">` +
-            `<img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) ${Math.ceil(wallW(it) * 0.64)}vw, ${Math.ceil(wallW(it) * 0.26)}vw" ` +
-            `width="${w.w}" height="${w.h}" alt="" loading="lazy" decoding="async">` +
-            `<span class="wall-cap"><span class="sp-no">${it.no}</span><span>${roman(plain(w))}</span><span class="wall-cm">${nb(w.size)}</span></span></a></li>`;
+        return `<li class="wall-item" style="--w:${wallW(it)}"><a href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${it.no}, ${w.size}${w.sold ? ', sold' : ''}">` +
+            `<span class="wall-pic"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) ${Math.ceil(wallW(it) * 0.64)}vw, ${Math.ceil(wallW(it) * 0.26)}vw" ` +
+            `width="${w.w}" height="${w.h}" alt="" loading="lazy" decoding="async">${hit(w, w.w / w.h)}</span>` +
+            `<span class="wall-cap${w.sold ? ' sold' : ''}"><span class="sp-no">${it.no}</span><span>${roman(plain(w))}</span><span class="wall-cm">${nb(w.size)}</span></span></a></li>`;
     };
 
     panel.className = `col-${main.dataset.collection}`;

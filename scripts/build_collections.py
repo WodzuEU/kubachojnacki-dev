@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261022d"
+STAMP = "20261106m"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -169,7 +169,6 @@ HEAD = """<!DOCTYPE html>
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="preload" href="../fonts/eb-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="../fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../css/fonts.css?v={stamp}">
     <link rel="stylesheet" href="../css/style.css?v={stamp}">
     {ld}
@@ -197,7 +196,7 @@ HEAD = """<!DOCTYPE html>
 FOOT_NL = """    <footer class="foot">
         <div class="foot-top grid">
             <div class="foot-nl">
-                <span class="fl">newsletter: subscribers see new works and prints first</span>
+                <span class="fl">new paintings and prints, to subscribers first</span>
                 <div class="nl-signup" data-cta="join" data-where="footer"></div>
             </div>
             <nav class="next" aria-label="Next"><a href="{next_href}"><span class="next-label">next</span><span class="next-name">{next_name}</span></a></nav>
@@ -215,32 +214,34 @@ LIGHTBOX = """
         <button class="lightbox-btn lb-close" type="button" aria-label="Close">
             <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
-        <button class="lightbox-btn lb-prev" type="button" aria-label="Previous work">
-            <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="">
             <div class="lightbox-info">
-                <div>
+                <div class="lb-head">
                     <h2 id="lb-title" class="lb-title"></h2>
+                    <div id="lb-col" class="lb-col"></div>
+                </div>
+                <div class="lb-facts">
                     <div id="lb-price" class="lb-price"></div>
                     <div id="lb-status" class="lb-status" hidden></div>
                     <div id="lb-specs" class="lb-specs"></div>
                 </div>
                 <div class="lb-inquiry-section">
-                    <p class="purchase-info">For inquiries please use email or instagram direct message.</p>
-                    <a id="lb-inquire-mail" href="mailto:chojnacki.studio@gmail.com" class="lb-submit">Inquire via email</a>
-                    <a href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener" class="lb-submit">Inquire via instagram</a>
-                    <div class="lb-extra">
-                        <p>Certificate of authenticity included.</p>
-                        <p>Shipping worldwide.</p>
-                    </div>
+                    <a id="lb-inquire-mail" href="mailto:chojnacki.studio@gmail.com" class="lb-submit">inquire via email</a>
+                    <a id="lb-inquire-ig" href="https://instagram.com/chojnacki.studio" target="_blank" rel="noopener" class="lb-submit">inquire via instagram</a>
+                    <a id="lb-print" href="#" class="lb-submit" hidden>see the print</a>
+                </div>
+                <div class="lb-extra">
+                    <p>certificate of authenticity included</p>
+                    <p>shipping worldwide</p>
+                </div>
+                <div class="lb-nav">
+                    <button class="lb-prev" type="button" aria-label="Previous work">&larr;</button>
+                    <span class="lb-count" id="lb-count"></span>
+                    <button class="lb-next" type="button" aria-label="Next work">&rarr;</button>
                 </div>
             </div>
         </div>
-        <button class="lightbox-btn lb-next" type="button" aria-label="Next work">
-            <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
     </div>
 """
 
@@ -369,6 +370,15 @@ def page_ld(c, cols):
     return ld(page)
 
 
+def put_lightbox(path):
+    """index.html is written by hand: the lightbox goes between <!--lightbox--> marks."""
+    full = os.path.join(REPO, path)
+    src = io.open(full, encoding="utf-8").read()
+    src = re.sub(r"<!--lightbox-->.*?<!--/lightbox-->", lambda m: f"<!--lightbox-->{LIGHTBOX}    <!--/lightbox-->", src, count=1, flags=re.S)
+    with io.open(full, "w", encoding="utf-8", newline="\n") as f:
+        f.write(src)
+
+
 def put_ld(path, block):
     """index.html and about/ are written by hand: their data goes between <!--ld--> marks."""
     full = os.path.join(REPO, path)
@@ -386,7 +396,7 @@ def put_ld(path, block):
 def col_line(c, cols, esc):
     # every collection in one line, in order; this one is the page's title, large
     # a long name, bold and larger, takes two half-columns so the next one never touches it
-    return "".join(f'<h1 class="col-title{" wide" if len(x["name"]) > 11 else ""}">{esc(x["name"].lower())}</h1>' if x is c
+    return "".join(f'<h1 class="col-title">{esc(x["name"].lower())}</h1>' if x is c
                    else f'<a href="../{x["slug"]}/">{esc(x["name"].lower())}</a>' for x in cols)
 
 
@@ -416,7 +426,8 @@ def main():
                                next_name=esc(nx["name"].lower()) if nx else "about")
         if not c["kind"]:
             page += LIGHTBOX
-        extra = '' if c["kind"] else (f'\n    <script src="../js/colors.js?v={STAMP}"></script>'
+        extra = '' if c["kind"] else (f'\n    <script src="../js/boxes.js?v={STAMP}"></script>'
+                                       f'\n    <script src="../js/colors.js?v={STAMP}"></script>'
                                        f'\n    <script src="../js/collection.js?v={STAMP}"></script>')
         page += TAIL.format(stamp=STAMP, extra=extra)
         write(f"{c['slug']}/index.html", page)
@@ -431,6 +442,7 @@ def main():
     xml.append("</urlset>")
     write("sitemap.xml", "\n".join(xml) + "\n")
 
+    put_lightbox("index.html")
     put_ld("index.html", ld({"@type": "WebSite", "@id": f"{SITE}/#site", "url": f"{SITE}/",
                              "name": "Kuba Chojnacki", "inLanguage": "en", "author": {"@id": ARTIST["@id"]}}))
     put_ld("about/index.html", ld({"@type": "AboutPage", "@id": f"{SITE}/about/", "url": f"{SITE}/about/",

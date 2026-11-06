@@ -74,18 +74,17 @@ const PRINT_FORMATS = [
 
 // home: the selected works under the slideshow, four across, in this order:
 // one loop of colour, from blue through burgundy and khaki to umber and back
-// to blue. A work on the site is named by its slug; a painting not yet on the
-// site (no name, size or price yet) by its picture alone, shown unlinked.
+// to blue, by slug.
 const HOME = {
   selected: [
     "40-atmosphere-blue",
     "41-atmosphere-burgundy-blue-ii",
     "02-atmosphere-burgundy-blue",
     "03-atmosphere-maroon-khaki",
-    { img: "new-01", w: 1500, h: 2000, alt: "A new painting: maroon running down over khaki and white" },
+    "44-atmosphere-lavender-green-ochre",
     "38-atmosphere-burgundy-khaki",
     "39-atmosphere-brown-purple",
-    { img: "new-02", w: 1500, h: 2000, alt: "A new painting: umber running down over cream, with drops of blue" },
+    "45-atmosphere-deep-violet",
   ],
 };
 
@@ -93,7 +92,7 @@ const COLLECTIONS = [
   {
     name: "Atmosphere",
     line: "main body of work, colors conformed to gravity in a single pursuit of gradient",
-    cover: "44-atmosphere-lavender-green-ochre",
+    cover: "03-atmosphere-maroon-khaki",
     note: "Fields of thin acrylic on raw canvas. It moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. It studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.",
     works: [
       { ref: "44", slug: "44-atmosphere-lavender-green-ochre", title: "Atmosphere | lavender green ochre", medium: "acrylic on raw canvas", size: "200 × 150 cm", year: 2026, price: 2800, w: 2588, h: 3450, hero: 4 },
@@ -112,7 +111,7 @@ const COLLECTIONS = [
       { ref: "04", slug: "04-atmosphere-cyan-purple-blue",     title: "Atmosphere | cyan purple blue",     medium: "acrylic on raw canvas", size: "100 × 80 cm",  year: 2026, price: 1100, w: 3024, h: 4032 },
       { ref: "37", slug: "37-atmosphere-blue-red",             title: "Atmosphere | blue red",             medium: "acrylic on raw canvas", size: "60 × 50 cm",   year: 2026, price: 600,  w: 2587, h: 3450 },
       { ref: "35", slug: "35-atmosphere-violet-plum-i",        title: "Atmosphere | violet plum I",        medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2587, h: 3450 },
-      { ref: "36", slug: "36-atmosphere-violet-plum-ii",       title: "Atmosphere | violet plum II",       medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2587, h: 3450 },
+      { ref: "36", slug: "36-atmosphere-violet-plum-ii",       title: "Atmosphere | violet plum II",       medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2587, h: 3450, sold: true },
       { ref: "33", slug: "33-atmosphere-blue",                 title: "Atmosphere | blue",                 medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2587, h: 3450 },
       { ref: "34", slug: "34-atmosphere-green-blue",           title: "Atmosphere | green blue",           medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2587, h: 3450 },
       { ref: "05", slug: "05-atmosphere-burnt-red-green-i",    title: "Atmosphere | burnt red green I",    medium: "acrylic on raw canvas", size: "50 × 40 cm",   year: 2026, price: 450,  w: 2574, h: 3432, sold: true },
@@ -154,7 +153,7 @@ const COLLECTIONS = [
     note: "Six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). The series runs from deep purples into crimson reds.",
     works: [
       { ref: "47", slug: "47-paper-purple-01",  title: "Study in purple 01",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 425, h: 578 },
-      { ref: "48", slug: "48-paper-purple-02",  title: "Study in purple 02",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
+      { ref: "48", slug: "48-paper-purple-02",  title: "Study in purple 02",  medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602, sold: true },
       { ref: "49", slug: "49-paper-crimson-01", title: "Study in crimson 01", medium: "acrylic on cold press paper", size: "40 × 30 cm",   year: 2026, price: 250, w: 443, h: 602 },
       { ref: "50", slug: "50-paper-crimson-02", title: "Study in crimson 02", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
       { ref: "51", slug: "51-paper-crimson-03", title: "Study in crimson 03", medium: "acrylic on cold press paper", size: "20 × 15 cm",   year: 2026, price: 150, w: 443, h: 602 },
@@ -171,6 +170,7 @@ const COLLECTIONS = [
   },
   {
     name: "Prints",
+    cover: "02-atmosphere-burgundy-blue",
     line: "limited edition prints of two paintings",
     kind: "prints",
     note: "Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.",

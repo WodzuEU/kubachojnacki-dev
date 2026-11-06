@@ -10,6 +10,41 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**2026-11-06, final round (these win over anything older below).**
+- **One family: EB Garamond everywhere.** Inter is gone (he tried Futura as a
+  second font and dropped it: "too harsh", it loses the premium simple look).
+  `--s` is 13px, since Garamond reads smaller.
+- **Photographs are never cropped.** Only the painting and its caption answer
+  the pointer: links let clicks through, and `.hit` stands over the painting
+  (measured by `scripts/make_boxes.py` into `js/boxes.js`; re-run after adding works).
+- **No bold.** What is picked is black, what is not is grey. Only the current
+  page in the header menu is one step bolder (500).
+- **Header as on the live site:** the menu close together at the right edge.
+- **A caption is the number at the picture's left edge, the name at its right.**
+- **On hover a painting grows 4%.** Nothing dims.
+- **The main page opens works in place** (`/#<slug>`): close, or browser back,
+  returns to the same spot; the arrows walk the selected works or the slideshow's.
+- **Lightbox:** solid white, painting on half-columns 1-4, words from 5, only
+  the word "sold" red. A sold work offers "ask about a similar work", and "see
+  the print" if it has one.
+- **Selected works share the collection page's look** (same frame and caption).
+- **Home collections:** list and note on half-columns 1-2; four tiles of one
+  size (A-paper proportion, two upright, two on their side) in the right half,
+  on half-columns 5, 7 and 8, never going below the foot of the words.
+- **About, from his draft:** portrait and sentence on 1-2; the line in large
+  capitals on 5-8; story on 5-6, statement on 7-8.
+- **Contact:** the live newsletter page's split, closeups full bleed on the left.
+- **Prints** sell by email or Instagram only, no Stripe on the site. The sheet
+  lies on white with a soft shadow, the only shadow on the site.
+- **Footer on a wide screen (1280 px and up):** the way on above, then one line
+  at one size: sentence on half-columns 1-2, field 3, join 4, email 5, instagram 7,
+  privacy and year at the end of 8. Narrower laptops take two rows.
+- **Collection head:** the names close together (not on half-columns), the note
+  one column on 1-3, left aligned.
+- **Print sizes differ on screen,** not to scale: A1 fills the box, A2 80%, A3 62%.
+- **Contact fits the window with no scrolling**; its footer is privacy and the way on.
+- **A sold painting's caption is red.** No dots anywhere.
+
 **2026-10: minimal first, then a page per collection.** Built from this
 site after several rejected proposals (none of them on this branch). The
 artist's brief: minimalism first, start from the original, nothing
