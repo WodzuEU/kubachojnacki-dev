@@ -1,18 +1,8 @@
-/* Renders the newsletter signup forms (site-native Kit submission) and, where
-   its containers are present, the archive of past issues from
-   js/newsletter-data.js, and the sliding work carousel. A signup goes into
-   every .nl-signup: the footer line on each page, the contact page's
-   newsletter row, the page of a collection still to come; data-cta names
-   its button, data-where the placement it reports. The carousel runs on the
-   contact page and the collector page. Each block runs only where its
-   container exists. */
+/* Renders the newsletter signup forms (site-native Kit submission) and the sliding
+   closeups of the contact page. A signup goes into every .nl-signup; data-cta names
+   its button, data-where the placement it reports. */
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    const io = new IntersectionObserver(entries => {
-        entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
-    }, { threshold: 0.07 });
-    const reveal = () => setTimeout(() => document.querySelectorAll('.fade-up').forEach(el => io.observe(el)), 100);
 
     // ── analytics events (GoatCounter) ───────────────────────
     // count.js loads only on the live domain (bottom of this file); track()
@@ -46,10 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = form.querySelector('button');
                 btn.disabled = true;
                 btn.textContent = 'sending…';
-                const where = signup.dataset.where
-                            || (location.pathname.includes('collector') ? 'collector'
-                              : location.pathname.includes('contact')   ? 'contact'
-                              :                                           'home');
+                const where = signup.dataset.where || (location.pathname.includes('contact') ? 'contact' : 'home');
                 track('signup/' + where, 'Newsletter signup');
                 try {
                     const res = await fetch(form.action, {
@@ -69,25 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── sliding work carousel ────────────────────────────────
-    //    wherever .preview-carousel is: the collector landing (the drop) and
-    //    the newsletter page (the works going to print). data-slides on the
-    //    container picks the works (without it, the drop slugs below);
-    //    data-interval sets how long each slide holds, in ms.
+    // ── sliding closeups (the contact page): data-slides picks the works,
+    //    data-interval how long each holds, in ms
     const preview = document.querySelector('.preview-carousel');
     if (preview && typeof COLLECTIONS !== 'undefined') {
         const ROOT = window.ROOT || '';
-        // closeups of the new atmosphere series, in order (each has a -hero crop)
-        const DEFAULT_SLUGS = [
-            '44-atmosphere-lavender-green-ochre',
-            '45-atmosphere-deep-violet',
-            '46-atmosphere-dark-plum',
-            '39-atmosphere-brown-purple',
-            '40-atmosphere-blue',
-        ];
-        const SLUGS = (preview.dataset.slides || '')
-            .split(',').map(s => s.trim()).filter(Boolean);
-        if (!SLUGS.length) SLUGS.push(...DEFAULT_SLUGS);
+        const SLUGS = (preview.dataset.slides || '').split(',').map(s => s.trim()).filter(Boolean);
 
         const allWorks = COLLECTIONS.reduce((a, c) => a.concat(c.works || []), []);
         const capOf = slug => {
@@ -145,72 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         preview.addEventListener('focusout', e => { if (!preview.contains(e.relatedTarget)) start(); });
         start();
     }
-
-    // ── drop countdown (only where #drop-timer exists) ────────
-    const dropTimer = document.getElementById('drop-timer');
-    if (dropTimer) {
-        const deadline = new Date(dropTimer.dataset.deadline).getTime();
-        const cell = id => document.getElementById(id);
-        const pad2 = n => String(n).padStart(2, '0');
-        let iv = null;
-        const tick = () => {
-            const ms = deadline - Date.now();
-            if (ms <= 0) {
-                if (iv) clearInterval(iv);
-                const when = document.querySelector('.drop-when');
-                if (when) when.textContent = 'the preview is open.';
-                dropTimer.remove();
-                return;
-            }
-            cell('t-days').textContent  = pad2(Math.floor(ms / 864e5));
-            cell('t-hours').textContent = pad2(Math.floor(ms % 864e5 / 36e5));
-            cell('t-mins').textContent  = pad2(Math.floor(ms % 36e5 / 6e4));
-            cell('t-secs').textContent  = pad2(Math.floor(ms % 6e4 / 1e3));
-        };
-        tick();
-        iv = setInterval(tick, 1000);
-    }
-
-    // ── archive of past issues (only where its containers exist) ─
-    const list  = document.getElementById('nl-issues');
-    const count = document.getElementById('nl-count');
-    if (list && count) {
-        const issues = (typeof NEWSLETTER_ISSUES !== 'undefined' ? NEWSLETTER_ISSUES : [])
-            .slice()
-            .sort((a, b) => String(b.date).localeCompare(String(a.date)));
-
-        const MONTHS = ['january','february','march','april','may','june',
-                        'july','august','september','october','november','december'];
-        const formatDate = iso => {
-            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
-            if (!m) return String(iso || '');
-            const [, y, mo, d] = m;
-            return `${Number(d)} ${MONTHS[Number(mo) - 1]} ${y}`;
-        };
-
-        if (!issues.length) {
-            count.textContent = '';
-            list.innerHTML =
-                `<p class="nl-empty">the first issue is on its way. subscribe above and it will land in your inbox — and appear here — as soon as it goes out.</p>`;
-        } else {
-            count.textContent = `${issues.length} issue${issues.length === 1 ? '' : 's'}`;
-            issues.forEach(it => {
-                const row = document.createElement('article');
-                row.className = 'issue-item fade-up';
-                const link = it.url ? String(it.url) : '';
-                row.innerHTML =
-                    `<div class="issue-date">${formatDate(it.date)}</div>
-                     <div class="issue-body">
-                         <h3 class="issue-title">${link ? `<a href="${link}" target="_blank" rel="noopener">${it.title || 'untitled'}</a>` : (it.title || 'untitled')}</h3>
-                         ${it.excerpt ? `<p class="issue-excerpt">${it.excerpt}</p>` : ''}
-                     </div>
-                     ${link ? `<a class="issue-link lb-submit" href="${link}" target="_blank" rel="noopener">read</a>` : ''}`;
-                list.appendChild(row);
-            });
-        }
-    }
-
-    reveal();
 
     // ── analytics (live domain only) ─────────────────────────
     // site.js and newsletter.js both run on the home page, so the loader is

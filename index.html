@@ -21,7 +21,8 @@
     <!-- links from the one-page site still land where they meant to -->
     <script>
         (function () {
-            var h = decodeURIComponent(location.hash.slice(1));
+            var h = '';
+            try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
             if (!h) return;
             var pages = { about: 'about/', contact: 'contact/', newsletter: 'contact/' };
             if (h === 'works') location.replace('collections/');
@@ -32,7 +33,7 @@
     <link rel="canonical" href="https://kubachojnacki.com/">
     <meta property="og:title" content="Kuba Chojnacki | Paintings">
     <meta property="og:description" content="Abstract paintings: color absorbed directly into unprimed canvas.">
-    <meta property="og:image" content="https://kubachojnacki.com/IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg">
+    <meta property="og:image" content="https://kubachojnacki.com/IMAGES/og.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kubachojnacki.com/">
     <meta name="twitter:card" content="summary_large_image">
@@ -43,8 +44,8 @@
     <link rel="preload" as="image" href="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp"
           imagesrcset="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp 1600w, IMAGES/thumbs/03-atmosphere-maroon-khaki-hero-2400.webp 2400w"
           imagesizes="100vw" fetchpriority="high">
-    <link rel="stylesheet" href="css/fonts.css?v=20261106n">
-    <link rel="stylesheet" href="css/style.css?v=20261106n">
+    <link rel="stylesheet" href="css/fonts.css?v=20261106p">
+    <link rel="stylesheet" href="css/style.css?v=20261106p">
     <!--ld--><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://kubachojnacki.com/#artist","name":"Kuba Chojnacki","jobTitle":"Painter","description":"Kuba Chojnacki is a painter working with color, gravity and diffusion, from a studio in Cracow.","url":"https://kubachojnacki.com/","image":"https://kubachojnacki.com/IMAGES/about/portrait-bw.jpg","email":"mailto:chojnacki.studio@gmail.com","sameAs":["https://instagram.com/chojnacki.studio"],"address":{"@type":"PostalAddress","addressLocality":"Cracow","addressCountry":"PL"}},{"@type":"WebSite","@id":"https://kubachojnacki.com/#site","url":"https://kubachojnacki.com/","name":"Kuba Chojnacki","inLanguage":"en","author":{"@id":"https://kubachojnacki.com/#artist"}}]}</script><!--/ld-->
 </head>
 <body>
@@ -59,7 +60,7 @@
     <main id="main">
         <section class="hero-wrap" aria-label="Slideshow">
             <div class="hero" id="hero">
-                <div class="slides" id="slides" data-pre="12v1515"><!--pre:slides--><div class="slide">
+                <div class="slides" id="slides" data-pre="dkrax"><!--pre:slides--><div class="slide">
                  <a href="#03-atmosphere-maroon-khaki" aria-label="maroon khaki, Atmosphere">
                      <img src="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp" srcset="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp 1600w, IMAGES/thumbs/03-atmosphere-maroon-khaki-hero-2400.webp 2400w" fetchpriority="high"
                           sizes="100vw" alt="Atmosphere, maroon khaki, acrylic on raw canvas, 150 × 100 cm, 2026" decoding="async">
@@ -70,9 +71,9 @@
                           sizes="100vw" alt="Atmosphere, brown purple, acrylic on raw canvas, 150 × 100 cm, 2026" decoding="async">
                  </a>
              </div><div class="slide">
-                 <a href="#40-atmosphere-blue" aria-label="blue, Atmosphere">
+                 <a href="#40-atmosphere-blue" aria-label="blue I, Atmosphere">
                      <img data-srcset="IMAGES/thumbs/40-atmosphere-blue-hero.webp 1600w, IMAGES/thumbs/40-atmosphere-blue-hero-2400.webp 2400w"
-                          sizes="100vw" alt="Atmosphere, blue, acrylic on raw canvas, 150 × 100 cm, 2026" decoding="async">
+                          sizes="100vw" alt="Atmosphere, blue I, acrylic on raw canvas, 150 × 100 cm, 2026" decoding="async">
                  </a>
              </div><div class="slide">
                  <a href="#44-atmosphere-lavender-green-ochre" aria-label="lavender green ochre, Atmosphere">
@@ -104,43 +105,43 @@
 
         <section class="selected grid" aria-labelledby="selected-head">
             <h2 class="sel-head" id="selected-head">selected works</h2>
-            <div class="sel-grid" id="selected" data-pre="1jzmse2"><!--pre:selected--><a class="sel-item" href="#40-atmosphere-blue" data-work="40-atmosphere-blue" aria-label="blue, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/40-atmosphere-blue.webp" srcset="IMAGES/thumbs/40-atmosphere-blue.webp 400w, IMAGES/thumbs/40-atmosphere-blue-800.webp 800w, IMAGES/thumbs/40-atmosphere-blue-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
-                             alt="Atmosphere, blue, acrylic on raw canvas, 150 × 100 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.9%;width:82.5%;height:92.1%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">05</span><span class="sp-nm">blue</span></span>
+            <div class="sel-grid" id="selected" data-pre="bwhuvm"><!--pre:selected--><a class="sel-item" href="#40-atmosphere-blue" data-work="40-atmosphere-blue" aria-label="blue I, atmosphere">
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/40-atmosphere-blue.webp" srcset="IMAGES/thumbs/40-atmosphere-blue.webp 400w, IMAGES/thumbs/40-atmosphere-blue-800.webp 800w, IMAGES/thumbs/40-atmosphere-blue-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
+                             alt="Atmosphere, blue I, acrylic on raw canvas, 150 × 100 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.9%;width:82.5%;height:92.1%"></span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">blue <span class="rn">I</span></span></span>
                     </a><a class="sel-item" href="#41-atmosphere-burgundy-blue-ii" data-work="41-atmosphere-burgundy-blue-ii" aria-label="burgundy blue II, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp" srcset="IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp 400w, IMAGES/thumbs/41-atmosphere-burgundy-blue-ii-800.webp 800w, IMAGES/thumbs/41-atmosphere-burgundy-blue-ii-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp" srcset="IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp 400w, IMAGES/thumbs/41-atmosphere-burgundy-blue-ii-800.webp 800w, IMAGES/thumbs/41-atmosphere-burgundy-blue-ii-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, burgundy blue II, acrylic on raw canvas, 150 × 100 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:9.0%;top:3.9%;width:82.3%;height:92.3%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">08</span><span class="sp-nm">burgundy blue <span class="rn">II</span></span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">burgundy blue <span class="rn">II</span></span></span>
                     </a><a class="sel-item" href="#02-atmosphere-burgundy-blue" data-work="02-atmosphere-burgundy-blue" aria-label="burgundy blue, atmosphere, sold">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/02-atmosphere-burgundy-blue.webp" srcset="IMAGES/thumbs/02-atmosphere-burgundy-blue.webp 400w, IMAGES/thumbs/02-atmosphere-burgundy-blue-800.webp 800w, IMAGES/thumbs/02-atmosphere-burgundy-blue-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/02-atmosphere-burgundy-blue.webp" srcset="IMAGES/thumbs/02-atmosphere-burgundy-blue.webp 400w, IMAGES/thumbs/02-atmosphere-burgundy-blue-800.webp 800w, IMAGES/thumbs/02-atmosphere-burgundy-blue-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, burgundy blue, acrylic on raw canvas, 150 × 100 cm, 2026" width="3024" height="4032" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.7%;width:82.5%;height:92.3%"></span></span>
-                        <span class="sp-cap sold"><span class="sp-no">07</span><span class="sp-nm">burgundy blue</span></span>
+                        <span class="sp-cap sold"><span class="sp-no">Atmosphere</span><span class="sp-nm">burgundy blue</span></span>
                     </a><a class="sel-item" href="#03-atmosphere-maroon-khaki" data-work="03-atmosphere-maroon-khaki" aria-label="maroon khaki, atmosphere, sold">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/03-atmosphere-maroon-khaki.webp" srcset="IMAGES/thumbs/03-atmosphere-maroon-khaki.webp 400w, IMAGES/thumbs/03-atmosphere-maroon-khaki-800.webp 800w, IMAGES/thumbs/03-atmosphere-maroon-khaki-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/03-atmosphere-maroon-khaki.webp" srcset="IMAGES/thumbs/03-atmosphere-maroon-khaki.webp 400w, IMAGES/thumbs/03-atmosphere-maroon-khaki-800.webp 800w, IMAGES/thumbs/03-atmosphere-maroon-khaki-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, maroon khaki, acrylic on raw canvas, 150 × 100 cm, 2026" width="3024" height="4032" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.9%;width:82.5%;height:92.3%"></span></span>
-                        <span class="sp-cap sold"><span class="sp-no">09</span><span class="sp-nm">maroon khaki</span></span>
+                        <span class="sp-cap sold"><span class="sp-no">Atmosphere</span><span class="sp-nm">maroon khaki</span></span>
                     </a><a class="sel-item" href="#44-atmosphere-lavender-green-ochre" data-work="44-atmosphere-lavender-green-ochre" aria-label="lavender green ochre, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" srcset="IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp 400w, IMAGES/thumbs/44-atmosphere-lavender-green-ochre-800.webp 800w, IMAGES/thumbs/44-atmosphere-lavender-green-ochre-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" srcset="IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp 400w, IMAGES/thumbs/44-atmosphere-lavender-green-ochre-800.webp 800w, IMAGES/thumbs/44-atmosphere-lavender-green-ochre-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, lavender green ochre, acrylic on raw canvas, 200 × 150 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:1.5%;top:1.1%;width:97.0%;height:97.9%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">01</span><span class="sp-nm">lavender green ochre</span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">lavender green ochre</span></span>
                     </a><a class="sel-item" href="#38-atmosphere-burgundy-khaki" data-work="38-atmosphere-burgundy-khaki" aria-label="burgundy khaki, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/38-atmosphere-burgundy-khaki.webp" srcset="IMAGES/thumbs/38-atmosphere-burgundy-khaki.webp 400w, IMAGES/thumbs/38-atmosphere-burgundy-khaki-800.webp 800w, IMAGES/thumbs/38-atmosphere-burgundy-khaki-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/38-atmosphere-burgundy-khaki.webp" srcset="IMAGES/thumbs/38-atmosphere-burgundy-khaki.webp 400w, IMAGES/thumbs/38-atmosphere-burgundy-khaki-800.webp 800w, IMAGES/thumbs/38-atmosphere-burgundy-khaki-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, burgundy khaki, acrylic on raw canvas, 150 × 100 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.9%;width:82.5%;height:92.3%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">10</span><span class="sp-nm">burgundy khaki</span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">burgundy khaki</span></span>
                     </a><a class="sel-item" href="#39-atmosphere-brown-purple" data-work="39-atmosphere-brown-purple" aria-label="brown purple, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/39-atmosphere-brown-purple.webp" srcset="IMAGES/thumbs/39-atmosphere-brown-purple.webp 400w, IMAGES/thumbs/39-atmosphere-brown-purple-800.webp 800w, IMAGES/thumbs/39-atmosphere-brown-purple-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/39-atmosphere-brown-purple.webp" srcset="IMAGES/thumbs/39-atmosphere-brown-purple.webp 400w, IMAGES/thumbs/39-atmosphere-brown-purple-800.webp 800w, IMAGES/thumbs/39-atmosphere-brown-purple-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, brown purple, acrylic on raw canvas, 150 × 100 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:8.8%;top:3.9%;width:82.5%;height:92.5%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">11</span><span class="sp-nm">brown purple</span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">brown purple</span></span>
                     </a><a class="sel-item" href="#45-atmosphere-deep-violet" data-work="45-atmosphere-deep-violet" aria-label="deep violet, atmosphere">
-                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/45-atmosphere-deep-violet.webp" srcset="IMAGES/thumbs/45-atmosphere-deep-violet.webp 400w, IMAGES/thumbs/45-atmosphere-deep-violet-800.webp 800w, IMAGES/thumbs/45-atmosphere-deep-violet-1600.webp 1600w" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="IMAGES/thumbs/45-atmosphere-deep-violet.webp" srcset="IMAGES/thumbs/45-atmosphere-deep-violet.webp 400w, IMAGES/thumbs/45-atmosphere-deep-violet-800.webp 800w, IMAGES/thumbs/45-atmosphere-deep-violet-1600.webp 1600w" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="Atmosphere, deep violet, acrylic on raw canvas, 150 × 130 cm, 2026" width="2588" height="3450" loading="lazy" decoding="async"><span class="hit" style="left:1.5%;top:7.1%;width:97.0%;height:83.1%"></span></span>
-                        <span class="sp-cap"><span class="sp-no">02</span><span class="sp-nm">deep violet</span></span>
+                        <span class="sp-cap"><span class="sp-no">Atmosphere</span><span class="sp-nm">deep violet</span></span>
                     </a><!--/pre:selected--></div>
         </section>
 
         <section class="cl grid" id="collections" aria-labelledby="cl-head">
-            <div class="cl-in" id="col-list" data-pre="1anfx33"><!--pre:col-list--><div class="cl-side"><h2 class="cl-head" id="cl-head">collections</h2><ol class="cl-index"><li><a href="atmosphere/" data-col="0" class="on"><span class="cl-no">01</span><span class="cl-nm">atmosphere</span></a></li><li><a href="chromatic/" data-col="1"><span class="cl-no">02</span><span class="cl-nm">chromatic</span></a></li><li><a href="works-on-paper/" data-col="2"><span class="cl-no">03</span><span class="cl-nm">works on paper</span></a></li><li><a href="prints/" data-col="3"><span class="cl-no">04</span><span class="cl-nm">prints</span></a></li></ol><div class="cl-text"><div class="cl-about on" data-about="0"><p class="cl-note">Fields of thin acrylic on raw canvas. It moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. It studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.</p><p class="cl-facts">31 works, acrylic on raw canvas, 2025–2026.</p></div><div class="cl-about" data-about="1"><p class="cl-note">Archival works and experiments exploring hues and colors. Earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.</p><p class="cl-facts">10 works, acrylic on raw canvas and oil on canvas, 2024–2026.</p></div><div class="cl-about" data-about="2"><p class="cl-note">Six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). The series runs from deep purples into crimson reds.</p><p class="cl-facts">6 works, acrylic on cold press paper, 2026.</p></div><div class="cl-about" data-about="3"><p class="cl-note">Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.</p><p class="cl-facts">2 prints, giclée on archival paper, A1, A2, A3.</p></div></div></div><div class="cl-tiles"><a class="cl-tile t1 on" href="atmosphere/" data-col="0" aria-label="atmosphere"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">01</span><span class="sp-nm">atmosphere</span></span></a><a class="cl-tile t2" href="chromatic/" data-col="1" aria-label="chromatic"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/20-chromatic-red-hero.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">02</span><span class="sp-nm">chromatic</span></span></a><a class="cl-tile t3" href="works-on-paper/" data-col="2" aria-label="works on paper"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/47-paper-purple-01-hero.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">03</span><span class="sp-nm">works on paper</span></span></a><a class="cl-tile t4" href="prints/" data-col="3" aria-label="prints"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/02-atmosphere-burgundy-blue-hero.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">04</span><span class="sp-nm">prints</span></span></a></div><!--/pre:col-list--></div>
+            <div class="cl-in" id="col-list" data-pre="1fcobwf"><!--pre:col-list--><div class="cl-side"><h2 class="cl-head" id="cl-head">collections</h2><ol class="cl-index"><li><a href="atmosphere/" data-col="0" class="on"><span class="cl-no">01</span><span class="cl-nm">atmosphere</span></a></li><li><a href="chromatic/" data-col="1"><span class="cl-no">02</span><span class="cl-nm">chromatic</span></a></li><li><a href="works-on-paper/" data-col="2"><span class="cl-no">03</span><span class="cl-nm">works on paper</span></a></li><li><a href="prints/" data-col="3"><span class="cl-no">04</span><span class="cl-nm">prints</span></a></li></ol><div class="cl-text"><div class="cl-about on" data-about="0"><p class="cl-note">Fields of thin acrylic on raw canvas. It moves from violets and blues through green into burgundies and earthy tones; the scale runs from two-metre canvases to intimate works. It studies how color acts on the psyche before cognition catches up, and the gradient never reaches a steady state.</p><p class="cl-facts">31 works, acrylic on raw canvas, 2025–2026.</p></div><div class="cl-about" data-about="1"><p class="cl-note">Archival works and experiments exploring hues and colors. Earlier oils sit beside recent acrylics on raw canvas, each holding a single color as it opens.</p><p class="cl-facts">10 works, acrylic on raw canvas and oil on canvas, 2024–2026.</p></div><div class="cl-about" data-about="2"><p class="cl-note">Six unique studies in thin acrylic, airbrushed on cold press paper (300 g, light grain). The series runs from deep purples into crimson reds.</p><p class="cl-facts">6 works, acrylic on cold press paper, 2026.</p></div><div class="cl-about" data-about="3"><p class="cl-note">Limited edition prints of two paintings, giclée on fine art archival paper with a white border. Each size frames the painting a little closer.</p><p class="cl-facts">2 prints, giclée on archival paper, A1, A2, A3.</p></div></div></div><div class="cl-tiles"><a class="cl-tile t1 on" href="atmosphere/" data-col="0" aria-label="atmosphere"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/03-atmosphere-maroon-khaki-tile.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">01</span><span class="sp-nm">atmosphere</span></span></a><a class="cl-tile t2" href="chromatic/" data-col="1" aria-label="chromatic"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/20-chromatic-red-tile.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">02</span><span class="sp-nm">chromatic</span></span></a><a class="cl-tile t3" href="works-on-paper/" data-col="2" aria-label="works on paper"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/47-paper-purple-01-tile.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">03</span><span class="sp-nm">works on paper</span></span></a><a class="cl-tile t4" href="prints/" data-col="3" aria-label="prints"><span class="cl-img"><img class="fade" src="IMAGES/thumbs/02-atmosphere-burgundy-blue-tile.webp" alt="" width="1600" height="1200" loading="lazy" decoding="async"></span><span class="sp-cap"><span class="sp-no">04</span><span class="sp-nm">prints</span></span></a></div><!--/pre:col-list--></div>
         </section>
     </main>
 
@@ -160,7 +161,7 @@
     </footer>
 
     <!--lightbox-->
-    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork detail">
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-labelledby="lb-title" tabindex="-1">
         <button class="lightbox-btn lb-close" type="button" aria-label="Close">
             <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -196,9 +197,9 @@
     <!--/lightbox-->
 
     <script>window.ROOT = '';</script>
-    <script src="js/data.js?v=20261106n"></script>
-    <script src="js/boxes.js?v=20261106n"></script>
-    <script src="js/site.js?v=20261106n"></script>
-    <script src="js/newsletter.js?v=20261106n"></script>
+    <script src="js/data.js?v=20261106p"></script>
+    <script src="js/boxes.js?v=20261106p"></script>
+    <script src="js/site.js?v=20261106p"></script>
+    <script src="js/newsletter.js?v=20261106p"></script>
 </body>
 </html>

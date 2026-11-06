@@ -1,0 +1,2 @@
+# GitHub Pages runs Jekyll on this repo: working files stay out of the public site
+exclude: [DESIGN.md, PLAN.md, README.md, scripts, alt]

@@ -3,11 +3,12 @@
    The original site, cleared and put on one grid: its header, its slideshow
    and its lightbox, and a page for every collection. Eight half-columns inside
    the margins. One family, EB Garamond (one font since 2026-11-06, his call:
-   "premium simple"). Sizes: --s small facts and captions, --t rows that are
-   read, --m sentences and links, --l names of collections and works, --xl the
-   one line that leads on (next) and the line on the about page. One line,
-   under the header; the page you are on and the email fields are underlined.
-   Space does everything else: --near inside a block, --far between blocks. */
+   "premium simple"). Five sizes: --s small facts and captions, --m sentences, menu
+   and rows, --h the slideshow's name and what is picked, --l names of collections
+   and works, --xl the one large sentence. The line of capitals on the about page is
+   set by its width. One line, under the header; the page you are on and the email
+   fields are underlined. Space does everything else: --near inside a block, --far
+   between blocks. */
 
 :root {
     --bg:   #ffffff;
@@ -19,11 +20,11 @@
 
     --serif: "EB Garamond", Georgia, serif;
 
-    --s:  13px;
-    --t:  1.0625rem;
-    --m:  1.15rem;
-    --l:  clamp(1.6rem, 2.4vw, 2.2rem);
-    --xl: clamp(1.9rem, 3vw, 2.75rem);
+    --s:  14px;
+    --m:  1.125rem;
+    --h:  1.3125rem;
+    --l:  clamp(1.6rem, 2.4vw, 2.125rem);
+    --xl: clamp(1.9rem, 3vw, 2.6875rem);
 
     --pad:  clamp(1.5rem, 4vw, 4rem);
     --gut:  clamp(12px, 1.4vw, 20px);
@@ -57,18 +58,18 @@ body {
     letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
 }
-/* EB Garamond is loaded in 400 roman and italic only: never let the
-   browser draw a fake bold */
-h1, h2, h3 { font-weight: 400; }
+/* the Garamond files are variable, 400-800; the site uses 400, and 500 for the page
+   you are on in the menu */
+h1, h2 { font-weight: 400; }
 /* Garamond at display sizes sits a hair tighter */
-.col-title, .cl-word, .next a, .print-name, .hc-title, .lb-title { letter-spacing: -0.01em; }
+.col-title, .next a, .hc-title, .lb-title { letter-spacing: -0.01em; }
 /* the roman numerals in a name stay capitals in a lowercase line */
 .rn { text-transform: none; }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.hidden, [hidden] { display: none !important; }
+[hidden] { display: none !important; }
 /* read out, not shown: the heading of a page whose picture says it */
 /* the first thing the keyboard reaches: past the menu, to the page */
 .skip {
@@ -96,7 +97,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* the grid (his Canva, 2026-10-21): four columns inside the margins, each
    split in half. .grid is those eight half-columns and everything starts on
    one of them: 1-2 is column 1, 3-4 column 2, 5-6 column 3, 7-8 column 4 */
-.cols, .grid {
+.grid {
     display: grid;
     grid-template-columns: repeat(8, minmax(0, 1fr));
     column-gap: var(--gut);
@@ -122,7 +123,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .name {
     grid-column: 1 / 5; justify-self: start;
     font-family: var(--serif);
-    font-size: 1.1rem;
+    font-size: var(--m);
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -133,7 +134,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .menu a {
     margin-left: 2.5rem;
     font-family: var(--serif);
-    font-size: 1.1rem;
+    font-size: var(--m);
     letter-spacing: 0.01em;
     white-space: nowrap;
     transition: opacity var(--t-fast) var(--ease);
@@ -162,6 +163,7 @@ main { padding-top: var(--top); }
     transition: opacity 0s linear var(--t-slow);
     pointer-events: none;
 }
+html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first painting still shows */
 .slide.active { opacity: 1; z-index: 1; pointer-events: auto; transition: opacity var(--t-slow) var(--ease); }
 .slide a { position: relative; display: block; height: 100%; }
 /* the closeup at its full height (the frame shows its top part): while a
@@ -180,7 +182,7 @@ main { padding-top: var(--top); }
 }
 .slide-vignette {
     position: absolute; inset: 0; z-index: 5; pointer-events: none;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.36) 0%, transparent 38%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 38%);
 }
 .hero-bar {
     position: absolute; z-index: 10; left: var(--pad); right: var(--pad); bottom: 2.4rem;
@@ -188,17 +190,18 @@ main { padding-top: var(--top); }
     color: #fff; pointer-events: none;
 }
 .hero-cap { min-width: 0; }
-.hc-title { display: block; width: fit-content; font-family: var(--serif); font-size: 1.35rem; line-height: 1.15; text-transform: lowercase; pointer-events: auto; }
+.hc-title { display: block; width: fit-content; font-family: var(--serif); font-size: var(--h); line-height: 1.15; text-transform: lowercase; pointer-events: auto; }
 .hc-title:hover { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.hc-specs { display: block; margin-top: 0.3rem; font-size: var(--s); letter-spacing: 0.04em; text-transform: lowercase; color: rgba(255, 255, 255, 0.78); }
+.hc-specs { display: block; margin-top: 0.3rem; font-size: var(--s); letter-spacing: 0.04em; text-transform: lowercase; color: #fff; }
 .hc-specs i { font-style: normal; margin-inline: 0.6em; }
 /* the words come with the painting, while it crosses in */
 .hero-cap.in .hc-title { animation: cap-rise var(--t-slow) var(--ease-out) 0.25s both; }
 .hero-cap.in .hc-specs { animation: cap-rise var(--t-slow) var(--ease-out) 0.33s both; }
 @keyframes cap-rise { from { opacity: 0; transform: translateY(10px); } }
 .hero-nav { display: flex; align-items: baseline; gap: 0.7rem; pointer-events: auto; flex: none; }
-.hero-counter { font-size: var(--s); letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.7); font-variant-numeric: tabular-nums; }
-.hero-nav button { color: #fff; font-size: 1.1rem; line-height: 1; padding: 0.2rem 0.35rem; transition: opacity var(--t-fast) var(--ease); }
+.hero-counter { font-size: var(--s); letter-spacing: 0.12em; color: #fff; font-variant-numeric: tabular-nums; }
+.hero :focus-visible { outline-color: #fff; outline-offset: -4px; }
+.hero-nav button { color: #fff; font-size: var(--m); line-height: 1; padding: 0.2rem 0.35rem; transition: opacity var(--t-fast) var(--ease); }
 @media (hover: hover) { .hero-nav button:hover { opacity: 0.55; } }
 
 .selected { padding-top: var(--near); row-gap: var(--near); }
@@ -210,7 +213,7 @@ main { padding-top: var(--top); }
     gap: 2.4rem var(--gut);
 }
 .sel-item { display: block; }
-.sel-frame { position: relative; display: block; aspect-ratio: 3 / 4; width: 64.5%; margin-inline: auto; }
+.sel-frame { position: relative; display: block; aspect-ratio: 3 / 4; width: 64.5%; }
 .sel-frame img { width: 100%; height: 100%; object-fit: contain; }
 
 /* paintings arrive: each fades in once its picture is loaded and decoded
@@ -238,13 +241,13 @@ main { padding-top: var(--top); }
 .cl-index { list-style: none; margin-top: 0.9rem; }
 .cl-index a { display: grid; grid-template-columns: 2.25em minmax(0, 1fr); align-items: baseline; font-family: var(--serif); font-size: var(--l); line-height: 1.12; text-transform: lowercase; transition: color var(--t-fast) var(--ease); }
 .cl-index a:not(.on) { color: var(--mid); }
-.cl-no { font-size: 0.93em; font-variant-numeric: tabular-nums; }
+.cl-no { font-variant-numeric: tabular-nums; }
 /* every note stands in the same place, so the height never jumps as one is picked */
 .cl-text { display: grid; margin-top: 1.6rem; }
 .cl-about { grid-area: 1 / 1; }
 .cl-about:not(.on) { visibility: hidden; }
-.cl-note { font-family: var(--serif); font-size: clamp(1.15rem, 1.4vw, 1.6rem); line-height: 1.42; text-align: justify; hyphens: auto; }
-.cl-facts { margin-top: 1rem; font-family: var(--serif); font-size: var(--t); line-height: 1.4; }
+.cl-note { font-family: var(--serif); font-size: clamp(var(--m), 1.46vw, 3rem); line-height: 1.42; text-align: justify; hyphens: auto; }
+.cl-facts { margin-top: 1rem; font-family: var(--serif); font-size: max(var(--m), 1.25vw); line-height: 1.4; }
 .cl-tiles { grid-column: 5 / 9; position: relative; container-type: size; }
 .cl-tile {
     --tr: calc((100cqw - 3 * var(--gut)) / 4);                          /* one half-column */
@@ -275,13 +278,11 @@ main { padding-top: var(--top); }
     line-height: 1.45;
     text-wrap: pretty;
 }
-.say-text + .say-text { margin-top: 1.1em; }
 
-/* ── a collection (his Canva, 2026-10-21): the line of all collections on
-      the half-columns of columns 1 and 2, this one black and larger, the others grey; the note
-      justified across columns 1 and 2; then the paintings four across, each
-      centred in its column in an upright frame, its number at the column's
-      left edge and its name at its right, in small Garamond ── */
+/* ── a collection: the line of all collections, this one black and larger, the
+      others grey; the note in one column; then the paintings four across, each
+      hanging from its column's left edge in an upright frame, its number at the
+      frame's left edge and its name at its right, in small Garamond ── */
 .col-head { padding-top: 1.25rem; row-gap: 1.4rem; align-items: baseline; }
 .col-line {
     grid-column: 1 / -1;
@@ -298,8 +299,7 @@ main { padding-top: var(--top); }
     line-height: 1.1;
     text-transform: lowercase;
 }
-.col-line .col-title { font-size: calc(var(--m) * 1.55); }
-.col-head .note { grid-column: 1 / 4; font-size: var(--t); line-height: 1.6; text-wrap: pretty; }
+.col-head .note { grid-column: 1 / 4; font-size: var(--m); line-height: 1.6; text-wrap: pretty; }
 #collection { padding-top: 2.5rem; }
 
 .cg-grid {
@@ -313,7 +313,7 @@ main { padding-top: var(--top); }
     align-items: start;
 }
 .cg-item > a { display: block; }
-.cg-item .sp-frame { width: 64.5%; margin-inline: auto; }
+.cg-item .sp-frame { width: 64.5%; }
 /* while it arrives, the painting's own box in its own colour, faintly */
 .sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
 .sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
@@ -327,42 +327,28 @@ main { padding-top: var(--top); }
 .sp-cap { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 1em; margin-top: 0.35rem; font-family: var(--serif); font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
 .sp-no { flex: none; font-variant-numeric: tabular-nums; }
 .sp-nm { text-align: end; }
-.cg-item .sp-cap, .sel-item .sp-cap { width: 64.5%; margin-inline: auto; }
+.cg-item .sp-cap, .sel-item .sp-cap { width: 64.5%; }
+/* on the main page the words show only under the mouse; a phone, with no mouse,
+   always shows them. The place is kept, so nothing moves */
+@media (hover: hover) {
+    .sel-item .sp-cap { opacity: 0; transition: opacity var(--t-fast) var(--ease); }
+    .sel-item .sp-cap > * { pointer-events: none; }
+    .sel-item:hover .sp-cap, .sel-item:focus-visible .sp-cap { opacity: 1; }
+    .sel-item:hover .sp-cap > * { pointer-events: auto; }
+}
 /* a sold painting: its caption red */
-.sp-cap.sold, .wall-cap.sold { color: var(--sold); }
+.sp-cap.sold { color: var(--sold); }
 /* only the painting and its caption answer the pointer. Nothing is cropped: the
    link lets clicks through, and .hit stands over the painting in its photograph
    (js/boxes.js), so the white around it does nothing */
-.cg-item > a, .sel-item, .wall-item a { pointer-events: none; }
-.hit, .sp-cap > *, .wall-cap > * { pointer-events: auto; }
+.cg-item > a, .sel-item { pointer-events: none; }
+.hit, .sp-cap > * { pointer-events: auto; }
 .hit { position: absolute; z-index: 2; }
 /* a painting pointed at grows a little, as on the old site; nothing dims */
-.cg-item img, .sel-item img, .wall-item img, .cl-img img { transition: transform var(--t-base) var(--ease-out); }
+.cg-item img, .sel-item img, .cl-img img { transition: transform var(--t-base) var(--ease-out); }
 @media (hover: hover) {
-    .cg-item a:hover img, .sel-item:hover img, .wall-item a:hover img, .cl-tile:hover img { transform: scale(1.04); }
+    .cg-item a:hover img, .sel-item:hover img, .cl-tile:hover img { transform: scale(1.04); }
 }
-/* the painting pointed at stays, the rest step back */
-.cg-item, .wall-item { transition: opacity var(--t-fast) var(--ease); }
-
-/* ── the wall: every painting as wide as it really is, softened, the largest
-      first, hung on one middle line with white around it ── */
-.sp-wall { padding-top: var(--near); }
-.wall-list {
-    grid-column: 1 / -1;
-    container-type: inline-size;
-    list-style: none;
-    display: flex; flex-wrap: wrap; align-items: center;
-    gap: clamp(2.5rem, 5vw, 5rem) clamp(2rem, 4.5vw, 4.5rem);
-}
-.wall-item { flex: none; width: max(calc(var(--w) * 0.26cqw), 7.5rem); }
-.wall-item a { display: flex; flex-direction: column; gap: 0.5rem; }
-.wall-pic { position: relative; display: block; }
-.wall-item img { width: calc(var(--w) * 0.26cqw); height: auto; }
-.wall-cap { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 0.6em; font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
-.wall-cm { flex-basis: 100%; color: var(--mid); }
-@media (hover: hover) {
-}
-
 /* prints (his Canva, 2026-10-21): the print chosen on column 2 in its
    A-paper box; on column 3 its words: "a print of", the two paintings, the
    sizes with the price beside them, the measure and edition, the order link.
@@ -376,20 +362,19 @@ main { padding-top: var(--top); }
 .pr-pic[data-size="A3"] img { transform: scale(var(--a3)); }
 .pr-pic img { width: 100%; height: auto; transform-origin: right top; transition: transform var(--t-base) var(--ease-out); box-shadow: 0 2px 6px rgba(26, 26, 24, 0.10), 0 14px 34px rgba(26, 26, 24, 0.16); }
 .pr-info {
-    grid-column: 5 / 7;
+    grid-column: 6 / 8;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gut); row-gap: 0.55rem; align-items: baseline;
     padding-top: 2.2rem;
     font-family: var(--serif); font-size: var(--m); text-transform: lowercase;
 }
 .pr-k { grid-column: 1 / -1; }
 .pr-opt { justify-self: start; color: var(--mid); transition: color var(--t-fast) var(--ease); }
-.pr-opt[aria-pressed="true"] { color: var(--ink); font-size: 1.29em; }
+.pr-opt[aria-pressed="true"] { color: var(--ink); font-size: var(--h); }
 .pr-sizes { display: flex; align-items: baseline; gap: 0.9rem; }
 .pr-in { color: var(--mid); }
-.pr-sizes .pr-opt[aria-pressed="true"] { font-size: 1.22em; }
-.pr-price { font-size: var(--t); font-variant-numeric: tabular-nums; }
-.pr-facts { grid-column: 1 / -1; font-size: 0.8em; color: var(--mid); }
-.pr-order, .pr-ask { grid-column: 1 / -1; font-size: 1.2em; }
+.pr-price { font-size: var(--m); font-variant-numeric: tabular-nums; }
+.pr-facts { grid-column: 1 / -1; font-size: var(--s); color: var(--mid); }
+.pr-order, .pr-ask { grid-column: 1 / -1; font-size: var(--h); }
 .pr-order { margin-top: 0.8rem; }
 @media (hover: hover) { .pr-opt:hover { color: var(--ink); } }
 
@@ -407,14 +392,14 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .about-page { container-type: inline-size; align-items: start; grid-template-rows: auto 1fr; padding-block: 4.5rem var(--near); column-gap: var(--gut); row-gap: clamp(2.5rem, 5vw, 4.5rem); }
 .about-side { grid-column: 1 / 3; grid-row: 1 / 3; }
 .about-side img { width: 100%; height: auto; }
-.about-lead { margin-top: 2.2rem; font-family: var(--serif); font-size: 1.2rem; line-height: 1.5; text-align: justify; hyphens: auto; }
+.about-lead { margin-top: 2.2rem; font-family: var(--serif); font-size: var(--m); line-height: 1.5; text-align: justify; hyphens: auto; }
 .about-line { grid-column: 5 / 9; grid-row: 1; font-family: var(--serif); font-size: 2.33cqw; line-height: 1.2; letter-spacing: 0; text-transform: uppercase; }
 .about-line span { display: block; text-align: justify; text-align-last: justify; white-space: nowrap; }
-.about-story { grid-column: 5 / 7; grid-row: 2; display: grid; gap: 1.1rem; font-family: var(--serif); font-size: var(--t); line-height: 1.5; text-align: justify; hyphens: auto; }
-.about-text { grid-column: 7 / 9; grid-row: 2; font-family: var(--serif); font-size: var(--t); line-height: 1.5; text-align: justify; hyphens: auto; }
+.about-story { grid-column: 5 / 7; grid-row: 2; display: grid; gap: 1.1rem; font-family: var(--serif); font-size: var(--m); line-height: 1.5; text-align: justify; hyphens: auto; }
+.about-text { grid-column: 7 / 9; grid-row: 2; font-family: var(--serif); font-size: var(--m); line-height: 1.5; text-align: justify; hyphens: auto; }
 
 /* ── privacy: the name on column 1, the rows from column 7 ── */
-.privacy-page { align-items: start; padding-top: var(--far); }
+.privacy-page { align-items: start; padding-top: 4.5rem; }
 .privacy-page .col-title { grid-column: 1 / 5; }
 .privacy-page .facts { grid-column: 5 / 9; }
 .privacy-page .facts > div { grid-template-columns: 7.5rem minmax(0, 1fr); padding-block: 0.55rem; }
@@ -440,12 +425,8 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .contact-text .signup { margin-block: 1.6rem 2.6rem; }
 .contact-text .facts > div { grid-template-columns: 6.5rem minmax(0, 1fr); padding-block: 0.25rem; }
 
-.facts > div { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gut); padding-block: 0.25rem; }
-.contact-text .facts dd { grid-column: 2 / 5; }
-
-.facts > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--gut); padding-block: 0.3rem; font-size: var(--t); }
+.facts > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--gut); padding-block: 0.3rem; font-size: var(--m); }
 .facts a { text-decoration: underline; text-underline-offset: 3px; }
-.facts .signup { margin-top: 0.6rem; }
 
 /* the sliding closeups (newsletter.js), as on the newsletter page */
 .preview-carousel { position: absolute; inset: 0; }
@@ -466,7 +447,7 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .newsletter-form input {
     flex: 1; min-width: 0;
     font: inherit;
-    font-size: var(--t);
+    font-size: var(--m);
     text-transform: lowercase;
     color: var(--ink);
     background: none;
@@ -498,7 +479,7 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .lb-submit:hover { opacity: 0.42; }
 /* a press is felt: the buttons that do not hold their place by transform give a pixel */
 .pr-opt:active, .nl-submit:active { transform: translateY(1px); }
-.nl-submit { display: inline-block; font-size: var(--t); }
+.nl-submit { display: inline-block; font-size: var(--m); }
 
 /* ── footer (his Canva, 2026-10-21): the newsletter field on column 1, "join"
       on the half-column after it; the way on, large, at the right edge; then
@@ -506,7 +487,7 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .foot { margin-top: var(--far); padding-bottom: 2rem; }
 .foot-top { align-items: end; padding-bottom: var(--near); }
 .foot-nl { grid-column: 1 / 4; }
-.foot-nl .fl { display: block; margin-bottom: 0.1rem; font-family: var(--serif); font-size: var(--t); line-height: 1.3; text-transform: lowercase; }
+.foot-nl .fl { display: block; margin-bottom: 0.1rem; font-family: var(--serif); font-size: var(--m); line-height: 1.3; text-transform: lowercase; }
 .foot-nl .newsletter-form, .contact-text .newsletter-form {
     max-width: none;
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline;
@@ -514,11 +495,11 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 .foot-nl .newsletter-form input, .contact-text .newsletter-form input { grid-column: 1 / 3; }
 .foot-nl .nl-submit, .contact-text .nl-submit { grid-column: 3; justify-self: start; }
 .next { grid-column: 5 / 9; justify-self: end; }
-.next a { display: inline-flex; align-items: baseline; font-family: var(--serif); font-size: clamp(1.35rem, 1.9vw, 1.75rem); line-height: 1; text-transform: lowercase; }
+.next a { display: inline-flex; align-items: baseline; font-family: var(--serif); font-size: var(--h); line-height: 1; text-transform: lowercase; }
 .next a::after { content: "\2192"; margin-left: 0.45em; transition: transform var(--t-base) var(--ease-out); }
 @media (hover: hover) { .next a:hover::after { transform: translateX(0.2em); } }
 .next a:hover .next-name { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
-.next-label { font-size: 0.62em; color: var(--mid); margin-right: 0.7em; }
+.next-label { font-size: var(--s); color: var(--mid); margin-right: 0.7em; }
 .foot-row { align-items: baseline; padding-top: 0.4rem; }
 .foot .f1 { grid-column: 1 / 5; }
 .foot .f2 { grid-column: 5 / 7; }
@@ -530,7 +511,7 @@ body.fit .foot { margin-top: 0; padding-top: var(--near); }
 @media (min-width: 801px) {
     .foot { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline; padding-inline: var(--pad); }
     .foot-top, .foot-row, .foot-nl { display: contents; }
-    .foot-nl .fl, .foot-nl .newsletter-form input, .foot-nl .nl-submit, .foot .f1, .foot .f2, .foot .f3 > * { font-size: 0.875rem; }
+    .foot-nl .fl, .foot-nl .newsletter-form input, .foot-nl .nl-submit, .foot .f1, .foot .f2, .foot .f3 > * { font-size: var(--s); }
     .next { grid-column: 5 / 9; grid-row: 1; margin-bottom: 2rem; }
     .foot-nl .fl { grid-column: 1 / 3; grid-row: 2; margin: 0; white-space: nowrap; }
     .foot-nl .nl-signup { grid-column: 3 / 5; grid-row: 2; }
@@ -566,7 +547,9 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 /* the white behind the painting: a layer of its own, so opening and
    closing only fade it (site.js), never repaint it */
 .lightbox::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--bg); }
-.lightbox.active { visibility: visible; pointer-events: auto; opacity: 1; }
+/* shown at once, while the white fades: focus can only move onto what is visible */
+.lightbox.active { visibility: visible; pointer-events: auto; opacity: 1; transition: opacity var(--t-base) var(--ease), visibility 0s; }
+.lightbox:focus { outline: none; }
 .lightbox, .lightbox-content, .lightbox-info { overscroll-behavior: contain; }
 .lightbox.lb-flip { transition: none; }
 .lightbox-content {
@@ -575,8 +558,8 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     width: 100%; height: 100%; padding: 1.5rem var(--pad);
 }
 .lightbox img {
-    grid-column: 1 / 5; align-self: stretch;
-    width: 100%; height: 100%; min-height: 0; object-fit: contain;
+    grid-column: 1 / 5; place-self: center;
+    width: 100%; height: 100%; min-height: 0; object-fit: contain; touch-action: pan-y;
     transition: transform var(--t-base) var(--ease-out);
     transform-origin: center; position: relative; z-index: 1;
 }
@@ -592,15 +575,15 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 .lightbox-info.is-unavailable .status-text { color: var(--mid); }
 .lightbox-info.is-sold .status-text { color: var(--sold); }
 .lb-inquiry-section { display: flex; flex-direction: column; gap: 0.5rem; }
-.lb-extra { font-size: var(--t); line-height: 1.35; }
+.lb-extra { font-size: var(--s); line-height: 1.35; }
 .lb-nav { display: flex; align-items: center; gap: 0.7rem; }
-.lb-count { font-size: var(--t); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.lb-count { font-size: var(--m); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
 .lb-nav button { font-size: var(--l); line-height: 1; padding: 0.2rem 0.35rem; margin-left: -0.35rem; transition: opacity var(--t-fast) var(--ease); }
 .lb-next { margin-left: 0; }
 @media (hover: hover) { .lb-nav button:hover { opacity: 0.45; } }
 .lightbox-btn {
     position: absolute; z-index: 101;
-    padding: 1.5rem; opacity: 0.45; transition: opacity var(--t-fast) var(--ease); color: var(--ink);
+    padding: 1.5rem; opacity: 0.6; transition: opacity var(--t-fast) var(--ease); color: var(--ink);
 }
 .lightbox-btn:hover { opacity: 1; }
 .lb-close { top: 0; right: 0; }
@@ -639,7 +622,14 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
 
 @media (max-width: 1100px) {
     .cg-grid { grid-template-columns: repeat(var(--n-mid, 3), minmax(0, 1fr)); }
-    .menu a[aria-current] { font-size: var(--m); }
+}
+/* the tiles need the width: on a narrow window the list and note stand over them */
+@media (max-width: 1000px) {
+    .cl-in { row-gap: var(--near); }
+    .cl-side { grid-column: 1 / -1; }
+    .cl-tiles { grid-column: 1 / -1; container-type: normal; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--near) var(--gut); }
+    .cl-tile.t1, .cl-tile.t2, .cl-tile.t3, .cl-tile.t4 { position: static; width: auto; }
+    .cl-tile.t1 .cl-img, .cl-tile.t2 .cl-img, .cl-tile.t3 .cl-img, .cl-tile.t4 .cl-img { height: auto; aspect-ratio: 1 / 1.414; }
 }
 
 /* ── narrow: one column, the same order ── */
@@ -647,26 +637,19 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     :root { --pad: clamp(1rem, 3vw, 2.5rem); }
     .top { display: flex; justify-content: space-between; column-gap: 0; }
     .menu { display: flex; column-gap: 0; }
-    .menu a { margin-left: 1.2rem; font-size: var(--m); }
-    .menu a[aria-current] { font-size: var(--m); }
+    .menu a { margin-left: 1.2rem; }
+    .cl-note, .about-lead, .about-story, .about-text { text-align: start; hyphens: manual; }
     .col-line { column-gap: 0.9em; }
-    .col-line .col-title { font-size: var(--l); }
     .col-head .note { grid-column: 1 / -1; }
     .hero-wrap { height: auto; }
     .hero { aspect-ratio: 4 / 5; --hero-h: 125vw; }
     .hero-bar { bottom: 1.4rem; }
     .sel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .cl-in { row-gap: var(--near); }
-    .cl-side { grid-column: 1 / -1; }
-    /* on a phone the tiles are two by two, all upright, the same size */
-    .cl-tiles { grid-column: 1 / -1; container-type: normal; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--near) var(--gut); }
-    .cl-tile.t1, .cl-tile.t2, .cl-tile.t3, .cl-tile.t4 { position: static; width: auto; }
-    .cl-tile.t1 .cl-img, .cl-tile.t2 .cl-img, .cl-tile.t3 .cl-img, .cl-tile.t4 .cl-img { height: auto; aspect-ratio: 1 / 1.414; }
+    /* on a phone the tiles are two by two */
+    .cl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #collection { padding-top: var(--near); }
     .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
     .cg-item .sp-frame, .cg-item .sp-cap, .sel-frame, .sel-item .sp-cap { width: 82%; }
-    .wall-item { width: max(calc(var(--w) * 0.64cqw), 6rem); }
-    .wall-item img { width: calc(var(--w) * 0.64cqw); }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
     .pr-pic img { transform-origin: center top; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
@@ -674,7 +657,7 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .about-side, .about-story, .about-text, .about-line { grid-column: 1 / -1; grid-row: auto; }
     .about-side img { max-width: 78%; }
     .about-lead { margin-top: var(--near); }
-    .about-line { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+    .about-line { font-size: var(--l); }
     .about-line span { display: inline; white-space: normal; text-align: start; text-align-last: auto; }
     .contact-page { grid-template-rows: none; row-gap: var(--near); }
     .contact-media { grid-column: 1 / -1; height: 62vh; margin-right: calc(-1 * var(--pad)); }
@@ -698,13 +681,23 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
 }
 @media (max-width: 520px) {
     :root { --top: 45px; }
-    .name { font-size: 0.74rem; letter-spacing: 0.06em; }
-    .menu a { font-size: 0.88rem; margin-left: 0.75rem; }
-    .menu a[aria-current] { font-size: 0.95rem; }
-    .col-line { font-size: 1rem; }
-    .facts > div { font-size: 0.95rem; }
+    .name { font-size: 13px; letter-spacing: 0.04em; }
+    .menu a { font-size: var(--s); margin-left: 0.65rem; }
+    .hero-bar { flex-wrap: wrap-reverse; }
+    .hero-cap { flex-basis: 100%; }
+    .hero-nav { margin-left: auto; }
+    .hc-title { font-size: var(--m); }
+    .facts > div, .contact-text .facts > div, .privacy-page .facts > div { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 0.45rem; }
+}
+/* a thumb needs more room than the small words take: more padding, the same place */
+@media (hover: none) {
+    .hero-nav button, .lb-nav button { padding: 0.7rem 0.6rem; margin-block: -0.5rem; }
+    .pr-sizes .pr-opt { padding: 0.6rem 0.4rem; margin: -0.6rem -0.4rem; }
+    .nl-submit { padding: 0.6rem; margin: -0.6rem; }
+    .menu a { padding-block: 0.6rem; }
+    .foot-row a { padding-block: 0.4rem; margin-block: -0.4rem; }
 }
 @media (max-width: 360px) {
-    .name { font-size: 0.72rem; letter-spacing: 0.04em; }
-    .menu a { font-size: 0.82rem; margin-left: 0.7rem; }
+    .name { font-size: 12.5px; }
+    .menu a { margin-left: 0.55rem; }
 }

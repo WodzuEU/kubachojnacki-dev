@@ -7,7 +7,7 @@ after ANY change to js/data.js:
 
     python scripts/build_collections.py
 
-STAMP must match the ?v= stamp of the pages.
+STAMP is the one version stamp: this script writes it into every page.
 """
 import datetime
 import html
@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261106n"
+STAMP = "20261106p"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -186,7 +186,6 @@ HEAD = """<!DOCTYPE html>
         <section class="col-head grid">
             <div class="col-line">{line}</div>
             <p class="say-text note">{note}</p>
-            {views}
         </section>
         <section id="collection" class="col-{slug}"></section>
     </main>
@@ -210,7 +209,7 @@ FOOT_NL = """    <footer class="foot">
 """
 
 LIGHTBOX = """
-    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork detail">
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-labelledby="lb-title" tabindex="-1">
         <button class="lightbox-btn lb-close" type="button" aria-label="Close">
             <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -270,7 +269,8 @@ FORWARD = """<!DOCTYPE html>
            #<slug> -> its collection with the work open, anything else -> the
            first collection */
         (function () {{
-            var h = decodeURIComponent(location.hash.slice(1)), to = '../{first}/';
+            var h = '', to = '../{first}/';
+            try {{ h = decodeURIComponent(location.hash.slice(1)); }} catch (e) {{}}
             var page = function (c) {{ return '../' + c.name.toLowerCase().replace(/\\s+/g, '-') + '/'; }};
             COLLECTIONS.forEach(function (c) {{
                 if (page(c) === '../' + h + '/') to = page(c);
@@ -294,11 +294,8 @@ def describe(c):
 
 
 def og_image(c):
-    if c["kind"] != "prints" and c["cover"]:
-        for name in (f"{c['cover']}-hero.jpg", f"{c['cover']}.jpg"):
-            if os.path.exists(os.path.join(REPO, "IMAGES", "works", name)):
-                return f"IMAGES/works/{name}"
-    return "IMAGES/works/03-atmosphere-maroon-khaki-hero.jpg"
+    # one wide closeup for every page's link preview (scripts/make_thumbs.py)
+    return "IMAGES/og.jpg"
 
 
 # ── structured data (schema.org JSON-LD) ────────────────────────────────────
@@ -322,10 +319,17 @@ def cm(value):
     return {"@type": "QuantitativeValue", "value": int(value) if value == int(value) else value, "unitCode": "CMT"}
 
 
+BOXES = {m[0]: json.loads(m[1]) for m in re.findall(r'"([^"]+)": (\[[^\]]+\])',
+         io.open(os.path.join(REPO, "js", "boxes.js"), encoding="utf-8").read())}
+
+
 def artwork(w, c, no):
-    # the size string does not say which side is the height: the photo does
+    # the size string does not say which side is the height: the painting's own
+    # place in its photograph does (js/boxes.js); the photographs are all upright
     a, b = [float(x) for x in re.findall(r"\d+(?:\.\d+)?", w["size"])[:2]]
-    portrait = (w["h"] or 1) > (w["w"] or 1)
+    box = BOXES.get(w["slug"])
+    wide, tall = ((box[2] - box[0]) * w["w"], (box[3] - box[1]) * w["h"]) if box and w["w"] else (w["w"] or 1, w["h"] or 1)
+    portrait = tall > wide
     width, height = (min(a, b), max(a, b)) if portrait else (max(a, b), min(a, b))
     medium, _, surface = w["medium"].partition(" on ")
     url = f"{SITE}/{c['slug']}/#{w['slug']}"
@@ -408,18 +412,24 @@ def write(path, text):
     print("wrote", path)
 
 
+def put_stamp():
+    """the one stamp above goes into the pages written by hand and into site.js"""
+    for path in ("index.html", "404.html", "about/index.html", "contact/index.html", "privacy/index.html", "js/site.js"):
+        full = os.path.join(REPO, path)
+        src = io.open(full, encoding="utf-8").read()
+        with io.open(full, "w", encoding="utf-8", newline="\n") as f:
+            f.write(re.sub(r"\?v=\d{8}[a-z]*", "?v=" + STAMP, src))
+
+
 def main():
+    put_stamp()
     cols = collections()
     esc = lambda s: html.escape(s, quote=True)
     for i, c in enumerate(cols):
         page = HEAD.format(
             title=esc(c["name"]), desc=esc(describe(c)), site=SITE, slug=c["slug"], og=og_image(c),
             stamp=STAMP, line=col_line(c, cols, esc), note=esc(c["note"]), first=cols[0]["slug"], order=i + 1,
-            ld=page_ld(c, cols),
-            # a collection of paintings is seen two ways: grid and wall (js/collection.js)
-            views='' if True else ('<div class="views" id="views" role="group" aria-label="view">'
-                                        '<button type="button" data-view="grid" aria-pressed="true">grid</button>'
-                                        '<button type="button" data-view="wall" aria-pressed="false">wall</button></div>'))
+            ld=page_ld(c, cols))
         # the way on: the next collection, after the last one the about page
         nx = cols[i + 1] if i + 1 < len(cols) else None
         page += FOOT_NL.format(next_href=f"../{nx['slug']}/" if nx else "../about/",

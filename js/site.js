@@ -56,7 +56,7 @@ const siteBoot = () => {
         return `<span class="hit" style="left:${pc(0.5 + (b[0] - 0.5) * pw)};top:${pc(0.5 + (b[1] - 0.5) * ph)};width:${pc((b[2] - b[0]) * pw)};height:${pc((b[3] - b[1]) * ph)}"></span>`;
     };
     // what js/collection.js borrows
-    window.KCH = { put, arrive, decoded, hit, T, EASE, EASE_OUT };
+    window.KCH = { put, arrive, hit };
 
     // analytics events (GoatCounter): sent only on the live domain
     const gcQueue = (window.__gcQueue = window.__gcQueue || []);
@@ -79,9 +79,9 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106n`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106p`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
-    const roman   = s => s.replace(/\b(III|II|I)\b/g, '<span class="rn">$1</span>');
+    const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
     const plain   = w => (w.title.split('|')[1] || w.title).trim();
     const altOf   = w => `${w.title.replace(' | ', ', ')}, ${w.medium}, ${w.size}, ${w.year}`;
@@ -93,10 +93,11 @@ const siteBoot = () => {
     const two     = n => String(n).padStart(2, '0');
     // a click on a painting opens the lightbox out of it, on the same page
     // (see openWork); from the slideshow it simply fades in
-    let clickedAt = -Infinity, navAt = -Infinity, fromHero = false;
+    let clickedAt = -Infinity, navAt = -Infinity, fromHero = false, keyed = false;
     document.addEventListener('click', e => {
         if (!e.target.closest) return;
         const now = performance.now();
+        keyed = e.detail === 0;   // pressed from the keyboard, not with a mouse
         fromHero = !!e.target.closest('.hero-wrap');
         if (e.target.closest('[data-work]')) clickedAt = navAt = now;
         else if (fromHero && e.target.closest('a')) navAt = now;
@@ -104,7 +105,7 @@ const siteBoot = () => {
     let heroList = [];
 
     // ── home: the slideshow, as on the live site: the name over the painting,
-    //    medium, size and year under it, the count and the dots ──
+    //    medium, size and year under it, the count and its arrows ──
     const slidesWrap = document.getElementById('slides');
     if (slidesWrap) {
         const picks = heroList = WORKS.filter(w => w.hero).sort((a, b) => a.hero - b.hero);
@@ -133,8 +134,6 @@ const siteBoot = () => {
         const cap = document.getElementById('hero-cap');
         const counter = document.getElementById('hero-counter');
         const N = slides.length;
-        // no dots: the count and the two arrows in the row under the painting
-        const dots = [];
         // it plays one round and comes to rest on the first painting; it
         // waits while the pointer or the keyboard is on it
         let cur = 0, timer = null, shown = 1, held = false;
@@ -147,7 +146,6 @@ const siteBoot = () => {
                 s.setAttribute('aria-hidden', k !== cur);
                 s.querySelector('a').tabIndex = k === cur ? 0 : -1;
             });
-            dots.forEach((d, k) => d.classList.toggle('active', k === cur));
             const w = picks[cur];
             // new words each time, so they rise in again with each painting
             cap.innerHTML =
@@ -166,7 +164,6 @@ const siteBoot = () => {
 
         document.querySelector('.prev-btn').addEventListener('click', () => { goTo(cur - 1); restart(); });
         document.querySelector('.next-btn').addEventListener('click', () => { goTo(cur + 1); restart(); });
-        dots.forEach((d, k) => d.addEventListener('click', () => { goTo(k); restart(); }));
 
         const hero = slidesWrap.closest('.hero-wrap');
         const hold = () => { held = true; stop(); };
@@ -192,16 +189,17 @@ const siteBoot = () => {
         start();
     }
 
-    // ── home: the selected works, whole, four across, the number and name
-    //    under each, as on the collection pages. They open here, on this page ──
+    // ── home: the selected works, whole, four across, as on the collection pages:
+    //    under each its collection and name, shown only under the mouse (style.css).
+    //    They open here, on this page ──
     const selWorks = (typeof HOME !== 'undefined' ? HOME.selected || [] : []).map(s => bySlug[s]).filter(Boolean);
     const selected = document.getElementById('selected');
     if (selected) {
         put(selected, selWorks.map(w =>
             `<a class="sel-item" href="#${w.slug}" data-work="${w.slug}" aria-label="${plain(w)}, ${colOf[w.slug].name.toLowerCase()}${w.sold ? ', sold' : ''}">
-                        <span class="sel-frame"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 41vw, 17vw"
+                        <span class="sel-frame"><img class="fade" src="${thumb(w)}" srcset="${srcset(w)}" sizes="(max-width: 800px) 41vw, (max-width: 1100px) 21vw, 17vw"
                              alt="${altOf(w)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">${hit(w, 3 / 4)}</span>
-                        <span class="sp-cap${w.sold ? ' sold' : ''}"><span class="sp-no">${noOf[w.slug]}</span><span class="sp-nm">${nameOf(w)}</span></span>
+                        <span class="sp-cap${w.sold ? ' sold' : ''}"><span class="sp-no">${colOf[w.slug].name}</span><span class="sp-nm">${nameOf(w)}</span></span>
                     </a>`).join(''));
     }
 
@@ -212,7 +210,7 @@ const siteBoot = () => {
     //    is picked to start; pointing at a row or a tile picks it, a click opens it ──
     const colList = document.getElementById('col-list');
     if (colList) {
-        const tileImg = c => `<img class="fade" src="${thumb(bySlug[c.cover], '-hero')}" alt="" width="1600" height="1200" loading="lazy" decoding="async">`;
+        const tileImg = c => `<img class="fade" src="${thumb(bySlug[c.cover], '-tile')}" alt="" width="1600" height="1200" loading="lazy" decoding="async">`;
         const facts = c => {
             if (c.kind === 'prints') return `${c.prints.length} prints, giclée on archival paper, ${PRINT_FORMATS.map(f => f.size).join(', ')}.`;
             const media = [...new Set(c.works.map(w => w.medium))].join(' and ');
@@ -237,7 +235,7 @@ const siteBoot = () => {
     }
 
     // ── lightbox ─────────────────────────────────────────────
-    let openWork = () => {}, closeLb = () => {}, onPaint = () => true;
+    let openWork = () => {}, closeLb = () => {}, onPaint = () => true, canZoom = () => true;
     const lb = document.getElementById('lightbox');
     if (lb) {
         const img = document.getElementById('lightbox-img');
@@ -250,6 +248,10 @@ const siteBoot = () => {
         // the works the arrows walk through, and whether a click put us here
         // (then closing goes one step back in the browser's history too)
         let list = [], entered = false;
+        // a work photographed small is never drawn past 1.5x its photograph, and has no zoom
+        const LARGEST = 1.5, zoomOK = w => w.w >= 1000;
+        canZoom = () => zoomOK(WORKS[idx]);
+        const behind = () => document.querySelectorAll('.top, main, .foot');
         // zoomed: where the painting stands (x, y) and where it is going (tx, ty)
         let pan = null, raf = 0, drag = null, moved = false;
         // on the main page the arrows stay with what was clicked: the slideshow's
@@ -265,11 +267,13 @@ const siteBoot = () => {
             scrollY = window.scrollY;
             document.body.style.top = `-${scrollY}px`;
             document.documentElement.classList.add('lb-open');
+            behind().forEach(el => { el.inert = true; });
         };
         const unlock = () => {
             const root = document.documentElement;
             if (!root.classList.contains('lb-open')) return;
             root.classList.remove('lb-open');
+            behind().forEach(el => { el.inert = false; });
             document.body.style.top = '';
             const prev = root.style.scrollBehavior;
             root.style.scrollBehavior = 'auto';
@@ -358,7 +362,8 @@ const siteBoot = () => {
             idx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[idx];
             const fresh = !lb.classList.contains('active');
-            if (fresh) { list = listOf(w); entered = performance.now() - navAt < 900; }
+            if (fresh) entered = performance.now() - navAt < 900;
+            if (fresh || !list.includes(w)) list = listOf(w);
             // stepping closer: grow out of the painting that was clicked, when it was
             const from = fresh && !REDUCE_MOTION && performance.now() - clickedAt < 900 ? sourceOf(w) : null;
             // stepping while zoomed: the next one does not shrink in, it is simply there
@@ -369,7 +374,6 @@ const siteBoot = () => {
             pan = null; cancelAnimationFrame(raf); raf = 0; drag = null;
             img.style.transform = '';
             img.classList.remove('is-zoomed');
-            img.setAttribute('aria-label', 'Zoom in');
             img.style.transformOrigin = 'center center';
             full = false;
             const loading = sharp(w);
@@ -391,6 +395,12 @@ const siteBoot = () => {
                 });
             }
             img.alt = altOf(w);
+            const can = zoomOK(w);
+            img.style.maxWidth = can ? '' : `${w.w * LARGEST}px`;
+            img.style.maxHeight = can ? '' : `${w.h * LARGEST}px`;
+            img.tabIndex = can ? 0 : -1;
+            if (can) { img.setAttribute('role', 'button'); img.setAttribute('aria-label', `Zoom in, ${img.alt}`); }
+            else { img.removeAttribute('role'); img.removeAttribute('aria-label'); }
 
             document.getElementById('lb-title').innerHTML = nameOf(w);
             document.getElementById('lb-col').textContent = colOf[w.slug].name;
@@ -407,10 +417,12 @@ const siteBoot = () => {
             mail.href = `mailto:${SITE.email}?subject=` + encodeURIComponent(`${w.sold ? 'A work like' : 'Inquiry:'} ${noOf[w.slug]}, ${label(w)}`);
             insta.hidden = !!w.sold;
             printLink.hidden = !(w.sold && inPrint.has(w.slug));
-            printLink.href = `${ROOT}prints/`;
+            printLink.href = `${ROOT}prints/?work=${w.slug}`;
+            lb.querySelector('.lb-extra').hidden = !!w.sold;
 
             if (fresh) {
-                back = document.activeElement !== document.body ? document.activeElement : null;
+                // only the keyboard is given its place back: a mouse has no use for the ring
+                back = keyed && document.activeElement !== document.body ? document.activeElement : null;
                 lock();
                 if (from) {
                     lb.classList.add('lb-flip', 'active');
@@ -426,7 +438,7 @@ const siteBoot = () => {
                     lb.classList.add('lb-flip', 'active');
                     requestAnimationFrame(() => requestAnimationFrame(() => lb.classList.remove('lb-flip')));
                 } else lb.classList.add('active');
-                lb.querySelector('.lb-close').focus({ preventScroll: true });
+                lb.focus({ preventScroll: true });
             }
             history.replaceState(null, '', '#' + w.slug);
             track('open/' + w.slug, label(w));
@@ -446,9 +458,6 @@ const siteBoot = () => {
             decoded(m).then(() => { if (WORKS[idx] !== w || !full) return; img.removeAttribute('srcset'); img.removeAttribute('sizes'); img.src = m.src; });
         };
         // zoom where it was clicked; Enter or Space zooms into the middle
-        img.tabIndex = 0;
-        img.setAttribute('role', 'button');
-        img.setAttribute('aria-label', 'Zoom in');
         // zoomed in, the painting at 2.2x with the point clicked kept under the
         // pointer; then the view follows the mouse, or the finger as it drags,
         // a little behind (damped), and never past the painting's edge
@@ -479,7 +488,7 @@ const siteBoot = () => {
             place();
             setTimeout(() => { if (pan) img.style.transition = 'none'; }, T.base);
             fetchFull();
-            img.setAttribute('aria-label', 'Zoom out');
+            img.setAttribute('aria-label', `Zoom out, ${img.alt}`);
         };
         const zoomOut = () => {
             pan = null; cancelAnimationFrame(raf); raf = 0; drag = null;
@@ -487,7 +496,7 @@ const siteBoot = () => {
             img.style.transition = REDUCE_MOTION ? 'none' : `transform ${T.base}ms ${EASE_OUT}`;
             img.style.transform = '';
             setTimeout(() => { if (!pan) img.style.transition = ''; }, T.base);
-            img.setAttribute('aria-label', 'Zoom in');
+            img.setAttribute('aria-label', `Zoom in, ${img.alt}`);
         };
         img.addEventListener('pointerdown', e => {
             moved = false;
@@ -512,9 +521,18 @@ const siteBoot = () => {
             if (moved) { moved = false; return; }
             // the white around the painting closes, as the white beyond it does
             if (!onPaint(e)) { closeLb(); return; }
+            if (!canZoom()) return;
             if (pan) zoomOut(); else zoomIn(e.clientX, e.clientY);
         });
-        img.addEventListener('pointermove', e => { img.style.cursor = onPaint(e) ? '' : 'default'; });
+        img.addEventListener('pointermove', e => { img.style.cursor = onPaint(e) && canZoom() ? '' : 'default'; });
+        // a swipe on the picture walks to the next work, unless it is zoomed in
+        let sx = 0, sy = 0;
+        img.addEventListener('touchstart', e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+        img.addEventListener('touchend', e => {
+            if (pan) return;
+            const t = e.changedTouches[0], dx = sx - t.clientX, dy = sy - t.clientY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) { moved = true; step(dx > 0 ? 1 : -1); }
+        }, { passive: true });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();
@@ -534,9 +552,9 @@ const siteBoot = () => {
             else if (e.key === 'ArrowRight') step(1);
             else if (e.key === 'Tab') {
                 // keep the keyboard inside while it is open
-                const els = Array.from(lb.querySelectorAll('button, a[href], [tabindex="0"]'));
-                const first = els[0], last = els[els.length - 1];
-                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                const els = Array.from(lb.querySelectorAll('button, a[href], [tabindex="0"]')).filter(el => el.offsetParent !== null);
+                const first = els[0], last = els[els.length - 1], now = document.activeElement;
+                if (e.shiftKey && (now === first || now === lb)) { e.preventDefault(); last.focus(); }
                 else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         });
@@ -581,6 +599,9 @@ const siteBoot = () => {
                 o.href = orderHref(w, f.size);
                 o.setAttribute('aria-label', `Order the ${f.size} print of ${plain(w)} by email`);
             };
+            // arriving from a sold painting's "see the print": that painting's print
+            const asked = PR.findIndex(p => p.work === new URLSearchParams(location.search).get('work'));
+            if (asked > 0) { st.p = asked; sync(); }
             panel.addEventListener('click', e => {
                 if (e.target.closest('.pr-order')) { const w = bySlug[PR[st.p].work]; track(`order-print/${w.slug}-${st.f.size.toLowerCase()}`, `Print order: ${plain(w)}, ${st.f.size}`); return; }
                 const b = e.target.closest('[data-print], [data-size]');
@@ -598,7 +619,8 @@ const siteBoot = () => {
     if (lb || page) {
         const here = page && (COLS.find(x => x.slug === page.dataset.collection) || COLS[0]);
         const route = first => {
-            const h = decodeURIComponent(location.hash.slice(1));
+            let h = '';
+            try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
             if (bySlug[h]) {
                 if (here && colOf[h] !== here) { location.replace(pageOf(colOf[h]) + '#' + h); return; }
                 openWork(WORKS.indexOf(bySlug[h]), first === true);
@@ -638,7 +660,7 @@ const siteBoot = () => {
         const t = e.changedTouches[0];
         // not on the slideshow or the lightbox (they swipe their own pictures),
         // and not at the screen's edges (the browser's own back gesture)
-        touch = e.target.closest('.hero-wrap, .lightbox, .fx-lab, input') || t.clientX < 24 || t.clientX > innerWidth - 24
+        touch = e.target.closest('.hero-wrap, .lightbox, input') || t.clientX < 24 || t.clientX > innerWidth - 24
             ? null : { x: t.clientX, y: t.clientY };
     }, { passive: true });
     document.addEventListener('touchend', e => {
@@ -647,17 +669,6 @@ const siteBoot = () => {
         touch = null;
         if (Math.abs(dx) > 80 && Math.abs(dx) > 1.8 * Math.abs(dy)) walk(dx < 0 ? 1 : -1);
     }, { passive: true });
-
-    // ── the effects lab: only with ?explore in the address, then for the rest
-    //    of the visit; not part of the site ──
-    try {
-        if (/[?&]explore\b/.test(location.search)) sessionStorage.setItem('kch-explore', '1');
-        if (sessionStorage.getItem('kch-explore')) {
-            const lab = document.createElement('script');
-            lab.src = `${ROOT}js/explore.js?v=20261106n`;
-            document.body.appendChild(lab);
-        }
-    } catch (e) {}
 
     // ── the pointer is the computer's own. Over a painting a small word follows
     //    it, a little behind (damped), and says what a click does: "view",
@@ -676,7 +687,7 @@ const siteBoot = () => {
         const wordFor = (el, e) => {
             if (!el || !el.closest) return '';
             const big = el.closest('#lightbox-img');
-            if (big) return !onPaint(e) ? '' : big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
+            if (big) return !onPaint(e) || !canZoom() ? '' : big.classList.contains('is-zoomed') ? 'zoom out' : 'zoom';
             return el.closest('[data-work], .slide a') ? 'view' : '';
         };
         document.addEventListener('pointermove', e => {
@@ -692,6 +703,8 @@ const siteBoot = () => {
             if (REDUCE_MOTION) { x = tx; y = ty; tip.style.transform = `translate(${x}px, ${y}px)`; }
             else if (!raf) raf = requestAnimationFrame(follow);
         }, { passive: true });
+        // a click that opens a painting: the word goes with the page it was on
+        document.addEventListener('click', e => { if (word && e.target.closest && e.target.closest('[data-work], .slide a')) { word = ''; tip.classList.remove('on'); } });
         // a click on the picture changes what the next click does
         document.addEventListener('click', e => { if (word && e.target.closest && e.target.closest('#lightbox-img')) requestAnimationFrame(() => { word = wordFor(e.target, e); tip.textContent = word; }); });
         document.documentElement.addEventListener('mouseleave', () => { word = ''; tip.classList.remove('on'); });

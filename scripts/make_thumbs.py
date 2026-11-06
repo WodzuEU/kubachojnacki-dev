@@ -9,6 +9,8 @@ For each  IMAGES/works/<slug>.jpg       creates  IMAGES/thumbs/<slug>.webp (400p
 For each  IMAGES/works/<slug>-hero.jpg  creates  IMAGES/thumbs/<slug>-hero.webp (1600px)
                                             and  IMAGES/thumbs/<slug>-hero-2400.webp (2400px,
                                                  or the photo's own width when smaller)
+                                            and  IMAGES/thumbs/<slug>-tile.webp (800px, the home tiles)
+and once  IMAGES/og.jpg, the 1200 x 630 closeup every page's link preview shows.
 
 The 1600px tier is what the lightbox shows; the slideshow takes the 2400px
 hero on wide or sharp screens. The source JPEG is only fetched when a visitor
@@ -43,5 +45,18 @@ for f in sorted(WORKS.glob("*.jpg")):
         made += resize_webp(f, THUMBS / f"{f.stem}.webp", 400)
         made += resize_webp(f, THUMBS / f"{f.stem}-800.webp", 800)
         made += resize_webp(f, THUMBS / f"{f.stem}-1600.webp", 1600)
+
+# the home tiles, from every closeup (some have no JPEG master)
+for f in sorted(THUMBS.glob("*-hero.webp")):
+    made += resize_webp(f, THUMBS / f"{f.stem[:-5]}-tile.webp", 800, quality=80)
+
+og = ROOT / "IMAGES" / "og.jpg"
+if not og.exists():
+    img = Image.open(WORKS / "03-atmosphere-maroon-khaki-hero.jpg").convert("RGB")
+    w, h = img.size
+    box_h = round(w * 630 / 1200)
+    top = max(0, (h - box_h) // 2)
+    img.crop((0, top, w, top + box_h)).resize((1200, 630), Image.LANCZOS).save(og, "JPEG", quality=82, optimize=True, progressive=True)
+    made += 1
 
 print(f"created {made} new thumbnail(s)")

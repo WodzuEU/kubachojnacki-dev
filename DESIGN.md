@@ -10,7 +10,14 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
-**2026-11-06, final round (these win over anything older below).**
+**2026-11-06, after the audit (these win over anything older below).** Five type
+sizes (14, 18, 21, 34, 43 px at 1440; the about capitals are set by their width).
+On the main page the caption is collection + name, shown only under the mouse.
+Paintings and captions hang from the half-column, not centred. Works photographed
+small are never drawn past 1.5x their photograph and have no zoom. Names that repeat
+carry a numeral. Working files are kept off the site by `_config.yml`.
+
+**2026-11-06, final round.**
 - **One family: EB Garamond everywhere.** Inter is gone (he tried Futura as a
   second font and dropped it: "too harsh", it loses the premium simple look).
   `--s` is 13px, since Garamond reads smaller.

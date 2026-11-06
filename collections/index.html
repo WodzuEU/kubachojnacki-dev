@@ -6,14 +6,15 @@
     <title>Collections | Kuba Chojnacki</title>
     <meta name="robots" content="noindex">
     <link rel="canonical" href="https://kubachojnacki.com/atmosphere/">
-    <script src="../js/data.js?v=20261106n"></script>
+    <script src="../js/data.js?v=20261106p"></script>
     <script>
         /* collections open straight into the first one: old links to /works/ and
            /collections/ go on to the right page. #chromatic -> /chromatic/,
            #<slug> -> its collection with the work open, anything else -> the
            first collection */
         (function () {
-            var h = decodeURIComponent(location.hash.slice(1)), to = '../atmosphere/';
+            var h = '', to = '../atmosphere/';
+            try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
             var page = function (c) { return '../' + c.name.toLowerCase().replace(/\s+/g, '-') + '/'; };
             COLLECTIONS.forEach(function (c) {
                 if (page(c) === '../' + h + '/') to = page(c);
