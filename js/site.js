@@ -79,7 +79,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261106r`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261107a`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -602,25 +602,6 @@ const siteBoot = () => {
             // arriving from a sold painting's "see the print": that painting's print
             const asked = PR.findIndex(p => p.work === new URLSearchParams(location.search).get('work'));
             if (asked > 0) { st.p = asked; sync(); }
-
-            // until the prints open (SITE.printsOpen): the page blurred, a countdown
-            // beside the print, nothing to press. At zero it waits for the update
-            if (SITE.printsOpen) {
-                const at = new Date(SITE.printsOpen);
-                const when = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }).format(at);
-                page.classList.add('gated');
-                panel.inert = true;
-                page.insertAdjacentHTML('beforeend', `<div class="gate grid"><div class="gate-in"><p class="gate-k">prints open in</p><p class="gate-t" id="gate-t" role="timer"></p><p class="gate-when">${when}, cracow time</p></div></div>`);
-                const out = document.getElementById('gate-t');
-                let timer = 0;
-                const tick = () => {
-                    const s = Math.floor((at.getTime() - Date.now()) / 1000);
-                    if (s <= 0) { clearInterval(timer); out.textContent = 'opening now'; return; }
-                    out.textContent = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(two).join(' : ');
-                };
-                tick();
-                timer = setInterval(tick, 1000);
-            }
             panel.addEventListener('click', e => {
                 if (e.target.closest('.pr-order')) { const w = bySlug[PR[st.p].work]; track(`order-print/${w.slug}-${st.f.size.toLowerCase()}`, `Print order: ${plain(w)}, ${st.f.size}`); return; }
                 const b = e.target.closest('[data-print], [data-size]');

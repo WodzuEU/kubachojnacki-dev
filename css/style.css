@@ -377,16 +377,6 @@ body.fit main > .col-head { flex: none; }
 .pr-order, .pr-ask { grid-column: 1 / -1; font-size: var(--h); }
 .pr-order { margin-top: 0.8rem; }
 @media (hover: hover) { .pr-opt:hover { color: var(--ink); } }
-/* until the prints open: the page blurred, the countdown where the words will be */
-.gated { position: relative; }
-.gated .note { filter: blur(5px); user-select: none; }
-.gated #collection { filter: blur(16px); user-select: none; }
-.gated .pr-info { visibility: hidden; }
-.gate { position: absolute; inset: 0; align-items: center; pointer-events: none; }
-.gate-in { grid-column: 6 / 9; text-transform: lowercase; }
-.gate-k { font-size: var(--m); }
-.gate-t { font-size: var(--xl); line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.gate-when { margin-top: 0.3rem; font-size: var(--s); color: var(--mid); }
 
 /* ── about: the portrait on column 1, the words from column 7, then the
       one line, across ── */
@@ -661,9 +651,6 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
     .cg-item .sp-frame, .cg-item .sp-cap, .sel-frame, .sel-item .sp-cap { width: 82%; }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
-    .gated .pr-info { display: none; }
-    .gate { position: static; padding-top: var(--near); }
-    .gate-in { grid-column: 1 / -1; text-align: center; }
     .pr-pic img { transform-origin: center top; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
     .about-page { padding-top: var(--near); row-gap: var(--near); grid-template-rows: none; }

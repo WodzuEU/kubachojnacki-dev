@@ -55,10 +55,6 @@ const SITE = {
   instagram: "https://instagram.com/chojnacki.studio",
   instagramHandle: "@chojnacki.studio",
 
-  // the prints page stays blurred with a countdown to this moment. It stays
-  // blurred after it too: delete this line to open the prints
-  printsOpen: "2026-11-07T18:00:00+01:00",
-
   // optional integrations — fill in to activate (see README)
   goatcounter: "kubachojnacki",   // analytics code from goatcounter.com (loads on the live domain only)
   newsletter: {
