@@ -104,7 +104,7 @@ const COLLECTIONS = [
       { ref: "02", slug: "02-atmosphere-burgundy-blue",        title: "Atmosphere | burgundy blue",        medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true },
       { ref: "41", slug: "41-atmosphere-burgundy-blue-ii",     title: "Atmosphere | burgundy blue II",     medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450 },
       { ref: "03", slug: "03-atmosphere-maroon-khaki",         title: "Atmosphere | maroon khaki",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 3024, h: 4032, sold: true, hero: 1 },
-      { ref: "38", slug: "38-atmosphere-burgundy-khaki",       title: "Atmosphere | burgundy khaki",       medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, unavailable: true },
+      { ref: "38", slug: "38-atmosphere-burgundy-khaki",       title: "Atmosphere | burgundy khaki",       medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, sold: true },
       { ref: "39", slug: "39-atmosphere-brown-purple",         title: "Atmosphere | brown purple",         medium: "acrylic on raw canvas", size: "150 × 100 cm", year: 2026, price: 1500, w: 2588, h: 3450, hero: 2 },
       { ref: "42", slug: "42-atmosphere-umber-indigo-azure",   title: "Atmosphere | umber indigo azure",   medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2026, price: 1300, w: 2588, h: 3450, sold: true },
       { ref: "32", slug: "32-atmosphere-burgundy",             title: "Atmosphere | burgundy",             medium: "acrylic on raw canvas", size: "100 × 100 cm", year: 2026, price: 1300, w: 2588, h: 3450 },
