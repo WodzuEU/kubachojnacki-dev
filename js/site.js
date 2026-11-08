@@ -79,7 +79,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261108a`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261108b`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -248,8 +248,10 @@ const siteBoot = () => {
         // the works the arrows walk through, and whether a click put us here
         // (then closing goes one step back in the browser's history too)
         let list = [], entered = false;
-        // a work photographed small is never drawn past 1.5x its photograph, and has no zoom
-        const LARGEST = 1.5, zoomOK = w => w.w >= 1000;
+        // a work photographed small (the works on paper) has no zoom, is never drawn
+        // past 1.5x its photograph, and opens at most as tall as the smallest one (434px)
+        const LARGEST = 1.5, SMALL_H = 434, zoomOK = w => w.w >= 1000;
+        const smallScale = w => Math.min(LARGEST, SMALL_H / w.h);
         canZoom = () => zoomOK(WORKS[idx]);
         const behind = () => document.querySelectorAll('.top, main, .foot');
         // zoomed: where the painting stands (x, y) and where it is going (tx, ty)
@@ -396,8 +398,8 @@ const siteBoot = () => {
             }
             img.alt = altOf(w);
             const can = zoomOK(w);
-            img.style.maxWidth = can ? '' : `${w.w * LARGEST}px`;
-            img.style.maxHeight = can ? '' : `${w.h * LARGEST}px`;
+            img.style.maxWidth = can ? '' : `${Math.round(w.w * smallScale(w))}px`;
+            img.style.maxHeight = can ? '' : `${Math.round(w.h * smallScale(w))}px`;
             img.tabIndex = can ? 0 : -1;
             if (can) { img.setAttribute('role', 'button'); img.setAttribute('aria-label', `Zoom in, ${img.alt}`); }
             else { img.removeAttribute('role'); img.removeAttribute('aria-label'); }
