@@ -10,6 +10,39 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**2026-11-16, motion: nothing slides, things come into focus** (his picks and
+numbers from the motion study, `alt/motion/`; all values are tokens at the top
+of `css/style.css`, read by `js/site.js` too). These win over §6 where they differ.
+- **Pictures arriving:** soft, then sharp, and the blur spills freely (no box
+  clips it). First page of a visit: 8.4 px over 900 ms. A page reached from
+  another page (`html.came`): 4.8 px over 630 ms.
+- **Rows further down:** a loaded picture waits out of focus (`.soft`) and clears
+  when its row comes on screen (`.late`): one even 7.2 px blur over 630 ms, every
+  painting the same, no order.
+- **Changing page:** no effect on the page. The words are there at once; only
+  the pictures settle. The sideways drift is gone.
+- **Between collections the names trade places:** the picked name grows into the
+  title, the old title shrinks back into the line (350 ms; each name carries a
+  `view-transition-name`, written by `scripts/build_collections.py`).
+- **First page of a visit:** the whole page comes into focus as one, from the
+  white of the page, never from black (8 px, 700 ms; `html.first`, set in each
+  page's head; not with a `#work` address, not with reduced motion).
+- **Lightbox:** white behind the painting, and toward the edges the page it was
+  opened from, out of focus (7 px, 15% white at the edges, 650 ms). Only the
+  painting is drawn, not the white of its photograph. The words sharpen one
+  after another. This replaces "solid white" (2026-11-06) and "no blur" (2026-10-15).
+  Phones: white nearly everywhere.
+- **Neighbours:** on wide screens the works before and after wait at the edges,
+  small and out of focus (8 px, 60%); a click, the arrows or the keys bring one
+  forward (600 ms). **The arrows stay.** Phones have none: a step dissolves.
+- **Zoomed in, the words step back** (20%, 3.2 px, 500 ms) and the neighbours go.
+- **Prints:** the sheet stays, the picture on it turns into the other with no gap
+  (1200 ms); a size change glides at the same pace.
+- **Joining the list:** the field goes soft, the thank-you sharpens in its place (900 ms).
+- Shown in the study but **not built**: the slideshow change (04), leaving the
+  slideshow (06), the closeup opening into the painting (18), the header
+  stepping aside (19). Turned down: a blurred page change (03), a frosted header (05).
+
 **Prints opened 2026-11-07, 18:00 Cracow.** The prints page fits the window; A1 450, A2 300, A3 200 EUR. Phones show no words
 under the selected works, and the "next" link is at the right.
 

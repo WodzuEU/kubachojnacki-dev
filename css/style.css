@@ -39,7 +39,21 @@
     --t-slow: 900ms;   /* a painting crossing into another, a picture arriving */
     --ease:     cubic-bezier(.4, 0, .2, 1);
     --ease-out: cubic-bezier(.16, 1, .3, 1);
+
+    /* coming into focus (2026-11-16, his numbers from the motion study):
+       nothing slides, things sharpen */
+    --arr-blur: 8.4px; --arr-t: 900ms;      /* a picture arriving, first page of a visit */
+    --row-blur: 7.2px; --row-t: 630ms;      /* a row scrolled to: one even blur that clears */
+    --first-blur: 8px; --first-t: 700ms;    /* the first page of a visit, all of it at once */
+    --lb-t: 650ms; --lb-blur: 7px; --lb-edge: 0.15;   /* the lightbox: pace, blur behind, white at the edges */
+    --side-blur: 8px; --side-t: 600ms;      /* the works before and after, waiting at its edges */
+    --zoom-blur: 3.2px; --zoom-t: 500ms;    /* its words while the painting is zoomed */
+    --cn-t: 350ms;                          /* a collection's name growing into the title */
+    --pr-t: 1200ms;                         /* one print turning into the other */
+    --nl-blur: 4.5px; --nl-t: 900ms;        /* the thank-you after joining the list */
 }
+/* a page reached from another page of the site: its pictures settle more lightly */
+html.came { --arr-blur: 4.8px; --arr-t: 630ms; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html {
@@ -221,8 +235,25 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
    Only where scripts run (html.js, set in each page's head); without them
    the pictures simply show */
 .js img.fade { opacity: 0; }
-.js img.fade.in { opacity: 1; animation: arrive var(--t-slow) var(--ease-out) backwards; }
-@keyframes arrive { from { opacity: 0; } }
+.js img.fade.in { opacity: 1; animation: arrive var(--arr-t) var(--ease) backwards; }
+@keyframes arrive {
+    from { opacity: 0; filter: blur(var(--arr-blur)); }
+    25%  { opacity: 1; filter: blur(var(--arr-blur)); }
+    to   { filter: blur(0); }
+}
+/* further down the page a loaded picture waits out of focus, and clears when
+   its row comes on screen: one even blur, every painting the same, no order */
+.js img.fade.soft { opacity: 1; filter: blur(var(--row-blur)); }
+.js img.fade.in.late { animation: clear var(--row-t) var(--ease) backwards; }
+@keyframes clear { from { filter: blur(var(--row-blur)); } }
+
+/* the first page of a visit comes into focus as one, from the white of the
+   page (each page's head sets .first, site.js starts it when the first picture
+   is ready). If the script never comes, the page shows after 2.5 s */
+html.first body { opacity: 0; animation: first-safe 0s 2.5s forwards; }
+html.first-in body { animation: first-in var(--first-t) var(--ease) backwards; }
+@keyframes first-safe { to { opacity: 1; } }
+@keyframes first-in { from { opacity: 0; filter: blur(var(--first-blur)); } }
 
 /* a phone cannot hover: no words under the selected works, only the paintings */
 @media (hover: none) { .sel-item .sp-cap { display: none; } }
@@ -318,7 +349,7 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
 .sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
 .sp-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.3; transition: opacity var(--t-slow) var(--ease); }
-.sp-frame:has(img.in) .sp-ph { opacity: 0; }
+.sp-frame:has(img.in) .sp-ph, .sp-frame:has(img.soft) .sp-ph { opacity: 0; }
 /* the studies on paper are photographed close: shown smaller */
 .sp-frame.is-paper img { width: 62%; height: 62%; }
 .sp-frame.is-paper .sp-ph { transform: translate(-50%, -50%) scale(0.62); }
@@ -359,9 +390,13 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .pr { align-items: start; }
 body.fit main > .col-head { flex: none; }
 .pr-pic { grid-column: 2 / 5; justify-self: end; width: min(100%, calc((100svh - 27.5rem) / 1.414)); min-width: 9rem; --a2: 0.8; --a3: 0.62; }
-.pr-pic[data-size="A2"] img { transform: scale(var(--a2)); }
-.pr-pic[data-size="A3"] img { transform: scale(var(--a3)); }
-.pr-pic img { width: 100%; height: auto; transform-origin: right top; transition: transform var(--t-base) var(--ease-out); box-shadow: 0 2px 6px rgba(26, 26, 24, 0.10), 0 14px 34px rgba(26, 26, 24, 0.16); }
+/* the sheet stays where it is; the picture on it turns into the other one, with
+   no gap between them, and a change of size glides at the same pace (site.js) */
+.pr-sheet { display: block; position: relative; transform-origin: right top; transition: transform var(--pr-t) var(--ease); box-shadow: 0 2px 6px rgba(26, 26, 24, 0.10), 0 14px 34px rgba(26, 26, 24, 0.16); }
+.pr-pic[data-size="A2"] .pr-sheet { transform: scale(var(--a2)); }
+.pr-pic[data-size="A3"] .pr-sheet { transform: scale(var(--a3)); }
+.pr-sheet img { display: block; width: 100%; height: auto; }
+.pr-sheet .pr-over { position: absolute; inset: 0; height: 100%; opacity: 0; }
 .pr-info {
     grid-column: 6 / 8;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gut); row-gap: 0.55rem; align-items: baseline;
@@ -543,10 +578,19 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     visibility: hidden; pointer-events: none;
     position: fixed; z-index: 100; inset: 0;
     opacity: 0; transition: opacity var(--t-base) var(--ease), visibility var(--t-base) var(--ease);
+    overflow: hidden;
 }
-/* the white behind the painting: a layer of its own, so opening and
-   closing only fade it (site.js), never repaint it */
-.lightbox::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--bg); }
+/* behind the painting: white in the middle, and toward the edges the page it
+   was opened from, out of focus (2026-11-16). A layer of its own, so opening
+   and closing only fade it (site.js) */
+.lightbox::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse 62% 78% at 38% 50%, #fff 0, #fff 42%, rgb(255 255 255 / var(--lb-edge)) 100%);
+    -webkit-backdrop-filter: blur(var(--lb-blur)); backdrop-filter: blur(var(--lb-blur));
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .lightbox::before { background: var(--bg); }
+}
 /* shown at once, while the white fades: focus can only move onto what is visible */
 .lightbox.active { visibility: visible; pointer-events: auto; opacity: 1; transition: opacity var(--t-base) var(--ease), visibility 0s; }
 .lightbox:focus { outline: none; }
@@ -570,6 +614,17 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     max-height: 100%; overflow-y: auto; scrollbar-width: thin; padding-bottom: 0.25rem;
     font-size: var(--m); line-height: 1.4; text-transform: lowercase;
 }
+/* zoomed in, the words step back: pale and out of focus until you step back */
+.lightbox-info { transition: opacity var(--zoom-t) var(--ease), filter var(--zoom-t) var(--ease); }
+.lightbox:has(#lightbox-img.is-zoomed) .lightbox-info { opacity: 0.2; filter: blur(var(--zoom-blur)); }
+/* the works before and after wait at the edges, small and out of focus; a click
+   brings one forward (site.js). The arrows stay. Wide screens only */
+.lb-side { position: absolute; z-index: 0; top: 50%; height: 58%; translate: 0 -50%; opacity: 0.6; filter: blur(var(--side-blur)); cursor: pointer; transition: opacity var(--t-base) var(--ease); }
+.lightbox .lb-side img { display: block; position: static; width: auto; height: 100%; max-width: none; cursor: pointer; transition: none; }
+.lb-side-prev { right: calc(100% - var(--pad) + 0.75rem); }
+.lb-side-next { left: calc(100% - var(--pad) * 2.2); }
+.lb-alone .lb-side, .lightbox:has(#lightbox-img.is-zoomed) .lb-side { opacity: 0; pointer-events: none; }
+@media (hover: hover) { .lb-side:hover { opacity: 0.85; } }
 .lb-title { font-family: var(--serif); font-size: var(--l); line-height: 1.15; }
 .lb-col, .lb-specs, .lb-extra { color: var(--mid); }
 .lightbox-info.is-unavailable .status-text { color: var(--mid); }
@@ -602,18 +657,20 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 ::view-transition-group(site-top) { animation: none; }
 ::view-transition-old(site-top) { display: none; }
 ::view-transition-new(site-top) { animation: none; }
-/* the page before fades quickly; the next one comes in with a drift of a few
-   pixels from the side it lies on (going on from the right, back from the left) */
-html:active-view-transition-type(forward, back)::view-transition-old(root),
-html:active-view-transition-type(forward, back)::view-transition-new(root) { mix-blend-mode: normal; }
-html:active-view-transition-type(forward, back)::view-transition-old(root) { animation: page-out calc(var(--t-base) * 0.6) var(--ease) both; }
-html:active-view-transition-type(forward)::view-transition-new(root) { animation: page-in-right var(--t-base) var(--ease-out) 60ms both; }
-html:active-view-transition-type(back)::view-transition-new(root) { animation: page-in-left var(--t-base) var(--ease-out) 60ms both; }
-@keyframes page-out      { to   { opacity: 0; } }
-@keyframes page-in-right { from { opacity: 0; transform: translateX(12px); } }
-@keyframes page-in-left  { from { opacity: 0; transform: translateX(-12px); } }
+/* (2026-11-16) no effect on the page itself: the next page is simply there, its
+   words at once, and only its pictures settle into focus (img.fade above) */
+::view-transition-old(root) { display: none; }
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+/* between collections the names trade places: the one picked grows into the
+   title, the old title shrinks back into the line, the others make room. Each
+   name carries its own view-transition-name (scripts/build_collections.py) */
+.col-line > * { view-transition-class: cn; }
+::view-transition-group(.cn) { animation-duration: var(--cn-t); animation-timing-function: var(--ease); }
+::view-transition-old(.cn), ::view-transition-new(.cn) { animation-duration: var(--cn-t); }
+::view-transition-old(.cn):only-child { display: none; }
+::view-transition-new(.cn):only-child { animation: none; }
 @media (prefers-reduced-motion: reduce) {
-    :root { --t-base: 1ms; --t-slow: 1ms; }
+    :root { --t-base: 1ms; --t-slow: 1ms; --pr-t: 1ms; --zoom-t: 1ms; }
     html { scroll-behavior: auto; }
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
     .hero-cap.in .hc-title, .hero-cap.in .hc-specs, .fade.in, .slide img { animation: none; }
@@ -651,7 +708,7 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
     .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
     .cg-item .sp-frame, .cg-item .sp-cap, .sel-frame, .sel-item .sp-cap { width: 82%; }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
-    .pr-pic img { transform-origin: center top; }
+    .pr-sheet { transform-origin: center top; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
     .about-page { padding-top: var(--near); row-gap: var(--near); grid-template-rows: none; }
     .about-side, .about-story, .about-text, .about-line { grid-column: 1 / -1; grid-row: auto; }
@@ -677,6 +734,8 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation: p
         padding: 3.5rem 1.5rem 2rem; overflow-y: auto;
     }
     .lightbox img { flex: none; width: 100%; height: 56vh; }
+    .lightbox::before { background: radial-gradient(ellipse 110% 85% at 50% 45%, #fff 0, #fff 70%, rgb(255 255 255 / 0.6) 100%); }
+    .lb-side { display: none; }
     .lightbox-info { width: 100%; max-width: 380px; max-height: none; overflow: visible; gap: 1.2rem; }
 }
 @media (max-width: 520px) {
