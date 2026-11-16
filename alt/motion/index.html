@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en" data-mode="new">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Motion study | Kuba Chojnacki</title>
+<link rel="stylesheet" href="../../css/fonts.css">
+<style>
+/* A study, not part of the site: five places where the site moves today,
+   each shown as it is now and as proposed. The three numbers at the top
+   drive every proposed move. */
+:root {
+    --bg: #ffffff; --ink: #1a1a18; --mid: #6f6f6a; --sold: #991b1b; --wait: #f1f1ef;
+    --serif: "EB Garamond", Georgia, serif;
+    --s: 14px; --m: 1.125rem; --h: 1.3125rem; --l: clamp(1.6rem, 2.4vw, 2.125rem);
+    --pad: clamp(1.5rem, 4vw, 4rem); --gut: clamp(12px, 1.4vw, 20px);
+    --near: clamp(1.25rem, 2vw, 1.75rem); --far: clamp(4rem, 8vw, 7rem);
+    --ease: cubic-bezier(.4, 0, .2, 1); --ease-out: cubic-bezier(.16, 1, .3, 1);
+    /* the three values to tune */
+    --blur: 16px; --dur: 600ms; --veil: 0.5;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scrollbar-gutter: stable; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); font-size: var(--m); line-height: 1.45; letter-spacing: 0.005em; -webkit-font-smoothing: antialiased; text-transform: lowercase; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
+img { display: block; max-width: 100%; }
+.grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: var(--gut); padding-inline: var(--pad); }
+.mid { color: var(--mid); }
+
+/* the bar: what is compared, and the three values */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--ink); padding-block: 0.8rem; align-items: center; row-gap: 0.5rem; }
+.bar .ttl { grid-column: 1 / 3; text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
+.bar .mode { grid-column: 3 / 5; display: flex; gap: 1.1rem; }
+.mode button { color: var(--mid); }
+.mode button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
+.bar .knobs { grid-column: 5 / 9; display: flex; gap: 1.5rem; justify-content: flex-end; flex-wrap: wrap; font-size: var(--s); }
+.knobs label { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
+.knobs input { width: 6.5rem; accent-color: var(--ink); }
+.knobs output { min-width: 3.6em; font-variant-numeric: tabular-nums; }
+html[data-mode="now"] .knobs { opacity: 0.35; }
+
+.intro { padding-block: var(--far) 0; }
+.intro p { grid-column: 1 / 5; font-size: var(--l); line-height: 1.2; text-wrap: balance; }
+.intro .mid { grid-column: 5 / 8; align-self: end; font-size: var(--m); }
+
+.demo { padding-block: var(--far) 0; align-items: start; row-gap: var(--near); }
+.demo:last-of-type { padding-bottom: var(--far); }
+.demo .say { grid-column: 1 / 3; display: flex; flex-direction: column; gap: 0.9rem; }
+.demo h2 { font-weight: 400; font-size: var(--l); line-height: 1.15; display: grid; grid-template-columns: 2.1em 1fr; }
+.demo h2 span { color: var(--mid); }
+.demo dl { font-size: var(--s); line-height: 1.5; display: grid; grid-template-columns: 5.2em 1fr; row-gap: 0.35rem; }
+.demo dt { color: var(--mid); }
+html[data-mode="now"] dd.new, html[data-mode="new"] dd.now { color: var(--mid); }
+.demo .stage { grid-column: 3 / 9; }
+.act { justify-self: start; text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
+.act:hover { opacity: 0.45; }
+
+/* 01 the wall the lightbox opens from, and 02 pictures arriving */
+.row4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gut); }
+.work { display: block; text-align: left; }
+.work .frame { background: var(--bg); }
+#arrive .frame { overflow: hidden; }
+.work img { width: 100%; height: auto; transition: transform 450ms var(--ease-out); }
+@media (hover: hover) { #wall .work:hover img { transform: scale(1.04); } }
+.cap { display: flex; justify-content: space-between; font-size: var(--s); padding-top: 0.5rem; }
+
+/* the lightbox, laid out as on the site */
+.lb { position: fixed; inset: 0; z-index: 50; visibility: hidden; pointer-events: none; }
+.lb.on { visibility: visible; pointer-events: auto; }
+.lb-veil { position: absolute; inset: 0; background: var(--bg); opacity: 0; }
+html[data-mode="new"] .lb-veil { background: radial-gradient(ellipse 62% 78% at var(--cx, 38%) 50%, #fff 0, #fff 42%, rgb(255 255 255 / var(--veil)) 100%); -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur)); }
+.lb-in { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); column-gap: var(--gut); align-items: center; width: 100%; height: 100%; padding: 1.5rem var(--pad); }
+.lb-in img { grid-column: 1 / 5; place-self: center; width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; transform-origin: center; }
+.lb-info { grid-column: 5 / 7; display: flex; flex-direction: column; gap: 1.2rem; }
+.lb-info .t { font-size: var(--l); line-height: 1.15; }
+.lb-info a { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; color: inherit; }
+.lb-nav { display: flex; align-items: center; gap: 0.7rem; font-variant-numeric: tabular-nums; }
+.lb-nav button { font-size: var(--l); line-height: 1; padding: 0.2rem 0.35rem; margin-left: -0.35rem; }
+.lb-x { position: absolute; top: 0; right: 0; padding: 1.5rem; font-size: var(--l); line-height: 1; opacity: 0.6; }
+.lb-x:hover, .lb-nav button:hover { opacity: 0.45; }
+
+/* 03 two pages in a window */
+.win { position: relative; aspect-ratio: 16 / 9; outline: 1px solid #e4e4e1; overflow: hidden; background: var(--bg); font-size: 11px; }
+.win-top { position: absolute; inset: 0 0 auto 0; z-index: 2; display: flex; justify-content: space-between; padding: 0.9em 2.2em; border-bottom: 1px solid var(--ink); background: var(--bg); }
+.win-top b { font-weight: 400; text-transform: uppercase; letter-spacing: 0.12em; }
+.win-top span { display: flex; gap: 1.3em; }
+.win-top i { font-style: normal; }
+.win-top i.cur { font-weight: 500; }
+.pg { position: absolute; inset: 3.2em 0 0 0; padding: 1.8em 2.2em; opacity: 0; }
+.pg.on { opacity: 1; }
+.pg h3 { font-weight: 400; font-size: 2em; line-height: 1.1; margin-bottom: 0.5em; }
+.pg h3 span { font-size: 0.55em; color: var(--mid); margin-left: 1.2em; }
+.pg p { max-width: 34em; margin-bottom: 1.6em; }
+.pg .row4 img { width: 62%; }
+.pg.about { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 1.4em; align-content: start; }
+.pg.about img { grid-column: 1; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.pg.about .caps { grid-column: 3 / 5; grid-row: 1; text-transform: uppercase; font-size: 1.7em; line-height: 1.2; letter-spacing: 0.04em; text-align: justify; }
+.pg.about .txt { grid-column: 3 / 5; grid-row: 1; align-self: end; columns: 2; column-gap: 1.4em; text-align: justify; }
+
+/* 04 the slideshow */
+.show { position: relative; aspect-ratio: 16 / 8; overflow: hidden; background: #0c0c0a; color: #fff; }
+.show img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.show img.on { opacity: 1; }
+.show::after { content: ""; position: absolute; inset: 55% 0 0 0; background: linear-gradient(transparent, rgb(0 0 0 / 0.38)); pointer-events: none; }
+.show-cap { position: absolute; z-index: 2; left: 1.6rem; bottom: 1.3rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.show-cap .t { font-size: var(--h); }
+.show-cap .f { font-size: var(--s); }
+.show-n { position: absolute; z-index: 2; right: 1.6rem; bottom: 1.3rem; font-size: var(--s); font-variant-numeric: tabular-nums; }
+
+/* 05 the header as the painting passes under it */
+.scroller { position: relative; height: min(58vh, 460px); overflow-y: auto; outline: 1px solid #e4e4e1; overscroll-behavior: contain; scrollbar-width: thin; }
+.s-top { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; padding: 0.95rem 1.6rem; border-bottom: 1px solid var(--ink); background: var(--bg); }
+.s-top b { font-weight: 400; text-transform: uppercase; letter-spacing: 0.12em; }
+.s-top span { display: flex; gap: 1.4rem; }
+.scroller img { width: 100%; }
+.scroller p { padding: 3rem 1.6rem 12rem; font-size: var(--l); }
+
+
+/* the numbers under the intro */
+.jump { padding-top: var(--near); }
+.jump div { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-variant-numeric: tabular-nums; }
+.jump a { color: var(--mid); text-decoration: none; }
+.jump a:hover { color: var(--ink); }
+.demo { scroll-margin-top: 3rem; }
+
+/* 10 and 19: a wall to scroll */
+.rows { padding: 1.6rem 1.6rem 6rem; display: grid; row-gap: 2.6rem; }
+.rows .row4 img { width: 74%; }
+.s-top { transition: transform 320ms var(--ease-out); }
+.s-top.away { transform: translateY(-102%); }
+
+/* 16, 18, 21: a small lightbox in a box */
+.mini { position: relative; height: min(62vh, 500px); outline: 1px solid #e4e4e1; overflow: hidden; background: var(--bg); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); column-gap: var(--gut); align-items: center; padding: 1.4rem 1.6rem; }
+.mini .words { grid-column: 4 / 6; display: flex; flex-direction: column; gap: 0.9rem; position: relative; }
+.mini .words .t { font-size: var(--l); line-height: 1.15; }
+.zm > img { grid-column: 1 / 4; place-self: center; width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; cursor: zoom-in; position: relative; z-index: 1; transition: transform 450ms var(--ease-out); }
+.zm.zoomed > img { cursor: zoom-out; }
+.zm .words { transition: opacity var(--dur) var(--ease), filter var(--dur) var(--ease); }
+html[data-mode="new"] .zm.zoomed .words { opacity: 0.2; filter: blur(calc(var(--blur) * 0.4)); }
+
+/* 17 the line of collections */
+.cn { padding: 1.8em 2.2em; position: absolute; inset: 3.2em 0 0 0; }
+.cn-line { display: flex; align-items: baseline; gap: 1.5em; margin-bottom: 1.6em; white-space: nowrap; }
+.cn-line button { font-size: 1.1em; color: var(--mid); transform-origin: left bottom; }
+.cn-line button.cur { font-size: 2em; color: var(--ink); line-height: 1.1; }
+.cn .row4 img { width: 62%; }
+
+/* 18 the closeup opening into the painting */
+.op { cursor: pointer; }
+.op .op-crop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; }
+.op .op-whole { grid-column: 1 / 4; place-self: center; width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; }
+.op .op-cap { position: absolute; z-index: 3; left: 1.6rem; bottom: 1.2rem; color: #fff; font-size: var(--h); }
+.op.open .op-crop, .op.open .op-cap { opacity: 0; pointer-events: none; }
+
+/* 20 first arrival */
+.fa { position: absolute; inset: 3.2em 0 0 0; overflow: hidden; background: #0c0c0a; }
+.fa img { width: 100%; height: 100%; object-fit: cover; }
+.fa span { position: absolute; left: 2.2em; bottom: 1.6em; color: #fff; font-size: 1.5em; }
+
+/* 21 neighbours at the edges */
+.nb img { position: absolute; top: 50%; height: 86%; width: auto; translate: 0 -50%; transition: left var(--dur) var(--ease), height var(--dur) var(--ease), opacity var(--dur) var(--ease), filter var(--dur) var(--ease); }
+.nb img.cur  { left: 12%; z-index: 2; }
+.nb img.prev { left: -14%; height: 58%; opacity: 0.6; filter: blur(calc(var(--blur) * 0.5)); cursor: pointer; }
+.nb img.next { left: 88%; height: 58%; opacity: 0.6; filter: blur(calc(var(--blur) * 0.5)); cursor: pointer; }
+.nb img.off  { left: 110%; height: 58%; opacity: 0; }
+html[data-mode="now"] .nb img { transition: opacity 450ms var(--ease-out); left: 12%; height: 86%; filter: none; }
+html[data-mode="now"] .nb img:not(.cur) { opacity: 0; pointer-events: none; transition: opacity 200ms var(--ease); }
+.nb .words { grid-column: 4 / 6; }
+html[data-mode="new"] .nb .lb-nav { visibility: hidden; }
+
+/* 22 joining the list */
+.nl { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: var(--gut); align-items: baseline; min-height: 5rem; }
+.nl .say2 { grid-column: 1 / 3; grid-row: 1; }
+.nl form { grid-column: 3 / 6; grid-row: 1; display: flex; gap: 1rem; align-items: baseline; }
+.nl input { flex: 1; font: inherit; color: inherit; border: 0; border-bottom: 1px solid var(--ink); padding: 0.2rem 0; background: none; outline-offset: 4px; text-transform: none; }
+.nl form button, .nl .again { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
+.nl .thanks { grid-column: 3 / 6; grid-row: 1; visibility: hidden; }
+.nl.done form { visibility: hidden; }
+.nl.done .thanks { visibility: visible; }
+
+/* 06 the slideshow as you scroll past it */
+.lv-hero { overflow: hidden; }
+.scroller .lv-hero img { height: 400px; object-fit: cover; will-change: filter, opacity; }
+.lv-next { padding: 2.5rem 1.6rem 9rem; }
+.scroller .lv-next p { padding: 0 0 1.2rem; font-size: var(--l); }
+.lv-next .row4 img { width: 72%; }
+
+/* 09 prints */
+.pr-demo { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: var(--gut); align-items: start; min-height: 440px; }
+.pr-demo .pr-pic { grid-column: 1 / 4; justify-self: end; width: min(100%, 290px); }
+.pr-sheet { position: relative; transform-origin: right top; transition: transform 450ms var(--ease-out); box-shadow: 0 2px 6px rgb(26 26 24 / 0.10), 0 14px 34px rgb(26 26 24 / 0.16); }
+html[data-mode="new"] .pr-sheet { transition: transform calc(var(--dur) * 1.5) var(--ease); }
+.pr-sheet img { width: 100%; height: auto; }
+.pr-sheet #pr-over { position: absolute; inset: 0; opacity: 0; }
+.pr-pic[data-size="A2"] .pr-sheet { transform: scale(0.8); }
+.pr-pic[data-size="A3"] .pr-sheet { transform: scale(0.62); }
+.pr-words { grid-column: 4 / 7; display: flex; flex-direction: column; gap: 0.55rem; }
+.pr-opts { display: flex; align-items: baseline; gap: 0.9rem; flex-wrap: wrap; }
+.pr-opts button { color: var(--mid); }
+.pr-opts button[data-sz] { text-transform: none; }
+.pr-opts button[aria-pressed="true"] { color: var(--ink); font-size: var(--h); }
+.pr-words .f { font-size: var(--s); }
+
+@media (max-width: 800px) {
+    .pr-demo .pr-pic, .pr-words { grid-column: 1 / -1; }
+    .mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .zm > img, .op .op-whole { grid-column: 1; }
+    .mini .words { grid-column: 2; }
+    .nl .say2, .nl form, .nl .thanks { grid-column: 1 / -1; }
+    .nl .thanks { grid-row: 2; }
+    .nl .say2 { grid-row: 1; } .nl form { grid-row: 2; }
+    .nb img { top: 36%; height: 56%; }
+    .nb img.cur { left: 20%; }
+    .nb img.prev { left: -22%; height: 38%; }
+    .nb img.next { left: 84%; height: 38%; }
+    .nb .words { grid-column: 1 / -1; align-self: end; }
+    html[data-mode="now"] .nb img { left: 20%; height: 56%; }
+    .pr-demo .pr-pic { justify-self: start; width: 60%; margin-bottom: 1.2rem; }
+    .bar .ttl, .bar .mode { grid-column: span 4; }
+    .bar .mode { justify-content: flex-end; }
+    .bar .knobs { grid-column: 1 / -1; justify-content: space-between; gap: 0.6rem; }
+    .knobs input { width: 4.2rem; }
+    .intro p, .intro .mid, .demo .say, .demo .stage { grid-column: 1 / -1; }
+    .intro .mid { margin-top: var(--near); }
+    .row4 { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--near); }
+    .pg .row4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .win { font-size: 7px; }
+    .lb-in { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; row-gap: 1.2rem; padding-top: 4rem; }
+    .lb-in img, .lb-info { grid-column: 1; }
+    .lb { --cx: 50%; }
+}
+@media (prefers-reduced-motion: reduce) { .work img { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="bar grid">
+    <span class="ttl">motion study</span>
+    <div class="mode" role="group" aria-label="Which version plays">
+        <button type="button" data-mode="now" aria-pressed="false">now</button>
+        <button type="button" data-mode="new" aria-pressed="true">proposed</button>
+    </div>
+    <div class="knobs">
+        <label>blur <input type="range" id="k-blur" min="0" max="40" step="1" value="16"><output for="k-blur"></output></label>
+        <label>speed <input type="range" id="k-dur" min="300" max="1400" step="50" value="600"><output for="k-dur"></output></label>
+        <label>white at the edges <input type="range" id="k-veil" min="10" max="100" step="1" value="50"><output for="k-veil"></output></label>
+    </div>
+</header>
+
+<main>
+<section class="intro grid">
+    <p>one idea for all movement: nothing slides, things come into focus. the way a wash of paint settles.</p>
+    <p class="mid">fourteen moves, each one replacing something the site does today. switch between now and proposed at the top, then play each one. the three sliders change every proposed move at once.</p>
+</section>
+
+<nav class="jump grid" aria-label="Demos"><div><a href="#d01">01</a><a href="#d02">02</a><a href="#d04">04</a><a href="#d06">06</a><a href="#d07">07</a><a href="#d09">09</a><a href="#d10">10</a><a href="#d16">16</a><a href="#d17">17</a><a href="#d18">18</a><a href="#d19">19</a><a href="#d20">20</a><a href="#d21">21</a><a href="#d22">22</a></div></nav>
+
+<section class="demo grid" id="d01">
+    <div class="say">
+        <h2><span>01</span>opening a painting</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the page is covered by solid white, the painting grows out of its place.</dd>
+            <dt>proposed</dt><dd class="new">white behind the painting, the page showing out of focus toward the edges. the painting grows, the words sharpen one after another. arrows: one painting dissolves into the next.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click a painting. arrows or ← → to step, esc to close.</span>
+    </div>
+    <div class="stage row4" id="wall"></div>
+</section>
+
+<section class="demo grid" id="d02">
+    <div class="say">
+        <h2><span>02</span>pictures arriving</h2>
+        <dl>
+            <dt>now</dt><dd class="now">a flat tint, then the picture fades in.</dd>
+            <dt>proposed</dt><dd class="new">the painting is there at once as soft color, and sharpens.</dd>
+        </dl>
+        <button type="button" class="act" id="play-arrive">play</button>
+    </div>
+    <div class="stage row4" id="arrive"></div>
+</section>
+
+<section class="demo grid" id="d04">
+    <div class="say">
+        <h2><span>04</span>the slideshow</h2>
+        <dl>
+            <dt>now</dt><dd class="now">one closeup fades over the other.</dd>
+            <dt>proposed</dt><dd class="new">the same slow fade, only the new closeup settles into focus as it lands. the caption sharpens after it.</dd>
+        </dl>
+        <button type="button" class="act" id="play-show">next painting</button>
+    </div>
+    <div class="stage">
+        <div class="show" id="show">
+            <img class="on" src="../../IMAGES/thumbs/39-atmosphere-brown-purple-hero.webp" alt="">
+            <img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre-hero.webp" alt="" loading="lazy">
+            <img src="../../IMAGES/thumbs/45-atmosphere-deep-violet-hero.webp" alt="" loading="lazy">
+            <div class="show-cap"><span class="t"></span><span class="f"></span></div>
+            <span class="show-n"></span>
+        </div>
+    </div>
+</section>
+
+<section class="demo grid" id="d06">
+    <div class="say">
+        <h2><span>06</span>leaving the slideshow</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the closeup stays sharp until the header cuts it off.</dd>
+            <dt>proposed</dt><dd class="new">as you scroll past, the closeup goes soft and pale, and the paintings below take over.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">scroll inside the box.</span>
+    </div>
+    <div class="stage">
+        <div class="scroller" id="leave">
+            <div class="s-top"><b>Kuba Chojnacki</b><span><i style="font-style:normal;font-weight:500">home</i><span>collections</span><span>about</span><span>contact</span></span></div>
+            <div class="lv-hero"><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple-hero.webp" alt=""></div>
+            <div class="lv-next">
+                <p>selected works</p>
+                <div class="row4">
+                    <img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet.webp" alt="">
+                    <img src="../../IMAGES/thumbs/46-atmosphere-dark-plum.webp" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple.webp" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="demo grid" id="d07">
+    <div class="say">
+        <h2><span>07</span>changing page, quieter</h2>
+        <dl>
+            <dt>now</dt><dd class="now">a quick fade, the new page drifts in 12 px from the side.</dd>
+            <dt>proposed</dt><dd class="new">no page effect. the words are there at once, only the pictures settle into focus, as in 02.</dd>
+        </dl>
+        <button type="button" class="act" id="play-page">go to the other page</button>
+    </div>
+    <div class="stage">
+        <div class="win" id="win">
+            <div class="win-top"><b>Kuba Chojnacki</b><span><i>home</i><i class="cur" data-p="0">collections</i><i data-p="1">about</i><i>contact</i></span></div>
+            <div class="pg on">
+                <h3>atmosphere<span>chromatic</span><span>works on paper</span><span>prints</span></h3>
+                <p>Fields of thin acrylic on raw canvas. It moves from violets and blues through green into burgundies and earthy tones.</p>
+                <div class="row4">
+                    <img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet.webp" alt="">
+                    <img src="../../IMAGES/thumbs/46-atmosphere-dark-plum.webp" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple.webp" alt="">
+                </div>
+            </div>
+            <div class="pg about">
+                <img src="../../IMAGES/about/portrait-about.jpg" alt="">
+                <div class="caps">color caught in a shift transmission of one hue to another | gradient</div>
+                <div class="txt">I make abstract paintings: color absorbed directly into unprimed canvas. I am drawn to the moment before a color becomes a name, when it is still pure sensation. The pigment is poured and moved by gravity; what matters is what I leave alone.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="demo grid" id="d09">
+    <div class="say">
+        <h2><span>09</span>prints, changing painting</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the sheet swaps in an instant.</dd>
+            <dt>proposed</dt><dd class="new">the paper stays where it is. the picture on it turns slowly into the other, with no gap between them. a size change glides at the same pace.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click the other name, or a size.</span>
+    </div>
+    <div class="stage pr-demo">
+        <div class="pr-pic" data-size="A1"><div class="pr-sheet"><img id="pr-img" src="../../IMAGES/prints/03-atmosphere-maroon-khaki-a1-600.webp" width="1100" height="1556" alt=""><img id="pr-over" width="1100" height="1556" alt=""></div></div>
+        <div class="pr-words">
+            <span class="mid">a print of</span>
+            <div class="pr-opts"><button type="button" data-pr="0" aria-pressed="true">maroon khaki</button><button type="button" data-pr="1" aria-pressed="false">burgundy blue</button></div>
+            <div class="pr-opts"><span class="mid">in</span><button type="button" data-sz="0" aria-pressed="true">A1</button><button type="button" data-sz="1" aria-pressed="false">A2</button><button type="button" data-sz="2" aria-pressed="false">A3</button><span id="pr-price">450 €</span></div>
+            <span class="mid f" id="pr-facts">59.4 × 84.1 cm, edition of 5</span>
+        </div>
+    </div>
+</section>
+<section class="demo grid" id="d10">
+    <div class="say">
+        <h2><span>10</span>paintings settle as they enter</h2>
+        <dl>
+            <dt>now</dt><dd class="now">every picture settles when its file has loaded, often before you have scrolled to it.</dd>
+            <dt>proposed</dt><dd class="new">each row settles into focus when it comes on screen, once. this is 02, timed to your scrolling.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">scroll inside the box.</span> <button type="button" class="act" id="play-enter">again</button>
+    </div>
+    <div class="stage"><div class="scroller" id="enter"><div class="rows"><div class="row4"><img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet.webp" alt=""><img src="../../IMAGES/thumbs/46-atmosphere-dark-plum.webp" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/01-atmosphere-navy-khaki.webp" alt=""><img src="../../IMAGES/thumbs/40-atmosphere-blue.webp" alt=""><img src="../../IMAGES/thumbs/43-atmosphere-deep-green-blue.webp" alt=""><img src="../../IMAGES/thumbs/03-atmosphere-maroon-khaki.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/02-atmosphere-burgundy-blue.webp" alt=""><img src="../../IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp" alt=""><img src="../../IMAGES/thumbs/19-chromatic-blue-orange.webp" alt=""><img src="../../IMAGES/thumbs/20-chromatic-red.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/21-chromatic-orange.webp" alt=""><img src="../../IMAGES/thumbs/22-chromatic-blue-i.webp" alt=""><img src="../../IMAGES/thumbs/25-chromatic-blue-red.webp" alt=""><img src="../../IMAGES/thumbs/18-chromatic-orange-ii.webp" alt=""></div></div></div></div>
+</section>
+
+<section class="demo grid" id="d16">
+    <div class="say">
+        <h2><span>16</span>zoom, the words step back</h2>
+        <dl>
+            <dt>now</dt><dd class="now">you zoom into the painting and the words stay sharp beside it.</dd>
+            <dt>proposed</dt><dd class="new">while you look close, the words go soft and pale. they come back when you step back.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click the painting, click again to step back.</span>
+    </div>
+    <div class="stage"><div class="mini zm" id="zm"><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet-1600.webp" width="2588" height="3450" alt="" style="clip-path: inset(7.13% 1.5% 9.76% 1.5%)"><div class="words"><div><div class="t">deep violet</div><div class="mid">atmosphere</div></div><div>1900 €<div class="mid">acrylic on raw canvas<br>150 × 130 cm, 2026</div></div><div><u>inquire via email</u><br><u>inquire via instagram</u></div></div></div></div>
+</section>
+
+<section class="demo grid" id="d17">
+    <div class="say">
+        <h2><span>17</span>collection names trade places</h2>
+        <dl>
+            <dt>now</dt><dd class="now">a new page: the line of names is drawn again, with another name large.</dd>
+            <dt>proposed</dt><dd class="new">the name you pick grows into the title, the old title shrinks back into the line, the others make room. the paintings below settle as in 02.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click a name in the box.</span>
+    </div>
+    <div class="stage"><div class="win" id="cn"><div class="win-top"><b>Kuba Chojnacki</b><span><i>home</i><i class="cur">collections</i><i>about</i><i>contact</i></span></div><div class="cn"><div class="cn-line"><button type="button" class="cur" data-c="0">atmosphere</button><button type="button" data-c="1">chromatic</button><button type="button" data-c="2">works on paper</button><button type="button" data-c="3">prints</button></div><div class="row4"><img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet.webp" alt=""><img src="../../IMAGES/thumbs/46-atmosphere-dark-plum.webp" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple.webp" alt=""></div></div></div></div>
+</section>
+
+<section class="demo grid" id="d18">
+    <div class="say">
+        <h2><span>18</span>closeup opens into the painting</h2>
+        <dl>
+            <dt>now</dt><dd class="now">you click a closeup in the slideshow and the lightbox takes its place.</dd>
+            <dt>proposed</dt><dd class="new">the closeup draws back to where the whole painting hangs and turns into it. the closeups are separate photographs, so it is a guided dissolve, not an exact zoom out.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click the box, click again to go back.</span>
+    </div>
+    <div class="stage"><div class="mini op" id="op"><img class="op-whole" src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre-1600.webp" width="2588" height="3450" alt="" style="clip-path: inset(1.13% 1.5% 0.94% 1.5%)"><div class="words"><div><div class="t">lavender green ochre</div><div class="mid">atmosphere</div></div><div>2800 €<div class="mid">acrylic on raw canvas<br>200 × 150 cm, 2026</div></div></div><img class="op-crop" src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre-hero.webp" alt=""><span class="op-cap">atmosphere | lavender green ochre</span></div></div>
+</section>
+
+<section class="demo grid" id="d19">
+    <div class="say">
+        <h2><span>19</span>header steps aside</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the header stays fixed over the wall all the way down.</dd>
+            <dt>proposed</dt><dd class="new">scrolling down, the header slides out of the way and the wall has the whole window. the moment you scroll up, it is back. the one place something slides, because it follows your hand.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">scroll down inside the box, then up a little.</span>
+    </div>
+    <div class="stage"><div class="scroller" id="aside"><div class="s-top"><b>Kuba Chojnacki</b><span><span>home</span><i style="font-style:normal;font-weight:500">collections</i><span>about</span><span>contact</span></span></div><div class="rows"><div class="row4"><img src="../../IMAGES/thumbs/01-atmosphere-navy-khaki.webp" alt=""><img src="../../IMAGES/thumbs/40-atmosphere-blue.webp" alt=""><img src="../../IMAGES/thumbs/43-atmosphere-deep-green-blue.webp" alt=""><img src="../../IMAGES/thumbs/03-atmosphere-maroon-khaki.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre.webp" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet.webp" alt=""><img src="../../IMAGES/thumbs/46-atmosphere-dark-plum.webp" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/21-chromatic-orange.webp" alt=""><img src="../../IMAGES/thumbs/22-chromatic-blue-i.webp" alt=""><img src="../../IMAGES/thumbs/25-chromatic-blue-red.webp" alt=""><img src="../../IMAGES/thumbs/18-chromatic-orange-ii.webp" alt=""></div><div class="row4"><img src="../../IMAGES/thumbs/02-atmosphere-burgundy-blue.webp" alt=""><img src="../../IMAGES/thumbs/41-atmosphere-burgundy-blue-ii.webp" alt=""><img src="../../IMAGES/thumbs/19-chromatic-blue-orange.webp" alt=""><img src="../../IMAGES/thumbs/20-chromatic-red.webp" alt=""></div></div></div></div>
+</section>
+
+<section class="demo grid" id="d20">
+    <div class="say">
+        <h2><span>20</span>first arrival</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the first closeup fades in, its caption rises.</dd>
+            <dt>proposed</dt><dd class="new">once per visit: the name sharpens first, then the painting comes into focus, then its caption.</dd>
+        </dl>
+        <button type="button" class="act" id="play-first">play</button>
+    </div>
+    <div class="stage"><div class="win" id="first"><div class="win-top"><b>Kuba Chojnacki</b><span><i class="cur">home</i><i>collections</i><i>about</i><i>contact</i></span></div><div class="fa"><img src="../../IMAGES/thumbs/03-atmosphere-maroon-khaki-hero.webp" alt=""><span>atmosphere | maroon khaki</span></div></div></div>
+</section>
+
+<section class="demo grid" id="d21">
+    <div class="say">
+        <h2><span>21</span>neighbours at the edges</h2>
+        <dl>
+            <dt>now</dt><dd class="now">one painting, and arrows with a count to reach the others.</dd>
+            <dt>proposed</dt><dd class="new">the paintings before and after wait at the edges, small and out of focus. click one and it comes forward. it would replace the arrow row.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">click a painting at the edge.</span>
+    </div>
+    <div class="stage"><div class="mini nb" id="nb"><img src="../../IMAGES/thumbs/44-atmosphere-lavender-green-ochre-800.webp" width="2588" height="3450" alt=""><img src="../../IMAGES/thumbs/45-atmosphere-deep-violet-800.webp" width="2588" height="3450" alt=""><img src="../../IMAGES/thumbs/46-atmosphere-dark-plum-800.webp" width="2588" height="3450" alt=""><img src="../../IMAGES/thumbs/39-atmosphere-brown-purple-800.webp" width="2588" height="3450" alt=""><div class="words"><div><div class="t" id="nb-t"></div><div class="mid">atmosphere</div></div><div class="lb-nav"><button type="button" id="nb-prev" aria-label="Previous painting">←</button><span id="nb-n"></span><button type="button" id="nb-next" aria-label="Next painting">→</button></div></div></div></div>
+</section>
+
+<section class="demo grid" id="d22">
+    <div class="say">
+        <h2><span>22</span>joining the list</h2>
+        <dl>
+            <dt>now</dt><dd class="now">the field is swapped for the thank you in an instant.</dd>
+            <dt>proposed</dt><dd class="new">the field goes soft and the thank you sharpens in its place.</dd>
+        </dl>
+        <span class="mid" style="font-size:var(--s)">nothing is sent from here.</span>
+    </div>
+    <div class="stage"><div class="nl" id="nl"><span class="say2">new paintings and prints, to subscribers first</span><form><input type="email" placeholder="your email" aria-label="Email" autocomplete="off"><button type="submit">join</button></form><p class="thanks">thank you. now check your inbox to confirm the subscription. <button type="button" class="again mid">again</button></p></div></div>
+</section>
+</main>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Painting" tabindex="-1">
+    <div class="lb-veil"></div>
+    <div class="lb-in">
+        <img id="lb-img" alt="" width="2588" height="3450">
+        <div class="lb-info">
+            <div class="foc"><div class="t" id="lb-t"></div><div class="mid">atmosphere</div></div>
+            <div class="foc"><div id="lb-p"></div><div class="mid" id="lb-s"></div></div>
+            <div class="foc"><a href="#" onclick="return false">inquire via email</a><br><a href="#" onclick="return false">inquire via instagram</a></div>
+            <div class="foc lb-nav"><button type="button" id="lb-prev" aria-label="Previous painting">←</button><span id="lb-n"></span><button type="button" id="lb-next" aria-label="Next painting">→</button></div>
+        </div>
+    </div>
+    <button type="button" class="lb-x" id="lb-x" aria-label="Close">×</button>
+</div>
+
+<script>
+(() => {
+    const root = document.documentElement;
+    const $ = s => document.querySelector(s);
+    const T = '../../IMAGES/thumbs/';
+    const WORKS = [
+        { slug: '44-atmosphere-lavender-green-ochre', name: 'lavender green ochre', size: '200 × 150 cm', price: '2800 €', box: [0.015, 0.0113, 0.985, 0.9906] },
+        { slug: '45-atmosphere-deep-violet',          name: 'deep violet',          size: '150 × 130 cm', price: '1900 €', box: [0.015, 0.0713, 0.985, 0.9024] },
+        { slug: '46-atmosphere-dark-plum',            name: 'dark plum',            size: '150 × 130 cm', price: '1900 €', box: [0.0175, 0.0713, 0.9875, 0.9006] },
+        { slug: '39-atmosphere-brown-purple',         name: 'brown purple',         size: '150 × 100 cm', price: '1500 €', box: [0.0875, 0.0394, 0.9125, 0.9644] }
+    ];
+    const EASE = 'cubic-bezier(.4, 0, .2, 1)', OUT = 'cubic-bezier(.16, 1, .3, 1)';
+    const STILL = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const two = n => String(n).padStart(2, '0');
+
+    /* ── the bar ── */
+    const K = { blur: 16, dur: 600, veil: 50 };
+    const isNew = () => root.dataset.mode === 'new';
+    const D = () => STILL ? 1 : K.dur;          // the proposed pace
+    const B = f => `blur(${(K.blur * (f || 1)).toFixed(1)}px)`;
+    const knob = (id, key, unit, css) => {
+        const el = $('#' + id), out = el.nextElementSibling;
+        const set = () => { K[key] = +el.value; out.textContent = `${el.value} ${unit}`; css(K[key]); };
+        el.addEventListener('input', set); set();
+    };
+    knob('k-blur', 'blur', 'px', v => root.style.setProperty('--blur', v + 'px'));
+    knob('k-dur',  'dur',  'ms', v => root.style.setProperty('--dur', v + 'ms'));
+    knob('k-veil', 'veil', '%',  v => root.style.setProperty('--veil', v / 100));
+    document.querySelectorAll('.mode button').forEach(b => b.addEventListener('click', () => {
+        root.dataset.mode = b.dataset.mode;
+        document.querySelectorAll('.mode button').forEach(o => o.setAttribute('aria-pressed', o === b));
+    }));
+
+    /* ── 01 the lightbox ── */
+    const wall = $('#wall'), lb = $('#lb'), veil = lb.querySelector('.lb-veil'), img = $('#lb-img');
+    const lines = () => [...lb.querySelectorAll('.foc')];
+    let at = 0, open = false, busy = false;
+    WORKS.forEach((w, i) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'work';
+        b.innerHTML = `<span class="frame"><img src="${T}${w.slug}-800.webp" width="2588" height="3450" alt="${w.name}"></span><span class="cap"><span>${two(i + 1)}</span><span>${w.name}</span></span>`;
+        b.addEventListener('click', () => show(i));
+        wall.append(b);
+    });
+    const pct = v => (v * 100).toFixed(2) + '%';
+    const fill = w => {
+        // only the painting, not the white of its photograph: the page shows around it
+        img.style.clipPath = `inset(${pct(w.box[1])} ${pct(1 - w.box[2])} ${pct(1 - w.box[3])} ${pct(w.box[0])})`;
+        $('#lb-t').textContent = w.name; $('#lb-p').textContent = w.price;
+        $('#lb-s').innerHTML = `acrylic on raw canvas<br>${w.size}, 2026`;
+        $('#lb-n').textContent = `${two(at + 1)} / ${two(WORKS.length)}`;
+    };
+    const sharp = w => { const m = new Image(); m.src = `${T}${w.slug}-1600.webp`; return (m.decode ? m.decode() : Promise.resolve()).catch(() => {}).then(() => m.src); };
+    // where the painting shows inside the lightbox picture
+    const shown = () => {
+        const r = img.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+    };
+    const onto = el => {
+        const a = el.getBoundingClientRect(), b = shown();
+        return `translate(${(a.left + a.width / 2 - b.x).toFixed(1)}px, ${(a.top + a.height / 2 - b.y).toFixed(1)}px) scale(${(a.width / b.w).toFixed(4)})`;
+    };
+    const srcOf = i => wall.children[i].querySelector('img');
+    const focusIn = (els, delay, dur) => els.forEach((el, n) => el.animate(
+        [{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }],
+        { duration: dur, delay: delay + n * 70, easing: OUT, fill: 'backwards' }));
+
+    function show(i) {
+        if (open) return;
+        at = i; open = true;
+        const w = WORKS[at], from = srcOf(at);
+        img.src = from.currentSrc || from.src; fill(w);
+        root.style.overflow = 'hidden';
+        lb.classList.add('on');
+        from.style.visibility = 'hidden';
+        const move = onto(from);
+        if (isNew()) {
+            const d = D();
+            veil.animate({ opacity: [0, 1] }, { duration: d, easing: EASE, fill: 'forwards' });
+            img.animate([{ transform: move }, { transform: 'none' }], { duration: d * 1.1, easing: OUT });
+            focusIn(lines(), d * 0.4, d);
+            $('#lb-x').animate({ opacity: [0, 0.6] }, { duration: d, delay: d * 0.5, fill: 'backwards' });
+        } else {
+            veil.animate({ opacity: [0, 1] }, { duration: 450, easing: EASE, fill: 'forwards' });
+            img.animate([{ transform: move }, { transform: 'none' }], { duration: 540, easing: OUT });
+            [...lines(), $('#lb-x')].forEach(el => el.animate([{ opacity: 0, transform: el.id ? 'none' : 'translateY(10px)' }, {}], { duration: 450, delay: 225, easing: OUT, fill: 'backwards' }));
+        }
+        sharp(w).then(src => { if (open && WORKS[at] === w) img.src = src; });
+        lb.focus({ preventScroll: true });
+    }
+    function hide() {
+        if (!open || busy) return;
+        busy = true;
+        const to = srcOf(at), move = onto(to), d = isNew() ? D() * 0.8 : 380;
+        wall.querySelectorAll('img').forEach(im => { if (im !== to) im.style.visibility = ''; });
+        veil.animate({ opacity: [1, 0] }, { duration: d, easing: EASE, fill: 'forwards' });
+        [...lines(), $('#lb-x')].forEach(el => el.animate(isNew() ? [{ opacity: 0, filter: B(0.5) }] : [{ opacity: 0 }], { duration: d * 0.45, easing: EASE, fill: 'forwards' }));
+        img.animate([{ transform: 'none' }, { transform: move }], { duration: d, easing: EASE, fill: 'forwards' }).onfinish = () => {
+            lb.classList.remove('on');
+            lb.getAnimations({ subtree: true }).forEach(a => a.cancel());
+            to.style.visibility = ''; root.style.overflow = '';
+            open = busy = false;
+        };
+    }
+    function step(dir) {
+        if (!open || busy) return;
+        busy = true;
+        srcOf(at).style.visibility = '';
+        at = (at + dir + WORKS.length) % WORKS.length;
+        const w = WORKS[at], next = sharp(w), fresh = isNew(), d = D();
+        srcOf(at).style.visibility = 'hidden';
+        const out = fresh
+            ? img.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: B(0.8) }], { duration: d * 0.45, easing: EASE, fill: 'forwards' })
+            : img.animate({ opacity: [1, 0] }, { duration: 200, easing: EASE, fill: 'forwards' });
+        if (fresh) lines().slice(0, 2).forEach(el => el.animate([{ opacity: 0, filter: B(0.4) }], { duration: d * 0.4, easing: EASE, fill: 'forwards' }));
+        Promise.all([next, out.finished]).then(([src]) => {
+            img.src = src; fill(w);
+            const ready = Promise.race([img.decode ? img.decode().catch(() => {}) : 0, new Promise(r => setTimeout(r, 1200))]);
+            ready.then(() => {
+                out.cancel();
+                if (fresh) {
+                    img.animate([{ opacity: 0, filter: B(0.8) }, { opacity: 1, filter: 'blur(0)' }], { duration: d * 0.9, easing: OUT });
+                    lines().slice(0, 2).forEach(el => el.getAnimations().forEach(a => a.cancel()));
+                    focusIn(lines().slice(0, 2), d * 0.15, d * 0.8);
+                } else img.animate({ opacity: [0, 1] }, { duration: 450, easing: OUT });
+                busy = false;
+            });
+        });
+    }
+    $('#lb-x').addEventListener('click', hide);
+    veil.addEventListener('click', hide);
+    $('#lb-prev').addEventListener('click', () => step(-1));
+    $('#lb-next').addEventListener('click', () => step(1));
+    addEventListener('keydown', e => {
+        if (!open) return;
+        if (e.key === 'Escape') hide();
+        if (e.key === 'ArrowRight') step(1);
+        if (e.key === 'ArrowLeft') step(-1);
+    });
+
+    /* ── 02 pictures arriving ── */
+    const arrive = $('#arrive');
+    const TINT = ['#8e86b6', '#5a4a86', '#6a3a55', '#8a6a52'];
+    WORKS.forEach((w, i) => {
+        const d = document.createElement('div');
+        d.className = 'work';
+        d.innerHTML = `<span class="frame" style="display:block"><img src="${T}${w.slug}-800.webp" width="2588" height="3450" alt=""></span>`;
+        arrive.append(d);
+    });
+    const playArrive = () => arrive.querySelectorAll('.frame').forEach((f, i) => {
+        const im = f.firstChild;
+        f.getAnimations({ subtree: true }).forEach(a => a.cancel());
+        if (isNew()) {
+            // soft color at once, then it sharpens (on the site: a 24 px preview, scaled up)
+            im.animate([{ filter: B(1.4), transform: 'scale(1.06)' }, { filter: B(1.4), transform: 'scale(1.06)', offset: 0.25 }, { filter: 'blur(0)', transform: 'none' }],
+                       { duration: D() * 2, delay: i * 90, easing: EASE, fill: 'backwards' });
+        } else {
+            f.animate([{ background: TINT[i] + '55' }, { background: TINT[i] + '55', offset: 0.99 }, { background: '#fff' }], { duration: 500 + 900 + i * 60, fill: 'backwards' });
+            im.animate({ opacity: [0, 1] }, { duration: 900, delay: 500 + i * 60, easing: OUT, fill: 'backwards' });
+        }
+    });
+    $('#play-arrive').addEventListener('click', playArrive);
+
+    /* ── 04 the slideshow ── */
+    const slides = [...document.querySelectorAll('#show img')], cap = [...document.querySelectorAll('.show-cap span')];
+    const SL = [['brown purple', '150 × 100 cm'], ['lavender green ochre', '200 × 150 cm'], ['deep violet', '150 × 130 cm']];
+    let sl = 0;
+    const caption = () => {
+        cap[0].textContent = 'atmosphere | ' + SL[sl][0];
+        cap[1].textContent = `acrylic on raw canvas  |  ${SL[sl][1]}  |  2026`;
+        $('.show-n').textContent = `← ${two(sl + 1)} / ${two(SL.length)} →`;
+    };
+    caption();
+    $('#play-show').addEventListener('click', () => {
+        const a = slides[sl]; sl = (sl + 1) % slides.length; const b = slides[sl];
+        slides.forEach(s => s.getAnimations().forEach(x => x.cancel()));
+        a.classList.remove('on'); b.classList.add('on'); b.style.zIndex = 1; a.style.zIndex = 0;
+        caption();
+        if (isNew()) {
+            const d = D() * 2.4;
+            a.animate({ opacity: [1, 1, 0] }, { duration: d, easing: EASE });
+            b.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: B(0.3), offset: 0.5 }, { opacity: 1, filter: 'blur(0)' }], { duration: d, easing: EASE });
+            cap.forEach((c, n) => c.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }], { duration: D(), delay: d * 0.55 + n * 90, easing: OUT, fill: 'backwards' }));
+        } else {
+            a.animate({ opacity: [1, 1, 0] }, { duration: 900, easing: EASE });
+            b.animate({ opacity: [0, 1] }, { duration: 900, easing: EASE });
+            cap.forEach((c, n) => c.animate([{ opacity: 0, transform: 'translateY(10px)' }, {}], { duration: 900, delay: 250 + n * 80, easing: OUT, fill: 'backwards' }));
+        }
+    });
+    /* ── 06 leaving the slideshow ── */
+    const leave = $('#leave'), lvImg = leave.querySelector('.lv-hero img');
+    let lvRaf = 0;
+    const lvSync = () => {
+        lvRaf = 0;
+        const t = Math.min(1, leave.scrollTop / (lvImg.offsetHeight * 0.8));
+        const on = isNew() && !STILL && t > 0;
+        lvImg.style.filter = on ? B(t) : '';
+        lvImg.style.opacity = on ? (1 - t * 0.6).toFixed(3) : '';
+    };
+    const lvAsk = () => { if (!lvRaf) lvRaf = requestAnimationFrame(lvSync); };
+    leave.addEventListener('scroll', lvAsk, { passive: true });
+    document.querySelectorAll('.mode button, .knobs input').forEach(el => el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'click', lvAsk));
+
+    /* ── 07 changing page, quieter ── */
+    const pages = [...document.querySelectorAll('#win .pg')], marks = [...document.querySelectorAll('#win [data-p]')];
+    let pg = 0;
+    $('#play-page').addEventListener('click', () => {
+        const a = pages[pg], fwd = pg === 0; pg = 1 - pg; const b = pages[pg];
+        marks.forEach(m => m.classList.toggle('cur', +m.dataset.p === pg));
+        $('#win').getAnimations({ subtree: true }).forEach(x => x.cancel());
+        a.classList.remove('on'); b.classList.add('on');
+        if (isNew()) {
+            b.querySelectorAll('img').forEach((im, i) => im.animate(
+                [{ filter: B(1.2) }, { filter: B(1.2), offset: 0.2 }, { filter: 'blur(0)' }],
+                { duration: D() * 1.8, delay: i * 80, easing: EASE, fill: 'backwards' }));
+        } else {
+            a.animate({ opacity: [1, 0] }, { duration: 270, easing: EASE });
+            b.animate([{ opacity: 0, transform: `translateX(${fwd ? 12 : -12}px)` }, { opacity: 1, transform: 'none' }], { duration: 450, delay: 60, easing: OUT, fill: 'backwards' });
+        }
+    });
+
+    /* ── 09 prints: the paper stays, the picture on it changes ── */
+    const PR = ['03-atmosphere-maroon-khaki', '02-atmosphere-burgundy-blue'];
+    const FM = [['A1', '59.4 × 84.1 cm', 450, 5], ['A2', '42 × 59.4 cm', 300, 15], ['A3', '29.7 × 42 cm', 200, 30]];
+    const prImg = $('#pr-img'), prOver = $('#pr-over'), prSt = { p: 0, f: 0 };
+    let prRun = 0;
+    const drawn = im => (im.decode ? im.decode() : Promise.resolve()).catch(() => {});
+    const prShow = () => {
+        const src = `../../IMAGES/prints/${PR[prSt.p]}-${FM[prSt.f][0].toLowerCase()}-600.webp`, id = ++prRun;
+        // a change while one is under way: what was coming is taken as arrived
+        if (prOver.getAnimations().length) prImg.src = prOver.src;
+        prOver.getAnimations().forEach(x => x.cancel());
+        if (!isNew()) { prImg.src = src; return; }
+        const m = new Image(); m.src = src;
+        drawn(m).then(() => {
+            if (id !== prRun) return;
+            prOver.src = src;
+            const fade = prOver.animate({ opacity: [0, 1] }, { duration: D() * 1.5, easing: EASE, fill: 'forwards' });
+            fade.onfinish = () => { if (id !== prRun) return; prImg.src = src; drawn(prImg).then(() => { if (id === prRun) fade.cancel(); }); };
+        });
+    };
+    const prWords = () => {
+        document.querySelectorAll('[data-pr]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.pr === prSt.p));
+        document.querySelectorAll('[data-sz]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.sz === prSt.f));
+        prImg.closest('.pr-pic').dataset.size = FM[prSt.f][0];
+        $('#pr-price').textContent = FM[prSt.f][2] + ' €';
+        $('#pr-facts').textContent = `${FM[prSt.f][1]}, edition of ${FM[prSt.f][3]}`;
+    };
+    document.querySelectorAll('[data-sz]').forEach(b => b.addEventListener('click', () => { if (+b.dataset.sz === prSt.f) return; prSt.f = +b.dataset.sz; prWords(); prShow(); }));
+    document.querySelectorAll('[data-pr]').forEach(b => b.addEventListener('click', () => { if (+b.dataset.pr === prSt.p) return; prSt.p = +b.dataset.pr; prWords(); prShow(); }));
+
+    // what 02 does to one picture: soft color at once, then it sharpens
+    const settle = (im, i) => im.animate(
+        [{ filter: B(1.2) }, { filter: B(1.2), offset: 0.2 }, { filter: 'blur(0)' }],
+        { duration: D() * 1.8, delay: (i || 0) * 80, easing: EASE, fill: 'backwards' });
+
+    /* ── 10 paintings settle as they enter ── */
+    const enter = $('#enter'), enterRows = [...enter.querySelectorAll('.row4')];
+    const seen = new IntersectionObserver(es => es.forEach(e => {
+        if (!e.isIntersecting) return;
+        seen.unobserve(e.target);
+        [...e.target.children].forEach((im, i) => { im.style.filter = ''; if (isNew()) settle(im, i); });
+    }), { root: enter, threshold: 0.25 });
+    const arm = () => {
+        enter.scrollTop = 0;
+        enterRows.forEach(r => { seen.unobserve(r); [...r.children].forEach(im => { im.getAnimations().forEach(x => x.cancel()); im.style.filter = isNew() && !STILL ? B(1.2) : ''; }); });
+        requestAnimationFrame(() => enterRows.forEach(r => seen.observe(r)));
+    };
+    $('#play-enter').addEventListener('click', arm);
+    document.querySelectorAll('.mode button').forEach(b => b.addEventListener('click', arm));
+    // it starts when the box itself comes on screen, not before
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) arm(); }, { threshold: 0.6 }).observe(enter);
+
+    /* ── 16 zoom: the words step back ── */
+    const zm = $('#zm'), zmImg = zm.querySelector('img');
+    zmImg.addEventListener('click', e => {
+        if (zm.classList.toggle('zoomed')) {
+            const r = zmImg.getBoundingClientRect();
+            zmImg.style.transformOrigin = `${((e.clientX - r.left) / r.width * 100).toFixed(1)}% ${((e.clientY - r.top) / r.height * 100).toFixed(1)}%`;
+            zmImg.style.transform = 'scale(2.2)';
+        } else zmImg.style.transform = '';
+    });
+
+    /* ── 17 collection names trade places ── */
+    const cn = $('#cn'), cnNames = [...cn.querySelectorAll('.cn-line button')], cnRow = cn.querySelector('.row4');
+    const CN = [
+        ['44-atmosphere-lavender-green-ochre', '45-atmosphere-deep-violet', '46-atmosphere-dark-plum', '39-atmosphere-brown-purple'],
+        ['19-chromatic-blue-orange', '20-chromatic-red', '21-chromatic-orange', '22-chromatic-blue-i'],
+        ['47-paper-purple-01', '48-paper-purple-02', '49-paper-crimson-01', '50-paper-crimson-02'],
+        ['03-atmosphere-maroon-khaki', '02-atmosphere-burgundy-blue', '41-atmosphere-burgundy-blue-ii', '40-atmosphere-blue']
+    ];
+    cnNames.forEach(b => b.addEventListener('click', () => {
+        if (b.classList.contains('cur')) return;
+        const fresh = isNew(), d = D();
+        const was = cnNames.map(n => n.getBoundingClientRect());
+        cnNames.forEach(n => { n.getAnimations().forEach(x => x.cancel()); n.classList.toggle('cur', n === b); });
+        const pics = [...cnRow.children];
+        pics.forEach((im, i) => { im.getAnimations().forEach(x => x.cancel()); im.src = `${T}${CN[+b.dataset.c][i]}.webp`; });
+        if (fresh) {
+            // each name moves from where it stood to where it stands, and takes its new size on the way
+            cnNames.forEach((n, i) => {
+                const is = n.getBoundingClientRect();
+                n.animate([{ transform: `translate(${(was[i].left - is.left).toFixed(1)}px, ${(was[i].bottom - is.bottom).toFixed(1)}px) scale(${(was[i].height / is.height).toFixed(4)})`, color: n === b ? '#6f6f6a' : (was[i].height > is.height ? '#1a1a18' : '#6f6f6a') }, { transform: 'none' }],
+                          { duration: d, easing: EASE });
+            });
+            pics.forEach((im, i) => settle(im, i));
+        } else {
+            cn.querySelector('.cn').animate([{ opacity: 0, transform: 'translateX(12px)' }, { opacity: 1, transform: 'none' }], { duration: 450, delay: 60, easing: OUT, fill: 'backwards' });
+        }
+    }));
+
+    /* ── 18 the closeup opens into the painting ── */
+    const op = $('#op'), opCrop = op.querySelector('.op-crop'), opWhole = op.querySelector('.op-whole'), opWords = [...op.querySelectorAll('.words > div')], opCap = op.querySelector('.op-cap');
+    op.addEventListener('click', () => {
+        op.getAnimations({ subtree: true }).forEach(x => x.cancel());
+        if (op.classList.toggle('open')) {
+            if (isNew()) {
+                const d = D() * 1.6, o = op.getBoundingClientRect(), r = opWhole.getBoundingClientRect();
+                const inset = `inset(${(r.top - o.top).toFixed(1)}px ${(o.right - r.right).toFixed(1)}px ${(o.bottom - r.bottom).toFixed(1)}px ${(r.left - o.left).toFixed(1)}px)`;
+                opCap.animate({ opacity: [1, 0] }, { duration: d * 0.25, easing: EASE });
+                opCrop.animate([{ clipPath: 'inset(0px 0px 0px 0px)', opacity: 1 }, { clipPath: inset, opacity: 1, offset: 0.7 }, { clipPath: inset, opacity: 0 }], { duration: d, easing: EASE });
+                opWhole.animate([{ opacity: 0, transform: 'scale(1.18)' }, { opacity: 0, transform: 'scale(1.1)', offset: 0.45 }, { opacity: 1, transform: 'none' }], { duration: d, easing: EASE });
+                opWords.forEach((el, n) => el.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }], { duration: D(), delay: d * 0.65 + n * 70, easing: OUT, fill: 'backwards' }));
+            } else {
+                opCrop.animate({ opacity: [1, 0] }, { duration: 450, easing: EASE });
+                opCap.animate({ opacity: [1, 0] }, { duration: 200, easing: EASE });
+                opWords.forEach(el => el.animate([{ opacity: 0, transform: 'translateY(10px)' }, {}], { duration: 450, delay: 225, easing: OUT, fill: 'backwards' }));
+            }
+        } else {
+            opCrop.animate({ opacity: [0, 1] }, { duration: isNew() ? D() : 380, easing: EASE });
+            opCap.animate({ opacity: [0, 1] }, { duration: isNew() ? D() : 380, easing: EASE });
+        }
+    });
+
+    /* ── 19 the header steps aside ── */
+    const aside = $('#aside'), asideTop = aside.querySelector('.s-top');
+    let lastY = 0;
+    aside.addEventListener('scroll', () => {
+        const y = aside.scrollTop;
+        if (Math.abs(y - lastY) < 4) return;
+        asideTop.classList.toggle('away', isNew() && y > lastY && y > 50);
+        lastY = y;
+    }, { passive: true });
+
+    /* ── 20 first arrival ── */
+    const first = $('#first'), fName = first.querySelector('.win-top'), fPic = first.querySelector('.fa img'), fCap = first.querySelector('.fa span');
+    $('#play-first').addEventListener('click', () => {
+        first.getAnimations({ subtree: true }).forEach(x => x.cancel());
+        if (isNew()) {
+            const d = D();
+            fName.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }], { duration: d * 1.2, easing: OUT, fill: 'backwards' });
+            fPic.animate([{ opacity: 0, filter: B(1.6), transform: 'scale(1.04)' }, { opacity: 1, filter: B(1.2), offset: 0.3 }, { opacity: 1, filter: 'blur(0)', transform: 'none' }], { duration: d * 3, delay: d * 0.5, easing: EASE, fill: 'backwards' });
+            fCap.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }], { duration: d * 1.2, delay: d * 2.6, easing: OUT, fill: 'backwards' });
+        } else {
+            fPic.animate({ opacity: [0, 1] }, { duration: 900, delay: 300, easing: OUT, fill: 'backwards' });
+            fCap.animate([{ opacity: 0, transform: 'translateY(10px)' }, {}], { duration: 900, delay: 550, easing: OUT, fill: 'backwards' });
+        }
+    });
+
+    /* ── 21 neighbours at the edges ── */
+    const nb = $('#nb'), nbPics = [...nb.querySelectorAll('img')], NB = ['lavender green ochre', 'deep violet', 'dark plum', 'brown purple'];
+    let nbAt = 0;
+    const nbDraw = () => {
+        const n = nbPics.length;
+        nbPics.forEach((im, i) => { im.className = i === nbAt ? 'cur' : i === (nbAt + 1) % n ? 'next' : i === (nbAt - 1 + n) % n ? 'prev' : 'off'; });
+        $('#nb-t').textContent = NB[nbAt]; $('#nb-n').textContent = `${two(nbAt + 1)} / ${two(n)}`;
+    };
+    const nbStep = dlt => { nbAt = (nbAt + dlt + nbPics.length) % nbPics.length; nbDraw(); if (isNew()) $('#nb-t').animate([{ opacity: 0, filter: B(0.4) }, { opacity: 1, filter: 'blur(0)' }], { duration: D(), delay: D() * 0.3, easing: OUT, fill: 'backwards' }); };
+    nbPics.forEach(im => im.addEventListener('click', () => { if (im.classList.contains('next')) nbStep(1); if (im.classList.contains('prev')) nbStep(-1); }));
+    $('#nb-prev').addEventListener('click', () => nbStep(-1));
+    $('#nb-next').addEventListener('click', () => nbStep(1));
+    nbDraw();
+
+    /* ── 22 joining the list ── */
+    const nl = $('#nl'), nlForm = nl.querySelector('form'), nlThanks = nl.querySelector('.thanks');
+    nlForm.addEventListener('submit', e => {
+        e.preventDefault();
+        nl.classList.add('done');
+        if (isNew()) {
+            const d = D();
+            nlForm.animate([{ visibility: 'visible', opacity: 1, filter: 'blur(0)' }, { visibility: 'visible', opacity: 0, filter: B(0.5) }], { duration: d * 0.6, easing: EASE });
+            nlThanks.animate([{ opacity: 0, filter: B(0.5) }, { opacity: 1, filter: 'blur(0)' }], { duration: d, delay: d * 0.45, easing: OUT, fill: 'backwards' });
+        }
+    });
+    nl.querySelector('.again').addEventListener('click', () => { nl.getAnimations({ subtree: true }).forEach(x => x.cancel()); nl.classList.remove('done'); });
+})();
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261108b"
+STAMP = "20261116a"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -144,6 +144,8 @@ HEAD = """<!DOCTYPE html>
         /* the pages stand in a row: going on, the next one slides in from the
            right; going back, from the left (the row itself: js/site.js) */
         document.documentElement.classList.add('js');
+        /* the first page of a visit comes into focus as one (style.css, site.js) */
+        try {{ if (!sessionStorage.getItem('kch-seen') && location.hash.length < 2 && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('first'); }} catch (x) {{}}
         /* a work opened by its address is open before the page shows: the first
            frame waits for the scripts at the end of the page (#end) */
         if (location.hash.length > 1) document.write('<link rel="expect" href="#end" blocking="render">');
@@ -400,8 +402,11 @@ def put_ld(path, block):
 def col_line(c, cols, esc):
     # every collection in one line, in order; this one is the page's title, large
     # a long name, bold and larger, takes two half-columns so the next one never touches it
-    return "".join(f'<h1 class="col-title">{esc(x["name"].lower())}</h1>' if x is c
-                   else f'<a href="../{x["slug"]}/">{esc(x["name"].lower())}</a>' for x in cols)
+    # each name keeps one view-transition-name on every page, so between collections
+    # the picked name grows into the title and the old title shrinks back (style.css)
+    vt = lambda x: f' style="view-transition-name: cn-{x["slug"]}"'
+    return "".join(f'<h1 class="col-title"{vt(x)}>{esc(x["name"].lower())}</h1>' if x is c
+                   else f'<a href="../{x["slug"]}/"{vt(x)}>{esc(x["name"].lower())}</a>' for x in cols)
 
 
 def write(path, text):

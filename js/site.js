@@ -15,6 +15,13 @@ const siteBoot = () => {
     if (typeof COLLECTIONS === 'undefined') return;
     const ROOT = window.ROOT || '';
     const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // a page reached from another page of this visit lets its pictures settle more
+    // lightly (style.css, html.came). The first page comes into focus as one: its
+    // head sets html.first, and the end of this file starts it
+    const rootEl = document.documentElement;
+    let seenBefore = true;
+    try { seenBefore = !!sessionStorage.getItem('kch-seen'); sessionStorage.setItem('kch-seen', '1'); } catch (e) {}
+    if (seenBefore) rootEl.classList.add('came');
     // the motion tokens of style.css (:root), so CSS and script move alike
     const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     const T = { fast: parseFloat(cssVar('--t-fast')) || 200, base: parseFloat(cssVar('--t-base')) || 450, slow: parseFloat(cssVar('--t-slow')) || 900 };
@@ -33,15 +40,34 @@ const siteBoot = () => {
         el.innerHTML = html;
         el.dataset.pre = h;
     };
-    // a painting fades in once its picture is loaded and decoded
+    // a painting comes into focus once its picture is loaded and decoded and it is
+    // on screen (.in). One further down that is ready before you scroll to it waits
+    // out of focus (.soft) and clears as its row comes into view (.late): one even
+    // blur, every painting the same. The looks are in style.css
+    const land = im => {
+        if (!im.dataset.ready) return;
+        if (im.dataset.seen) {
+            if (im.classList.contains('soft')) { im.classList.remove('soft'); im.classList.add('late'); }
+            im.classList.add('in');
+        } else if (im.dataset.below) im.classList.add('soft');
+    };
+    const rows = 'IntersectionObserver' in window && !REDUCE_MOTION
+        ? new IntersectionObserver(es => es.forEach(e => {
+            const im = e.target;
+            if (e.isIntersecting) { rows.unobserve(im); im.dataset.seen = '1'; }
+            else im.dataset.below = '1';
+            land(im);
+        }), { threshold: 0.15 })
+        : null;
     const arrive = root => root.querySelectorAll('img.fade:not(.in)').forEach(im => {
         if (im.dataset.arriving) return;
         im.dataset.arriving = '1';
-        const show = () => decoded(im).then(() => im.classList.add('in'));
-        if (im.complete && im.naturalWidth) im.classList.add('in');
+        const ready = () => { im.dataset.ready = '1'; land(im); };
+        if (rows) rows.observe(im); else im.dataset.seen = '1';
+        if (im.complete && im.naturalWidth) ready();
         else {
-            im.addEventListener('load', show, { once: true });
-            im.addEventListener('error', () => im.classList.add('in'), { once: true });
+            im.addEventListener('load', () => decoded(im).then(ready), { once: true });
+            im.addEventListener('error', ready, { once: true });
         }
     });
     // the painting's place in its photograph (js/boxes.js). Nothing is cropped:
@@ -79,7 +105,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261108b`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261116a`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -306,7 +332,55 @@ const siteBoot = () => {
             try { return lb.animate({ opacity: on ? [0, 1] : [1, 0] }, Object.assign({ pseudoElement: '::before' }, opts)); }
             catch (e) { return null; }
         };
-        const chrome = () => lb.querySelectorAll('.lightbox-info, .lightbox-btn');
+        // its pace and its blur are his numbers (style.css, :root)
+        const LB = { t: parseFloat(cssVar('--lb-t')) || 650, blur: parseFloat(cssVar('--lb-blur')) || 7,
+                     sideT: parseFloat(cssVar('--side-t')) || 600, sideBlur: parseFloat(cssVar('--side-blur')) || 8 };
+        // the words sharpen one after another; the close mark and the neighbours follow
+        const wordsIn = delay => {
+            [...info.children].filter(el => !el.hidden).forEach((el, n) => el.animate(
+                [{ opacity: 0, filter: `blur(${LB.blur / 2}px)` }, { opacity: 1, filter: 'blur(0)' }],
+                { duration: LB.t, delay: delay + n * 70, easing: EASE_OUT, fill: 'backwards' }));
+            lb.querySelectorAll('.lightbox-btn, .lb-side').forEach(el => el.animate([{ opacity: 0 }, {}],
+                { duration: LB.t, delay: delay + LB.t * 0.25, easing: EASE, fill: 'backwards' }));
+        };
+        // only the painting is drawn, not the white of its photograph (js/boxes.js):
+        // toward the edges the page shows through, and a white box would stand on it
+        const clip = () => {
+            const w = WORKS[idx], b = boxOf(w), W = img.clientWidth, H = img.clientHeight, ar = w.w / w.h;
+            if (!W || !H) return;
+            let pw = W, ph = pw / ar;
+            if (ph > H) { ph = H; pw = ph * ar; }
+            const ox = (W - pw) / 2, oy = (H - ph) / 2, px = v => `${v.toFixed(1)}px`;
+            img.style.clipPath = `inset(${px(oy + b[1] * ph)} ${px(ox + (1 - b[2]) * pw)} ${px(oy + (1 - b[3]) * ph)} ${px(ox + b[0] * pw)})`;
+        };
+        addEventListener('resize', () => { if (lb.classList.contains('active')) clip(); });
+        // the works before and after wait at the edges, small and out of focus (wide
+        // screens; style.css). A click brings one forward, as the arrows and keys do
+        const mkSide = d => {
+            const s = document.createElement('span');
+            s.className = `lb-side ${d < 0 ? 'lb-side-prev' : 'lb-side-next'}`;
+            s.setAttribute('aria-hidden', 'true');
+            s.innerHTML = '<img alt="">';
+            s.addEventListener('click', e => { e.stopPropagation(); step(d); });
+            lb.insertBefore(s, lb.querySelector('.lightbox-content'));
+            return s;
+        };
+        const prevEl = mkSide(-1), nextEl = mkSide(1);
+        const pc = v => `${(v * 100).toFixed(2)}%`;
+        const sideOf = (el, w, src) => {
+            const im = el.firstChild, b = boxOf(w);
+            im.width = w.w; im.height = w.h;
+            im.src = src || thumb(w, '-800');
+            im.style.clipPath = `inset(${pc(b[1])} ${pc(1 - b[2])} ${pc(1 - b[3])} ${pc(b[0])})`;
+            el.dataset.slug = w.slug;
+        };
+        const near = (w, d) => list[(list.indexOf(w) + d + list.length) % list.length];
+        const setSides = w => {
+            lb.classList.toggle('lb-alone', list.length < 2);
+            if (list.length < 2) return;
+            sideOf(prevEl, near(w, -1)); sideOf(nextEl, near(w, 1));
+        };
+        const sidesOn = () => list.length > 1 && getComputedStyle(prevEl).display !== 'none';
         // is the pointer on the painting, or on the white of its photograph?
         onPaint = e => {
             if (pan) return true;
@@ -326,7 +400,7 @@ const siteBoot = () => {
             m.sizes = SIZES; m.srcset = srcset(w); m.src = thumb(w, '-1600');
             return decoded(m).then(() => m);
         };
-        let closing = false;
+        let closing = false, stepDir = 0;
 
         closeLb = keepHash => {
             if (!lb.classList.contains('active') || closing) return;
@@ -353,14 +427,17 @@ const siteBoot = () => {
             img.classList.remove('is-zoomed');
             img.style.transformOrigin = 'center center';
             lb.classList.add('lb-flip');
-            const move = onto(to, w), out = Math.round(T.base * 0.85);
+            const move = onto(to, w), out = Math.round(LB.t * 0.8);
             veil(false, { duration: out, easing: EASE, fill: 'forwards' });
-            chrome().forEach(el => el.animate([{ opacity: 0 }], { duration: T.fast * 0.8, easing: EASE, fill: 'forwards' }));
+            lb.querySelectorAll('.lightbox-info, .lightbox-btn, .lb-side').forEach(el => el.animate([{ opacity: 0 }], { duration: out * 0.45, easing: EASE, fill: 'forwards' }));
             img.animate([{ transform: 'none' }, { transform: move }], { duration: out, easing: EASE, fill: 'forwards' })
                .onfinish = () => { img.style.transition = ''; finish(); };
         };
 
         openWork = (i, instant) => {
+            const was = WORKS[idx], dir = stepDir;
+            stepDir = 0;
+            let hop = null;
             idx = (i + WORKS.length) % WORKS.length;
             const w = WORKS[idx];
             const fresh = !lb.classList.contains('active');
@@ -385,21 +462,30 @@ const siteBoot = () => {
                 setPic(w, from);
             } else if (fresh) {
                 setPic(w, { sizes: SIZES, srcset: srcset(w), src: thumb(w, '-1600') });
+            } else if (dir && !REDUCE_MOTION && sidesOn() && (dir > 0 ? nextEl : prevEl).dataset.slug === w.slug && (dir > 0 ? nextEl : prevEl).firstChild.complete) {
+                // a step with the neighbours on screen: the one waiting at the edge comes
+                // forward (the move itself is below, once the words and sizes are set)
+                lb.getAnimations({ subtree: true }).forEach(a => a.finish());
+                if (stepFade) { stepFade.cancel(); stepFade = null; }
+                hop = { old: was, at: shown(was), src: img.currentSrc || img.src, come: (dir > 0 ? nextEl : prevEl).getBoundingClientRect() };
+                setPic(w, (dir > 0 ? nextEl : prevEl).firstChild);
             } else {
-                // a step to the next work: this one fades, the next comes in once drawn
-                const now = getComputedStyle(img).opacity;
+                // a step without them (a phone): this one dissolves, the next sharpens once drawn
+                const now = getComputedStyle(img).opacity, soft = `blur(${(LB.blur * 0.8).toFixed(1)}px)`;
                 if (stepFade) stepFade.cancel();
-                const fade = stepFade = REDUCE_MOTION ? null : img.animate({ opacity: [now, 0] }, { duration: T.fast, easing: EASE, fill: 'forwards' });
+                const fade = stepFade = REDUCE_MOTION ? null : img.animate([{ opacity: now, filter: 'blur(0)' }, { opacity: 0, filter: soft }], { duration: LB.t * 0.45, easing: EASE, fill: 'forwards' });
                 Promise.all([loading, fade ? fade.finished.catch(() => {}) : null]).then(([m]) => {
                     if (WORKS[idx] !== w) return;
                     setPic(w, m);
-                    if (fade) { fade.cancel(); stepFade = null; img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: T.base, easing: EASE_OUT }); }
+                    if (fade) { fade.cancel(); stepFade = null; img.animate([{ opacity: 0, filter: soft }, { opacity: 1, filter: 'blur(0)' }], { duration: LB.t * 0.9, easing: EASE_OUT }); }
                 });
             }
+            if (!hop) setSides(w);
             img.alt = altOf(w);
             const can = zoomOK(w);
             img.style.maxWidth = can ? '' : `${Math.round(w.w * smallScale(w))}px`;
             img.style.maxHeight = can ? '' : `${Math.round(w.h * smallScale(w))}px`;
+            clip();
             img.tabIndex = can ? 0 : -1;
             if (can) { img.setAttribute('role', 'button'); img.setAttribute('aria-label', `Zoom in, ${img.alt}`); }
             else { img.removeAttribute('role'); img.removeAttribute('aria-label'); }
@@ -422,6 +508,24 @@ const siteBoot = () => {
             printLink.href = `${ROOT}prints/?work=${w.slug}`;
             lb.querySelector('.lb-extra').hidden = !!w.sold;
 
+            if (hop) {
+                const come = dir > 0 ? nextEl : prevEl, go = dir > 0 ? prevEl : nextEl;
+                const is = shown(w), soft = `blur(${LB.sideBlur}px)`, t = LB.sideT;
+                // the newcomer grows from the edge into the middle, and sharpens
+                const grow = img.animate([
+                    { transform: `translate(${(hop.come.left + hop.come.width / 2 - is.x).toFixed(1)}px, ${(hop.come.top + hop.come.height / 2 - is.y).toFixed(1)}px) scale(${(hop.come.width / is.w).toFixed(4)})`, filter: soft, opacity: 0.6 },
+                    { transform: 'none', filter: 'blur(0)', opacity: 1 }], { duration: t, easing: EASE });
+                // the one that was looked at takes its place at the other edge
+                sideOf(go, hop.old, hop.src);
+                const g = go.getBoundingClientRect();
+                go.animate([
+                    { transform: `translate(${(hop.at.x - g.left - g.width / 2).toFixed(1)}px, ${(hop.at.y - g.top - g.height / 2).toFixed(1)}px) scale(${(hop.at.w / g.width).toFixed(4)})`, filter: 'blur(0)', opacity: 1 },
+                    {}], { duration: t, easing: EASE });
+                // and the next one along appears where the newcomer waited
+                sideOf(come, near(w, dir));
+                come.animate([{ opacity: 0 }, {}], { duration: t, delay: t * 0.4, easing: EASE, fill: 'backwards' });
+                Promise.all([loading, grow.finished.catch(() => {})]).then(([m]) => { if (WORKS[idx] === w && !full) setPic(w, m); });
+            }
             if (fresh) {
                 // only the keyboard is given its place back: a mouse has no use for the ring
                 back = keyed && document.activeElement !== document.body ? document.activeElement : null;
@@ -429,10 +533,9 @@ const siteBoot = () => {
                 if (from) {
                     lb.classList.add('lb-flip', 'active');
                     const move = onto(from, w);
-                    veil(true, { duration: T.base, easing: EASE });
-                    chrome().forEach(el => el.animate([{ opacity: 0, transform: el.classList.contains('lightbox-info') ? 'translateY(10px)' : getComputedStyle(el).transform }, {}],
-                                                      { duration: T.base, delay: T.base * 0.5, easing: EASE_OUT, fill: 'backwards' }));
-                    const grow = img.animate([{ transform: move }, { transform: 'none' }], { duration: T.base * 1.2, easing: EASE_OUT });
+                    veil(true, { duration: LB.t, easing: EASE });
+                    wordsIn(LB.t * 0.4);
+                    const grow = img.animate([{ transform: move }, { transform: 'none' }], { duration: LB.t * 1.1, easing: EASE_OUT });
                     grow.onfinish = () => lb.classList.remove('lb-flip');
                     Promise.all([loading, grow.finished.catch(() => {})]).then(([m]) => { if (WORKS[idx] === w && !full) setPic(w, m); });
                 } else if (instant) {
@@ -448,6 +551,7 @@ const siteBoot = () => {
 
         const step = d => {
             const j = list.indexOf(WORKS[idx]);
+            stepDir = d;
             openWork(WORKS.indexOf(list[(j + d + list.length) % list.length]));
         };
 
@@ -576,7 +680,7 @@ const siteBoot = () => {
             const startF = F.find(f => f.size === 'A2') || F[0];
             const pic = (p, f, px) => printImg(p.work, f.size, px);
             put(panel,
-                `<div class="pr grid"><div class="pr-pic" data-size="${startF.size}"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 24vw" width="1100" height="1556" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"></div>` +
+                `<div class="pr grid"><div class="pr-pic" data-size="${startF.size}"><span class="pr-sheet"><img class="fade" src="${pic(PR[0], startF, 1100)}" srcset="${pic(PR[0], startF, 600)} 600w, ${pic(PR[0], startF, 1100)} 1100w" sizes="(max-width: 800px) 78vw, 24vw" width="1100" height="1556" alt="Print of ${plain(bySlug[PR[0].work])}, ${startF.size}" decoding="async"><img class="pr-over" alt="" aria-hidden="true" width="1100" height="1556" sizes="(max-width: 800px) 78vw, 24vw"></span></div>` +
                 `<div class="pr-info"><span class="pr-k">a print of</span>` +
                 PR.map((p, i) => `<button type="button" class="pr-opt" data-print="${i}" aria-pressed="${i === 0}">${nameOf(bySlug[p.work])}</button>`).join('') +
                 `<span class="pr-sizes" role="group" aria-label="size"><span class="pr-in">in</span>` +
@@ -587,10 +691,27 @@ const siteBoot = () => {
                 `<a class="lb-submit pr-ask" href="${SITE.instagram}" target="_blank" rel="noopener">inquire via instagram</a></div></div>`);
 
             const st = { p: 0, f: startF };
+            // the sheet stays where it is; the picture on it turns into the next with
+            // no gap between them: the new one fades in over the old, then takes its place
+            const PR_T = parseFloat(cssVar('--pr-t')) || 1200;
+            let turnNo = 0;
+            const turn = (im, src, set) => {
+                const over = panel.querySelector('.pr-over'), no = ++turnNo;
+                const give = el => { el.srcset = set; el.src = src; };
+                // a change while one is under way: what was coming is taken as arrived
+                if (over.getAnimations().length) { im.srcset = over.srcset; im.src = over.src; }
+                over.getAnimations().forEach(a => a.cancel());
+                if (REDUCE_MOTION || !im.classList.contains('in')) { give(im); return; }
+                give(over);
+                decoded(over).then(() => {
+                    if (no !== turnNo) return;
+                    const fade = over.animate({ opacity: [0, 1] }, { duration: PR_T, easing: EASE, fill: 'forwards' });
+                    fade.onfinish = () => { if (no !== turnNo) return; give(im); decoded(im).then(() => { if (no === turnNo) fade.cancel(); }); };
+                });
+            };
             const sync = () => {
                 const p = PR[st.p], w = bySlug[p.work], f = st.f, im = panel.querySelector('.pr-pic img');
-                im.src = pic(p, f, 1100);
-                im.srcset = `${pic(p, f, 600)} 600w, ${pic(p, f, 1100)} 1100w`;
+                turn(im, pic(p, f, 1100), `${pic(p, f, 600)} 600w, ${pic(p, f, 1100)} 1100w`);
                 im.alt = `Print of ${plain(w)}, ${f.size}`;
                 panel.querySelector('.pr-pic').dataset.size = f.size;
                 panel.querySelectorAll('.pr-opt[data-print]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.print === st.p));
@@ -634,6 +755,24 @@ const siteBoot = () => {
 
     // ── paintings arrive: each fades in once its picture has loaded ──
     arrive(document);
+
+    // ── the first page of a visit is held back (html.first, set in its head)
+    //    until its first picture can be drawn, then all of it comes into focus
+    //    together, from the white of the page ──
+    if (rootEl.classList.contains('first')) {
+        const lead = document.querySelector('.slide img') || document.querySelector('main img');
+        const drawn = !lead ? Promise.resolve()
+            : lead.complete ? decoded(lead)
+            : new Promise(r => { lead.addEventListener('load', r, { once: true }); lead.addEventListener('error', r, { once: true }); });
+        Promise.race([drawn, new Promise(r => setTimeout(r, 1200))]).then(() => {
+            rootEl.classList.replace('first', 'first-in');
+            document.body.addEventListener('animationend', function end(e) {
+                if (e.target !== document.body) return;
+                document.body.removeEventListener('animationend', end);
+                rootEl.classList.remove('first-in');
+            });
+        });
+    }
 
     // ── moving through the site. The pages stand in a row, like rooms along
     //    a wall: home, the collections, about, contact. Going on slides the

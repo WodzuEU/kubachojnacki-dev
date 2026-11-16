@@ -45,8 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Accept': 'application/json' },
                     });
                     if (!res.ok) throw new Error('subscribe failed: ' + res.status);
+                    // the field goes soft, and the thank-you sharpens in its place
+                    const css = v => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v));
+                    const still = !form.animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const t = css('--nl-t') || 900, soft = `blur(${css('--nl-blur') || 4.5}px)`;
+                    if (!still) await form.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: soft }], { duration: t * 0.6, easing: 'ease', fill: 'forwards' }).finished.catch(() => {});
                     signup.innerHTML =
                         '<p class="newsletter-confirm">thank you. now check your inbox to confirm the subscription.</p>';
+                    if (!still) signup.firstElementChild.animate([{ opacity: 0, filter: soft }, { opacity: 1, filter: 'blur(0)' }], { duration: t, easing: 'ease-out' });
                 } catch (err) {
                     btn.disabled = false;
                     btn.textContent = cta;
