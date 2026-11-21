@@ -592,7 +592,8 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
    and closing only fade it (site.js) */
 .lightbox::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
-    background: radial-gradient(ellipse 62% 78% at 38% 50%, #fff 0, #fff 42%, rgb(255 255 255 / var(--lb-edge)) 100%);
+    /* no shape: a wide, eased fall-off (2026-11-21, he saw the old oval's edge) */
+    background: radial-gradient(ellipse 95% 130% at 38% 50%, #fff 0, #fff 25%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.043)) 34.4%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.156)) 43.8%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.316)) 53.1%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.500)) 62.5%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.684)) 71.9%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.844)) 81.2%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.957)) 90.6%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 1.000)) 100.0%);
     -webkit-backdrop-filter: blur(var(--lb-blur)); backdrop-filter: blur(var(--lb-blur));
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
