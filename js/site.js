@@ -40,10 +40,12 @@ const siteBoot = () => {
         el.innerHTML = html;
         el.dataset.pre = h;
     };
-    // a painting comes into focus once its picture is loaded and decoded and it is
-    // on screen (.in). One further down that is ready before you scroll to it waits
-    // out of focus (.soft) and clears as its row comes into view (.late): one even
-    // blur, every painting the same. The looks are in style.css
+    // paintings come into focus (the looks are in style.css):
+    //  - the ones on the first screen wait for each other and clear together, in
+    //    one moment, so nothing pops in on its own clock. They wait 700 ms at
+    //    most; one that is later still joins when its picture is there
+    //  - one further down that is loaded before you scroll to it waits out of
+    //    focus (.soft) and clears as its row comes into view (.late)
     const land = im => {
         if (!im.dataset.ready) return;
         if (im.dataset.seen) {
@@ -51,19 +53,40 @@ const siteBoot = () => {
             im.classList.add('in');
         } else if (im.dataset.below) im.classList.add('soft');
     };
-    const rows = 'IntersectionObserver' in window && !REDUCE_MOTION
-        ? new IntersectionObserver(es => es.forEach(e => {
+    const WATCH = 'IntersectionObserver' in window && !REDUCE_MOTION;
+    const lead = new Set();
+    let sorted = false, gate = false, gateTimer = 0;
+    const openGate = () => {
+        if (gate) return;
+        gate = true; clearTimeout(gateTimer);
+        lead.forEach(im => { im.dataset.seen = '1'; land(im); });
+    };
+    const tryGate = () => { if (sorted && !gate && [...lead].every(im => im.dataset.ready)) openGate(); };
+    // a row is "in view" once its top stands a tenth of the window above the foot
+    const rows = WATCH ? new IntersectionObserver(es => es.forEach(e => {
+        if (!e.isIntersecting) return;
+        rows.unobserve(e.target);
+        e.target.dataset.seen = '1';
+        land(e.target);
+    }), { rootMargin: '0px 0px -10% 0px' }) : null;
+    // once, as the page opens: what shows at all belongs to the first screen
+    const sort = WATCH ? new IntersectionObserver(es => {
+        es.forEach(e => {
             const im = e.target;
-            if (e.isIntersecting) { rows.unobserve(im); im.dataset.seen = '1'; }
-            else im.dataset.below = '1';
-            land(im);
-        }), { threshold: 0.15 })
-        : null;
+            sort.unobserve(im);
+            if (!e.isIntersecting) { im.dataset.below = '1'; rows.observe(im); land(im); }
+            else if (gate) { im.dataset.seen = '1'; land(im); }
+            else lead.add(im);
+        });
+        sorted = true;
+        if (!gate && !gateTimer) gateTimer = setTimeout(openGate, 700);
+        tryGate();
+    }) : null;
     const arrive = root => root.querySelectorAll('img.fade:not(.in)').forEach(im => {
         if (im.dataset.arriving) return;
         im.dataset.arriving = '1';
-        const ready = () => { im.dataset.ready = '1'; land(im); };
-        if (rows) rows.observe(im); else im.dataset.seen = '1';
+        const ready = () => { im.dataset.ready = '1'; land(im); tryGate(); };
+        if (sort) sort.observe(im); else im.dataset.seen = '1';
         if (im.complete && im.naturalWidth) ready();
         else {
             im.addEventListener('load', () => decoded(im).then(ready), { once: true });
@@ -105,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261116a`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261121a`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());

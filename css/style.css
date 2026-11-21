@@ -236,9 +236,11 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
    the pictures simply show */
 .js img.fade { opacity: 0; }
 .js img.fade.in { opacity: 1; animation: arrive var(--arr-t) var(--ease) backwards; }
+/* one even blur that clears from the first moment, the same for every painting
+   (no holding, no order); the picture itself is there within a fifth of it */
 @keyframes arrive {
     from { opacity: 0; filter: blur(var(--arr-blur)); }
-    25%  { opacity: 1; filter: blur(var(--arr-blur)); }
+    20%  { opacity: 1; }
     to   { filter: blur(0); }
 }
 /* further down the page a loaded picture waits out of focus, and clears when
@@ -345,11 +347,16 @@ html.first-in body { animation: first-in var(--first-t) var(--ease) backwards; }
 }
 .cg-item > a { display: block; }
 .cg-item .sp-frame { width: 64.5%; }
-/* while it arrives, the painting's own box in its own colour, faintly */
+/* while it arrives, the painting's own colour where it will hang, faintly */
 .sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
 .sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
-.sp-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.3; transition: opacity var(--t-slow) var(--ease); }
-.sp-frame:has(img.in) .sp-ph, .sp-frame:has(img.soft) .sp-ph { opacity: 0; }
+/* (2026-11-16) not a box with edges: a soft cloud of that colour, which the
+   painting then sharpens out of */
+.sp-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.3; filter: blur(14px); transition: opacity calc(var(--arr-t) * 0.2) var(--ease); }
+/* the moment the painting itself is there, its colour goes: it must not show
+   through the painting's soft edge, where it read as a dark frame (2026-11-21) */
+.sp-frame:has(img.in) .sp-ph { opacity: 0; }
+.sp-frame:has(img.soft) .sp-ph { opacity: 0; transition: none; }
 /* the studies on paper are photographed close: shown smaller */
 .sp-frame.is-paper img { width: 62%; height: 62%; }
 .sp-frame.is-paper .sp-ph { transform: translate(-50%, -50%) scale(0.62); }
