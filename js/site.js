@@ -128,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261121b`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261121c`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -199,7 +199,7 @@ const siteBoot = () => {
             // new words each time, so they rise in again with each painting
             cap.innerHTML =
                 `<a class="hc-title" href="#${w.slug}" tabindex="-1">${roman(w.title)}</a>
-                 <span class="hc-specs">${w.medium}<i>|</i>${nb(w.size)}<i>|</i>${w.year}</span>`;
+                 <span class="hc-specs">${w.medium}<i>|</i>${nb(w.size)}<i>|</i>${w.year}${w.sold ? '<i>|</i>sold' : ''}</span>`;
             counter.textContent = `${two(cur + 1)} / ${two(N)}`;
             // the painting on show, and the next one drawn before its turn comes
             fill(cur);
