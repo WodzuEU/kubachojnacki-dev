@@ -128,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261122a`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261122b`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -431,6 +431,7 @@ const siteBoot = () => {
             const finish = () => {
                 lb.classList.remove('active');
                 lb.getAnimations({ subtree: true }).forEach(a => a.cancel());
+                lb.style.removeProperty('--drag'); lb.classList.remove('lb-snap');
                 requestAnimationFrame(() => lb.classList.remove('lb-flip'));
                 closing = false;
                 unlock();
@@ -534,7 +535,8 @@ const siteBoot = () => {
 
             if (hop) {
                 const come = dir > 0 ? nextEl : prevEl, go = dir > 0 ? prevEl : nextEl;
-                const is = shown(w), soft = `blur(${LB.sideBlur}px)`, t = LB.sideT;
+                lb.style.removeProperty('--drag'); lb.classList.remove('lb-snap');
+                const is = shown(w), soft = `blur(${parseFloat(getComputedStyle(lb).getPropertyValue('--side-blur')) || 0}px)`, t = LB.sideT;
                 // the newcomer grows from the edge into the middle, and sharpens
                 const grow = img.animate([
                     { transform: `translate(${(hop.come.left + hop.come.width / 2 - is.x).toFixed(1)}px, ${(hop.come.top + hop.come.height / 2 - is.y).toFixed(1)}px) scale(${(hop.come.width / is.w).toFixed(4)})`, filter: soft, opacity: 0.6 },
@@ -577,6 +579,8 @@ const siteBoot = () => {
             const j = list.indexOf(WORKS[idx]);
             stepDir = d;
             openWork(WORKS.indexOf(list[(j + d + list.length) % list.length]));
+            // a step that did not carry the neighbour forward: what the finger moved settles back
+            if (lb.style.getPropertyValue('--drag')) { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }
         };
 
         // the full-resolution master only when someone zooms
@@ -655,22 +659,36 @@ const siteBoot = () => {
             if (pan) zoomOut(); else zoomIn(e.clientX, e.clientY);
         });
         img.addEventListener('pointermove', e => { img.style.cursor = onPaint(e) && canZoom() ? '' : 'default'; });
-        // a swipe on the picture walks to the next work, unless it is zoomed in
-        let sx = 0, sy = 0;
-        img.addEventListener('touchstart', e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
-        img.addEventListener('touchend', e => {
-            if (pan) return;
-            const t = e.changedTouches[0], dx = sx - t.clientX, dy = sy - t.clientY;
-            if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) { moved = true; step(dx > 0 ? 1 : -1); }
+        // a swipe anywhere in the lightbox carries the painting and its neighbours
+        // with the finger (--drag, style.css); let go past a fifth of the screen, or
+        // with a flick, and the next one comes forward, otherwise all settle back.
+        // Not while zoomed in: then the finger moves about the painting
+        let sw = null;
+        lb.addEventListener('touchstart', e => {
+            if (pan || e.touches.length > 1 || e.target.closest('a, button, input')) { sw = null; return; }
+            const t = e.touches[0];
+            sw = { x: t.clientX, y: t.clientY, t: performance.now(), dx: 0, on: null };
         }, { passive: true });
-        // a swipe anywhere else in the lightbox walks too (the neighbours, the words)
-        let lx = 0, ly = 0;
-        lb.addEventListener('touchstart', e => { const t = e.changedTouches[0]; lx = t.clientX; ly = t.clientY; }, { passive: true });
-        lb.addEventListener('touchend', e => {
-            if (pan || e.target === img || e.target.closest('a, button, input')) return;
-            const t = e.changedTouches[0], dx = lx - t.clientX, dy = ly - t.clientY;
-            if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx > 0 ? 1 : -1);
+        lb.addEventListener('touchmove', e => {
+            if (!sw || pan) return;
+            const t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+            if (sw.on === null && Math.abs(dx) + Math.abs(dy) > 8) sw.on = Math.abs(dx) > 1.2 * Math.abs(dy);
+            if (!sw.on) return;
+            sw.dx = dx;
+            lb.classList.remove('lb-snap');
+            // past the last work there is nothing to carry: the row resists
+            lb.style.setProperty('--drag', `${(list.length > 1 ? dx : dx * 0.3).toFixed(1)}px`);
         }, { passive: true });
+        lb.addEventListener('touchend', () => {
+            if (!sw) return;
+            const { dx, on } = sw, quick = Math.abs(dx) / Math.max(1, performance.now() - sw.t) > 0.5;
+            sw = null;
+            if (!on) return;
+            moved = true;
+            if (list.length > 1 && (Math.abs(dx) > innerWidth / 5 || (quick && Math.abs(dx) > 30))) step(dx < 0 ? 1 : -1);
+            else { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }
+        }, { passive: true });
+        lb.addEventListener('touchcancel', () => { sw = null; lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }, { passive: true });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();

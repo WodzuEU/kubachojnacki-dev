@@ -739,13 +739,15 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .privacy-page .facts { margin-top: var(--near); }
     .foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: var(--gut); row-gap: 0.35rem; padding-inline: var(--pad); }
     .foot-top, .foot-row { display: contents; }
+    /* the way on, the newsletter, then one last line: instagram, privacy, the year.
+       The email is on the contact page (his call, 2026-11-22) */
     .next { grid-column: 1 / -1; grid-row: 1; justify-self: end; margin: 0 0 2rem; }
-    .foot .f1 { grid-column: 1; grid-row: 2; }
+    .foot-nl { grid-column: 1 / -1; grid-row: 2; margin-bottom: 1.6rem; }
+    .foot-nl .fl, .foot-nl .newsletter-form input, .foot-nl .nl-submit { font-size: var(--s); }
+    .foot .f1 { display: none; }
     .foot .f2 { grid-column: 1; grid-row: 3; }
     .foot .f3 { grid-column: 2; grid-row: 3; gap: 1rem; white-space: nowrap; }
-    .foot .f1, .foot .f2, .foot .f3 > * { font-size: var(--s); }
-    .foot-nl { grid-column: 1 / -1; grid-row: 4; margin-top: 1.8rem; }
-    .foot-nl .fl, .foot-nl .newsletter-form input, .foot-nl .nl-submit { font-size: var(--s); }
+    .foot .f2, .foot .f3 > * { font-size: var(--s); }
     .lock .foot .f3 { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
     .lightbox { --pic-top: 3.4rem; --pic-h: min(52dvh, 118vw); }
     .lightbox-content {
@@ -760,16 +762,31 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .lb-inquiry-section { flex-direction: row; flex-wrap: wrap; column-gap: 1.2rem; row-gap: 0.3rem; }
     .lb-extra { display: flex; flex-wrap: wrap; column-gap: 0.4em; }
     .lb-extra p + p::before { content: "· "; }
-    /* the works before and after peek in at the screen's edges, out of focus,
-       and the arrows stand on them, either side of the painting */
-    .lb-side { display: block; top: calc(var(--pic-top) + var(--pic-h) / 2); height: calc(var(--pic-h) * 0.62); opacity: 0.55; }
-    .lb-side-prev { left: auto; right: calc(100% - 1.15rem); }
-    .lb-side-next { left: calc(100% - 1.15rem); }
+    /* a carousel, as the slideshow on the main page: the works before and after
+       stand at the screen's edges, sharp, and the finger carries all three (site.js).
+       Over them a soft chevron either side */
+    .lightbox { --side-blur: 0px; --drag: 0px; }
+    .lb-side { display: block; top: calc(var(--pic-top) + var(--pic-h) / 2); height: calc(var(--pic-h) * 0.8); opacity: 1; translate: var(--drag) -50%; }
+    .lb-side-prev { left: auto; right: calc(100% - 1.8rem); }
+    .lb-side-next { left: calc(100% - 1.8rem); }
+    .lightbox #lightbox-img { translate: var(--drag) 0; }
+    .lightbox.lb-snap #lightbox-img, .lightbox.lb-snap .lb-side { transition: translate 280ms var(--ease-out); }
     .lb-nav { justify-content: flex-start; }
     .lb-count { font-size: calc(var(--s) + 1px); }
-    .lightbox .lb-nav button { position: absolute; z-index: 3; top: calc(var(--pic-top) + var(--pic-h) / 2); translate: 0 -50%; margin: 0; padding: 1.2rem 0.35rem; font-size: var(--l); }
-    .lightbox .lb-prev { left: 0.15rem; }
-    .lightbox .lb-next { right: 0.15rem; }
+    .lightbox .lb-nav button {
+        position: absolute; z-index: 3; top: calc(var(--pic-top) + var(--pic-h) / 2); translate: 0 -50%;
+        width: 2.4rem; height: 2.4rem; margin: 0; padding: 0; border-radius: 50%;
+        font-size: 0; color: transparent; background: rgb(255 255 255 / 0.5);
+        -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    }
+    .lightbox .lb-nav button::before {
+        content: ""; position: absolute; left: 50%; top: 50%; width: 0.6rem; height: 0.6rem;
+        border-top: 1.5px solid rgb(26 26 24 / 0.7); border-right: 1.5px solid rgb(26 26 24 / 0.7);
+    }
+    .lightbox .lb-prev::before { translate: -30% -50%; rotate: -135deg; }
+    .lightbox .lb-next::before { translate: -70% -50%; rotate: 45deg; }
+    .lightbox .lb-prev { left: 0.45rem; }
+    .lightbox .lb-next { right: 0.45rem; }
 }
 @media (max-width: 520px) {
     :root { --top: 45px; }
