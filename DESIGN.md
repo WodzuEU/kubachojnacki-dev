@@ -11,15 +11,16 @@ full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
 **2026-11-22, phones (from his iPhone screenshots: "much worse than on the computer").**
-- **Footer:** the way on, then email, instagram, privacy, then the newsletter last,
-  everything at the small size.
+- **Footer:** the way on, the newsletter, then one line: instagram, privacy, the
+  year. No email there on a phone (it is on contact). All at the small size.
 - **Contact:** a shorter strip of paintings (38vh), the title at `--l`, the facts in
   two quiet columns (grey label, 15 px value), never stacked.
 - **About:** the portrait the full width of the text; the prose justified and
   hyphenated as on a wide screen, 16 px; the capitals balanced.
-- **Lightbox on one screen:** the painting (52dvh), its words at 15 px below; the
-  arrows either side of the painting, standing on the works before and after,
-  which peek in at the edges; a swipe anywhere in it walks.
+- **Lightbox on one screen, as a carousel:** the painting (52dvh), its words at
+  15 px below; the works before and after sharp at the screen's edges; the finger
+  carries all three and a fifth of the screen (or a flick) brings the next one
+  forward. Soft chevrons in translucent white circles either side, not arrows.
 
 **2026-11-16, motion: nothing slides, things come into focus** (his picks and
 numbers from the motion study, `alt/motion/`; all values are tokens at the top
