@@ -128,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261121c`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261122a`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -377,6 +377,7 @@ const siteBoot = () => {
             img.style.clipPath = `inset(${px(oy + b[1] * ph)} ${px(ox + (1 - b[2]) * pw)} ${px(oy + (1 - b[3]) * ph)} ${px(ox + b[0] * pw)})`;
         };
         addEventListener('resize', () => { if (lb.classList.contains('active')) clip(); });
+        img.addEventListener('load', () => { if (lb.classList.contains('active')) clip(); });
         // the works before and after wait at the edges, small and out of focus (wide
         // screens; style.css). A click brings one forward, as the arrows and keys do
         const mkSide = d => {
@@ -661,6 +662,14 @@ const siteBoot = () => {
             if (pan) return;
             const t = e.changedTouches[0], dx = sx - t.clientX, dy = sy - t.clientY;
             if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) { moved = true; step(dx > 0 ? 1 : -1); }
+        }, { passive: true });
+        // a swipe anywhere else in the lightbox walks too (the neighbours, the words)
+        let lx = 0, ly = 0;
+        lb.addEventListener('touchstart', e => { const t = e.changedTouches[0]; lx = t.clientX; ly = t.clientY; }, { passive: true });
+        lb.addEventListener('touchend', e => {
+            if (pan || e.target === img || e.target.closest('a, button, input')) return;
+            const t = e.changedTouches[0], dx = lx - t.clientX, dy = ly - t.clientY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx > 0 ? 1 : -1);
         }, { passive: true });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;

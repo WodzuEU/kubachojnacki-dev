@@ -703,7 +703,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .top { display: flex; justify-content: space-between; column-gap: 0; }
     .menu { display: flex; column-gap: 0; }
     .menu a { margin-left: 1.2rem; }
-    .cl-note, .about-lead, .about-story, .about-text { text-align: start; hyphens: manual; }
+    .cl-note { text-align: start; hyphens: manual; }
     .col-line { column-gap: 0.9em; }
     .col-head .note { grid-column: 1 / -1; }
     .hero-wrap { height: auto; }
@@ -720,31 +720,56 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }
     .about-page { padding-top: var(--near); row-gap: var(--near); grid-template-rows: none; }
     .about-side, .about-story, .about-text, .about-line { grid-column: 1 / -1; grid-row: auto; }
-    .about-side img { max-width: 78%; }
-    .about-lead { margin-top: var(--near); }
-    .about-line { font-size: var(--l); }
+    .about-side img { width: 100%; }
+    .about-lead { margin-top: 1rem; }
+    .about-lead, .about-story, .about-text { font-size: 1rem; line-height: 1.55; text-align: justify; hyphens: auto; }
+    .about-story { gap: 0.9rem; }
+    .about-line { font-size: clamp(1.35rem, 6.6vw, 2rem); line-height: 1.12; text-wrap: balance; margin-block: 0.4rem; }
     .about-line span { display: inline; white-space: normal; text-align: start; text-align-last: auto; }
     .contact-page { grid-template-rows: none; row-gap: var(--near); }
-    .contact-media { grid-column: 1 / -1; height: 62vh; margin-right: calc(-1 * var(--pad)); }
+    .contact-media { grid-column: 1 / -1; height: 38vh; margin-right: calc(-1 * var(--pad)); }
+    .contact-title { font-size: var(--l); }
+    .contact-text .signup { margin-block: 1.2rem 1.8rem; }
     .contact-text { grid-column: 1 / -1; padding-bottom: var(--near); }
-    .facts > div { grid-template-columns: 6.5rem minmax(0, 1fr); }
+    .facts > div, .contact-text .facts > div { grid-template-columns: 6.2rem minmax(0, 1fr); gap: var(--gut); padding-block: 0.4rem; font-size: calc(var(--s) + 1px); line-height: 1.45; }
+    .facts dt { color: var(--mid); }
     .privacy-page .col-title, .privacy-page .facts { grid-column: 1 / -1; }
     .nf-no, .nf-text { grid-column: 1 / -1; }
     .nf-text { margin-top: var(--near); }
     .privacy-page .facts { margin-top: var(--near); }
-    .foot-nl, .next { grid-column: 1 / -1; }
-    .next { justify-self: end; margin-top: var(--far); }
-    .foot .f1 { grid-column: 1 / -1; }
-    .foot .f2 { grid-column: 1 / 5; }
-    .foot .f3 { grid-column: 5 / 9; }
+    .foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: var(--gut); row-gap: 0.35rem; padding-inline: var(--pad); }
+    .foot-top, .foot-row { display: contents; }
+    .next { grid-column: 1 / -1; grid-row: 1; justify-self: end; margin: 0 0 2rem; }
+    .foot .f1 { grid-column: 1; grid-row: 2; }
+    .foot .f2 { grid-column: 1; grid-row: 3; }
+    .foot .f3 { grid-column: 2; grid-row: 3; gap: 1rem; white-space: nowrap; }
+    .foot .f1, .foot .f2, .foot .f3 > * { font-size: var(--s); }
+    .foot-nl { grid-column: 1 / -1; grid-row: 4; margin-top: 1.8rem; }
+    .foot-nl .fl, .foot-nl .newsletter-form input, .foot-nl .nl-submit { font-size: var(--s); }
+    .lock .foot .f3 { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
+    .lightbox { --pic-top: 3.4rem; --pic-h: min(52dvh, 118vw); }
     .lightbox-content {
-        display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
-        padding: 3.5rem 1.5rem 2rem; overflow-y: auto;
+        display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 1.1rem;
+        padding: var(--pic-top) 2.6rem 1rem; overflow: hidden;
     }
-    .lightbox img { flex: none; width: 100%; height: 56vh; }
-    .lightbox::before { background: radial-gradient(ellipse 110% 85% at 50% 45%, #fff 0, #fff 70%, rgb(255 255 255 / 0.6) 100%); }
-    .lb-side { display: none; }
-    .lightbox-info { width: 100%; max-width: 380px; max-height: none; overflow: visible; gap: 1.2rem; }
+    .lightbox img { flex: none; width: 100%; height: var(--pic-h); }
+    .lightbox::before { background: radial-gradient(ellipse 120% 90% at 50% 40%, #fff 0, #fff 62%, rgb(255 255 255 / 0.55) 100%); }
+    .lightbox-info { width: 100%; max-width: none; max-height: none; overflow: visible; gap: 0.75rem; font-size: calc(var(--s) + 1px); line-height: 1.35; }
+    .lb-title { font-size: var(--h); }
+    .lb-head { display: flex; align-items: baseline; gap: 0.6em; flex-wrap: wrap; }
+    .lb-inquiry-section { flex-direction: row; flex-wrap: wrap; column-gap: 1.2rem; row-gap: 0.3rem; }
+    .lb-extra { display: flex; flex-wrap: wrap; column-gap: 0.4em; }
+    .lb-extra p + p::before { content: "· "; }
+    /* the works before and after peek in at the screen's edges, out of focus,
+       and the arrows stand on them, either side of the painting */
+    .lb-side { display: block; top: calc(var(--pic-top) + var(--pic-h) / 2); height: calc(var(--pic-h) * 0.62); opacity: 0.55; }
+    .lb-side-prev { left: auto; right: calc(100% - 1.15rem); }
+    .lb-side-next { left: calc(100% - 1.15rem); }
+    .lb-nav { justify-content: flex-start; }
+    .lb-count { font-size: calc(var(--s) + 1px); }
+    .lightbox .lb-nav button { position: absolute; z-index: 3; top: calc(var(--pic-top) + var(--pic-h) / 2); translate: 0 -50%; margin: 0; padding: 1.2rem 0.35rem; font-size: var(--l); }
+    .lightbox .lb-prev { left: 0.15rem; }
+    .lightbox .lb-next { right: 0.15rem; }
 }
 @media (max-width: 520px) {
     :root { --top: 45px; }
@@ -754,7 +779,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .hero-cap { flex-basis: 100%; }
     .hero-nav { margin-left: auto; }
     .hc-title { font-size: var(--m); }
-    .facts > div, .contact-text .facts > div, .privacy-page .facts > div { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 0.45rem; }
+    .facts > div, .contact-text .facts > div, .privacy-page .facts > div { grid-template-columns: 5.6rem minmax(0, 1fr); }
 }
 /* a thumb needs more room than the small words take: more padding, the same place */
 @media (hover: none) {
