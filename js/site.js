@@ -128,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261122b`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261122c`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -397,7 +397,21 @@ const siteBoot = () => {
             im.src = src || thumb(w, '-800');
             im.style.clipPath = `inset(${pc(b[1])} ${pc(1 - b[2])} ${pc(1 - b[3])} ${pc(b[0])})`;
             el.dataset.slug = w.slug;
+            decoded(im);
         };
+        // the painting just looked at moves to the edge as it is: a copy of the very
+        // picture on screen, so nothing has to load or flash on the way
+        const sideAs = (el, w) => {
+            const pic = img.cloneNode(false), b = boxOf(w);
+            ['id', 'role', 'tabindex', 'aria-label', 'style', 'class'].forEach(a => pic.removeAttribute(a));
+            pic.alt = '';
+            pic.style.clipPath = `inset(${pc(b[1])} ${pc(1 - b[2])} ${pc(1 - b[3])} ${pc(b[0])})`;
+            el.replaceChild(pic, el.firstChild);
+            el.dataset.slug = w.slug;
+        };
+        const sideBlur = () => parseFloat(getComputedStyle(lb).getPropertyValue('--side-blur')) || 0;
+        // whatever a finger left on the pictures (their own blur), gone
+        const unfinger = () => { img.style.filter = ''; prevEl.style.filter = ''; nextEl.style.filter = ''; };
         const near = (w, d) => list[(list.indexOf(w) + d + list.length) % list.length];
         const setSides = w => {
             lb.classList.toggle('lb-alone', list.length < 2);
@@ -431,7 +445,7 @@ const siteBoot = () => {
             const finish = () => {
                 lb.classList.remove('active');
                 lb.getAnimations({ subtree: true }).forEach(a => a.cancel());
-                lb.style.removeProperty('--drag'); lb.classList.remove('lb-snap');
+                lb.style.removeProperty('--drag'); lb.style.removeProperty('--pull'); lb.classList.remove('lb-snap'); unfinger();
                 requestAnimationFrame(() => lb.classList.remove('lb-flip'));
                 closing = false;
                 unlock();
@@ -492,8 +506,11 @@ const siteBoot = () => {
                 // forward (the move itself is below, once the words and sizes are set)
                 lb.getAnimations({ subtree: true }).forEach(a => a.finish());
                 if (stepFade) { stepFade.cancel(); stepFade = null; }
-                hop = { old: was, at: shown(was), src: img.currentSrc || img.src, come: (dir > 0 ? nextEl : prevEl).getBoundingClientRect() };
-                setPic(w, (dir > 0 ? nextEl : prevEl).firstChild);
+                const comeEl = dir > 0 ? nextEl : prevEl, cs = getComputedStyle(comeEl);
+                hop = { old: was, at: shown(was), come: comeEl.getBoundingClientRect(), blur: cs.filter === 'none' ? 'blur(0px)' : cs.filter, op: cs.opacity };
+                // the one looked at goes to the far edge before its picture is replaced
+                sideAs(dir > 0 ? prevEl : nextEl, was);
+                setPic(w, comeEl.firstChild);
             } else {
                 // a step without them (a phone): this one dissolves, the next sharpens once drawn
                 const now = getComputedStyle(img).opacity, soft = `blur(${(LB.blur * 0.8).toFixed(1)}px)`;
@@ -536,17 +553,18 @@ const siteBoot = () => {
             if (hop) {
                 const come = dir > 0 ? nextEl : prevEl, go = dir > 0 ? prevEl : nextEl;
                 lb.style.removeProperty('--drag'); lb.classList.remove('lb-snap');
-                const is = shown(w), soft = `blur(${parseFloat(getComputedStyle(lb).getPropertyValue('--side-blur')) || 0}px)`, t = LB.sideT;
-                // the newcomer grows from the edge into the middle, and sharpens
+                unfinger();
+                const is = shown(w), t = LB.sideT;
+                // the newcomer grows from the edge into the middle, and sharpens: it
+                // starts exactly as it stood (its place, its blur, its strength)
                 const grow = img.animate([
-                    { transform: `translate(${(hop.come.left + hop.come.width / 2 - is.x).toFixed(1)}px, ${(hop.come.top + hop.come.height / 2 - is.y).toFixed(1)}px) scale(${(hop.come.width / is.w).toFixed(4)})`, filter: soft, opacity: 0.6 },
-                    { transform: 'none', filter: 'blur(0)', opacity: 1 }], { duration: t, easing: EASE });
-                // the one that was looked at takes its place at the other edge
-                sideOf(go, hop.old, hop.src);
+                    { transform: `translate(${(hop.come.left + hop.come.width / 2 - is.x).toFixed(1)}px, ${(hop.come.top + hop.come.height / 2 - is.y).toFixed(1)}px) scale(${(hop.come.width / is.w).toFixed(4)})`, filter: hop.blur, opacity: hop.op },
+                    { transform: 'none', filter: 'blur(0px)', opacity: 1 }], { duration: t, easing: EASE });
+                // the one that was looked at takes its place at the other edge, and softens
                 const g = go.getBoundingClientRect();
                 go.animate([
-                    { transform: `translate(${(hop.at.x - g.left - g.width / 2).toFixed(1)}px, ${(hop.at.y - g.top - g.height / 2).toFixed(1)}px) scale(${(hop.at.w / g.width).toFixed(4)})`, filter: 'blur(0)', opacity: 1 },
-                    {}], { duration: t, easing: EASE });
+                    { transform: `translate(${(hop.at.x - g.left - g.width / 2).toFixed(1)}px, ${(hop.at.y - g.top - g.height / 2).toFixed(1)}px) scale(${(hop.at.w / g.width).toFixed(4)})`, filter: 'blur(0px)', opacity: 1 },
+                    { filter: `blur(${sideBlur()}px)` }], { duration: t, easing: EASE });
                 // and the next one along appears where the newcomer waited
                 sideOf(come, near(w, dir));
                 come.animate([{ opacity: 0 }, {}], { duration: t, delay: t * 0.4, easing: EASE, fill: 'backwards' });
@@ -580,7 +598,7 @@ const siteBoot = () => {
             stepDir = d;
             openWork(WORKS.indexOf(list[(j + d + list.length) % list.length]));
             // a step that did not carry the neighbour forward: what the finger moved settles back
-            if (lb.style.getPropertyValue('--drag')) { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }
+            if (lb.style.getPropertyValue('--drag')) { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); unfinger(); }
         };
 
         // the full-resolution master only when someone zooms
@@ -667,28 +685,47 @@ const siteBoot = () => {
         lb.addEventListener('touchstart', e => {
             if (pan || e.touches.length > 1 || e.target.closest('a, button, input')) { sw = null; return; }
             const t = e.touches[0];
-            sw = { x: t.clientX, y: t.clientY, t: performance.now(), dx: 0, on: null };
+            sw = { x: t.clientX, y: t.clientY, t: performance.now(), dx: 0, dy: 0, on: null };
         }, { passive: true });
         lb.addEventListener('touchmove', e => {
             if (!sw || pan) return;
             const t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
-            if (sw.on === null && Math.abs(dx) + Math.abs(dy) > 8) sw.on = Math.abs(dx) > 1.2 * Math.abs(dy);
-            if (!sw.on) return;
-            sw.dx = dx;
+            if (sw.on === null && Math.abs(dx) + Math.abs(dy) > 8) sw.on = Math.abs(dx) > 1.2 * Math.abs(dy) ? 'x' : (dy > 0 ? 'down' : 'no');
             lb.classList.remove('lb-snap');
+            if (sw.on === 'down') {
+                sw.dy = Math.max(0, dy);
+                lb.style.setProperty('--pull', `${(sw.dy * 0.6).toFixed(1)}px`);
+                return;
+            }
+            if (sw.on !== 'x') return;
+            sw.dx = dx;
             // past the last work there is nothing to carry: the row resists
             lb.style.setProperty('--drag', `${(list.length > 1 ? dx : dx * 0.3).toFixed(1)}px`);
+            if (list.length < 2 || !sidesOn()) return;
+            // the one coming in sharpens as it nears the middle; this one softens
+            const p = Math.min(1, Math.abs(dx) / (innerWidth * 0.55)), sb = sideBlur();
+            (dx < 0 ? nextEl : prevEl).style.filter = `blur(${(sb * (1 - p)).toFixed(2)}px)`;
+            (dx < 0 ? prevEl : nextEl).style.filter = '';
+            img.style.filter = `blur(${(sb * p * 0.5).toFixed(2)}px)`;
         }, { passive: true });
+        const settle = () => { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); lb.style.setProperty('--pull', '0px'); unfinger(); };
         lb.addEventListener('touchend', () => {
             if (!sw) return;
-            const { dx, on } = sw, quick = Math.abs(dx) / Math.max(1, performance.now() - sw.t) > 0.5;
+            const { dx, dy, on } = sw, ms = Math.max(1, performance.now() - sw.t);
             sw = null;
-            if (!on) return;
+            if (on !== 'x' && on !== 'down') return;
             moved = true;
+            if (on === 'down') {
+                // far enough, or a flick: the lightbox goes, from where the finger left it
+                if (dy > 110 || (dy > 40 && dy / ms > 0.5)) closeLb();
+                else settle();
+                return;
+            }
+            const quick = Math.abs(dx) / ms > 0.5;
             if (list.length > 1 && (Math.abs(dx) > innerWidth / 5 || (quick && Math.abs(dx) > 30))) step(dx < 0 ? 1 : -1);
-            else { lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }
+            else settle();
         }, { passive: true });
-        lb.addEventListener('touchcancel', () => { sw = null; lb.classList.add('lb-snap'); lb.style.setProperty('--drag', '0px'); }, { passive: true });
+        lb.addEventListener('touchcancel', () => { sw = null; settle(); }, { passive: true });
         img.addEventListener('keydown', e => {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();

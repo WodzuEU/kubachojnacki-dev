@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-STAMP = "20261122b"
+STAMP = "20261122c"
 SITE = "https://kubachojnacki.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
