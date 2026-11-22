@@ -755,7 +755,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
         padding: var(--pic-top) 2.6rem 1rem; overflow: hidden;
     }
     .lightbox img { flex: none; width: 100%; height: var(--pic-h); }
-    .lightbox::before { background: radial-gradient(ellipse 120% 90% at 50% 40%, #fff 0, #fff 62%, rgb(255 255 255 / 0.55) 100%); }
+    .lightbox::before { background: linear-gradient(to bottom, rgb(255 255 255 / 0) calc(var(--pic-top) + var(--pic-h) * 0.85), rgb(255 255 255 / 0.95) calc(var(--pic-top) + var(--pic-h) + 1.5rem)), radial-gradient(ellipse 72% 74% at 50% 44%, #fff 0, #fff 36%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.043)) 44.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.156)) 52.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.316)) 60.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.500)) 68.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.684)) 76.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.844)) 84.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 0.957)) 92.0%, rgb(255 255 255 / calc(1 - (1 - var(--lb-edge)) * 1.000)) 100.0%); }
     .lightbox-info { width: 100%; max-width: none; max-height: none; overflow: visible; gap: 0.75rem; font-size: calc(var(--s) + 1px); line-height: 1.35; }
     .lb-title { font-size: var(--h); }
     .lb-head { display: flex; align-items: baseline; gap: 0.6em; flex-wrap: wrap; }
@@ -765,8 +765,11 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     /* a carousel, as the slideshow on the main page: the works before and after
        stand at the screen's edges, sharp, and the finger carries all three (site.js).
        Over them a soft chevron either side */
-    .lightbox { --side-blur: 0px; --drag: 0px; }
-    .lb-side { display: block; top: calc(var(--pic-top) + var(--pic-h) / 2); height: calc(var(--pic-h) * 0.8); opacity: 1; translate: var(--drag) -50%; }
+    .lightbox { --side-blur: 6px; --drag: 0px; --pull: 0px; }
+    .lb-side { display: block; top: calc(var(--pic-top) + var(--pic-h) / 2); height: calc(var(--pic-h) * 0.8); opacity: 0.85; translate: var(--drag) calc(-50% + var(--pull)); }
+    /* a swipe down takes the lightbox away (site.js): everything follows the finger */
+    .lightbox-content { translate: 0 var(--pull); }
+    .lightbox.lb-snap .lightbox-content { transition: translate 280ms var(--ease-out); }
     .lb-side-prev { left: auto; right: calc(100% - 1.8rem); }
     .lb-side-next { left: calc(100% - 1.8rem); }
     .lightbox #lightbox-img { translate: var(--drag) 0; }
@@ -775,13 +778,14 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .lb-count { font-size: calc(var(--s) + 1px); }
     .lightbox .lb-nav button {
         position: absolute; z-index: 3; top: calc(var(--pic-top) + var(--pic-h) / 2); translate: 0 -50%;
-        width: 2.4rem; height: 2.4rem; margin: 0; padding: 0; border-radius: 50%;
-        font-size: 0; color: transparent; background: rgb(255 255 255 / 0.5);
-        -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+        width: 2.4rem; height: 3rem; margin: 0; padding: 0;
+        font-size: 0; color: transparent; background: none;
     }
+    /* only a thin chevron, light, with a breath of shadow so it reads on any painting */
     .lightbox .lb-nav button::before {
-        content: ""; position: absolute; left: 50%; top: 50%; width: 0.6rem; height: 0.6rem;
-        border-top: 1.5px solid rgb(26 26 24 / 0.7); border-right: 1.5px solid rgb(26 26 24 / 0.7);
+        content: ""; position: absolute; left: 50%; top: 50%; width: 0.75rem; height: 0.75rem;
+        border-top: 1.5px solid rgb(255 255 255 / 0.92); border-right: 1.5px solid rgb(255 255 255 / 0.92);
+        filter: drop-shadow(0 0 1.5px rgb(0 0 0 / 0.45));
     }
     .lightbox .lb-prev::before { translate: -30% -50%; rotate: -135deg; }
     .lightbox .lb-next::before { translate: -70% -50%; rotate: 45deg; }

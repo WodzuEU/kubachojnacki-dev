@@ -20,7 +20,10 @@ lives only in git history (`aeefb41`).
 - **Lightbox on one screen, as a carousel:** the painting (52dvh), its words at
   15 px below; the works before and after sharp at the screen's edges; the finger
   carries all three and a fifth of the screen (or a flick) brings the next one
-  forward. Soft chevrons in translucent white circles either side, not arrows.
+  forward. The page shows out of focus around the painting as on a wide screen
+  (the words stand on white); the neighbours are out of focus (6 px) and sharpen
+  as the finger brings one to the middle. Thin light chevrons, no circles. A swipe
+  down takes the lightbox away.
 
 **2026-11-16, motion: nothing slides, things come into focus** (his picks and
 numbers from the motion study, `alt/motion/`; all values are tokens at the top
