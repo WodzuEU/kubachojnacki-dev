@@ -10,6 +10,17 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**2026-11-22, phones (from his iPhone screenshots: "much worse than on the computer").**
+- **Footer:** the way on, then email, instagram, privacy, then the newsletter last,
+  everything at the small size.
+- **Contact:** a shorter strip of paintings (38vh), the title at `--l`, the facts in
+  two quiet columns (grey label, 15 px value), never stacked.
+- **About:** the portrait the full width of the text; the prose justified and
+  hyphenated as on a wide screen, 16 px; the capitals balanced.
+- **Lightbox on one screen:** the painting (52dvh), its words at 15 px below; the
+  arrows either side of the painting, standing on the works before and after,
+  which peek in at the edges; a swipe anywhere in it walks.
+
 **2026-11-16, motion: nothing slides, things come into focus** (his picks and
 numbers from the motion study, `alt/motion/`; all values are tokens at the top
 of `css/style.css`, read by `js/site.js` too). These win over §6 where they differ.
