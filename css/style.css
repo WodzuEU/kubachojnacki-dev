@@ -223,11 +223,13 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .sel-grid {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    --fw: 0.645;
+    grid-template-columns: repeat(4, calc((100% - (4 - 1) * var(--gut)) / 4 * var(--fw)));
+    justify-content: space-between;
     gap: 2.4rem var(--gut);
 }
 .sel-item { display: block; }
-.sel-frame { position: relative; display: block; aspect-ratio: 3 / 4; width: 64.5%; }
+.sel-frame { position: relative; display: block; aspect-ratio: 3 / 4; width: 100%; }
 .sel-frame img { width: 100%; height: 100%; object-fit: contain; }
 
 /* paintings arrive: each fades in once its picture is loaded and decoded
@@ -340,13 +342,18 @@ html.first-in body { animation: first-in var(--first-t) var(--ease) backwards; }
     grid-column: 1 / -1;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    /* (2026-11-25) even margins: each column is as wide as its painting (--fw of
+       a share), the first stands on the text's left edge, the last on the menu's
+       right edge, the rest evenly between */
+    --fw: 0.645;
+    grid-template-columns: repeat(var(--n), calc((100% - (var(--n) - 1) * var(--gut)) / var(--n) * var(--fw)));
+    justify-content: space-between;
     column-gap: var(--gut);
     row-gap: 2.4rem;
     align-items: start;
 }
 .cg-item > a { display: block; }
-.cg-item .sp-frame { width: 64.5%; }
+.cg-item .sp-frame { width: 100%; }
 /* while it arrives, the painting's own colour where it will hang, faintly */
 .sp-frame { position: relative; display: grid; place-items: center; aspect-ratio: 3 / 4; }
 .sp-frame img { position: relative; width: 100%; height: 100%; object-fit: contain; }
@@ -365,7 +372,7 @@ html.first-in body { animation: first-in var(--first-t) var(--ease) backwards; }
 .sp-cap { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 1em; margin-top: 0.35rem; font-family: var(--serif); font-size: var(--s); line-height: 1.35; letter-spacing: 0.02em; text-transform: lowercase; }
 .sp-no { flex: none; font-variant-numeric: tabular-nums; }
 .sp-nm { text-align: end; }
-.cg-item .sp-cap, .sel-item .sp-cap { width: 64.5%; }
+.cg-item .sp-cap, .sel-item .sp-cap { width: 100%; }
 /* on the main page the words show only under the mouse. The place is kept, so
    nothing moves */
 @media (hover: hover) {
@@ -644,6 +651,32 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 .lb-nav button { font-size: var(--l); line-height: 1; padding: 0.2rem 0.35rem; margin-left: -0.35rem; transition: opacity var(--t-fast) var(--ease); }
 .lb-next { margin-left: 0; }
 @media (hover: hover) { .lb-nav button:hover { opacity: 0.45; } }
+.lightbox .lb-nav button::before {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 1rem; height: 1rem;
+    border-top: 1.5px solid rgb(255 255 255 / 0.92); border-right: 1.5px solid rgb(255 255 255 / 0.92);
+    filter: drop-shadow(0 0 1.5px rgb(0 0 0 / 0.45));
+}
+.lightbox .lb-prev::before { translate: -30% -50%; rotate: -135deg; }
+.lightbox .lb-next::before { translate: -70% -50%; rotate: 45deg; }
+/* wide screens (2026-11-25): the works before and after show the same width at
+   both edges (--side-show), the painting and its words stand between them, a
+   little nearer the middle; the chevrons sit on the works at the edges */
+@media (min-width: 801px) {
+    .lightbox { --side-show: 8vw; }
+    .lightbox-content { padding-inline: calc(var(--side-show) + 2.5rem); }
+    .lightbox-info { grid-column: 5 / 8; }
+    .lb-side-prev { right: calc(100% - var(--side-show)); }
+    .lb-side-next { left: calc(100% - var(--side-show)); }
+    .lb-nav { display: contents; }
+    .lb-count { display: none; }
+    .lightbox .lb-nav button {
+        position: absolute; z-index: 3; top: 50%; translate: -50% -50%;
+        width: 3.5rem; height: 5rem; margin: 0; padding: 0; font-size: 0; color: transparent; background: none;
+    }
+    .lightbox .lb-prev { left: calc(var(--side-show) / 2); }
+    .lightbox .lb-next { left: calc(100% - var(--side-show) / 2); }
+    .lb-alone .lb-nav button { visibility: hidden; }
+}
 .lightbox-btn {
     position: absolute; z-index: 101;
     padding: 1.5rem; opacity: 0.6; transition: opacity var(--t-fast) var(--ease); color: var(--ink);
@@ -686,7 +719,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 }
 
 @media (max-width: 1100px) {
-    .cg-grid { grid-template-columns: repeat(var(--n-mid, 3), minmax(0, 1fr)); }
+    .cg-grid { grid-template-columns: repeat(var(--n-mid, 3), calc((100% - (var(--n-mid, 3) - 1) * var(--gut)) / var(--n-mid, 3) * var(--fw))); }
 }
 /* the tiles need the width: on a narrow window the list and note stand over them */
 @media (max-width: 1000px) {
@@ -709,12 +742,11 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .hero-wrap { height: auto; }
     .hero { aspect-ratio: 4 / 5; --hero-h: 125vw; }
     .hero-bar { bottom: 1.4rem; }
-    .sel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sel-grid { --fw: 0.82; grid-template-columns: repeat(2, calc((100% - (2 - 1) * var(--gut)) / 2 * var(--fw))); }
     /* on a phone the tiles are two by two */
     .cl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #collection { padding-top: var(--near); }
-    .cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.8rem; }
-    .cg-item .sp-frame, .cg-item .sp-cap, .sel-frame, .sel-item .sp-cap { width: 82%; }
+    .cg-grid { --fw: 0.82; grid-template-columns: repeat(2, calc((100% - (2 - 1) * var(--gut)) / 2 * var(--fw))); row-gap: 1.8rem; }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
     .pr-sheet { transform-origin: center top; }
     .pr-info { grid-column: 1 / -1; padding-top: var(--near); }

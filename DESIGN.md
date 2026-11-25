@@ -10,6 +10,15 @@ Redesigns, new visual concepts, or layout experiments are out — the one
 full redesign attempt (the 2026-07 "printed catalogue") was rejected and
 lives only in git history (`aeefb41`).
 
+**2026-11-25, even margins and the wide lightbox.**
+- **Grids (collections, selected works):** each column is as wide as its painting;
+  the first painting stands on the text's left edge, the last on the menu's right
+  edge, the rest evenly between (`--fw` 0.645, phones 0.82). This replaces
+  "paintings hang from the half-column".
+- **Lightbox on a wide screen:** the works before and after show the same width at
+  both edges (`--side-show` 8vw); the painting and its words stand between them, a
+  little nearer the middle; thin chevrons on the works at the edges; no count.
+
 **2026-11-22, phones (from his iPhone screenshots: "much worse than on the computer").**
 - **Footer:** the way on, the newsletter, then one line: instagram, privacy, the
   year. No email there on a phone (it is on contact). All at the small size.
