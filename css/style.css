@@ -749,7 +749,12 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     /* on a phone the tiles are two by two */
     /* (2026-11-25) on a phone one small tile: the collection tapped in the list
        (site.js). A second tap on the name, or a tap on the tile, opens it */
-    .cl-tiles { grid-template-columns: minmax(0, 1fr); width: 52%; }
+    /* the tile stands to the right of the list of names, as tall as the word
+       "collections" and the list together, without words under it */
+    .cl-in { grid-template-columns: minmax(0, 1fr) 27%; }
+    .cl-side { grid-column: 1 / -1; grid-row: 1; }
+    .cl-tiles { grid-column: 2; grid-row: 1; align-self: start; justify-self: end; display: block; width: min(100%, 6.4rem); }
+    .cl-tile .sp-cap { display: none; }
     .cl-tile:not(.on) { display: none; }
     .cl-tile.on .cl-img { animation: tile-in var(--arr-t) var(--ease) backwards; }
     #collection { padding-top: var(--near); }
