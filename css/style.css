@@ -662,9 +662,11 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
    both edges (--side-show), the painting and its words stand between them, a
    little nearer the middle; the chevrons sit on the works at the edges */
 @media (min-width: 801px) {
-    .lightbox { --side-show: 8vw; }
-    .lightbox-content { padding-inline: calc(var(--side-show) + 2.5rem); }
-    .lightbox-info { grid-column: 5 / 8; }
+    /* --lb-shift moves the painting toward the middle, --lb-gap is the white between
+       the painting and its words (his tuning, 2026-11-25) */
+    .lightbox { --side-show: 8vw; --lb-shift: 9vw; --lb-gap: 3rem; }
+    .lightbox-content { padding-inline: calc(var(--side-show) + var(--lb-shift)) calc(var(--side-show) + 2.5rem); }
+    .lightbox-info { grid-column: 5 / 8; margin-left: var(--lb-gap); }
     .lb-side-prev { right: calc(100% - var(--side-show)); }
     .lb-side-next { left: calc(100% - var(--side-show)); }
     .lb-nav { display: contents; }
