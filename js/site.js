@@ -128,7 +128,7 @@ const siteBoot = () => {
     const pageOf  = c => `${ROOT}${c.slug}/`;
     const thumb   = (w, t) => `${ROOT}IMAGES/thumbs/${w.slug}${t || ''}.webp`;
     const srcset  = w => `${thumb(w)} 400w, ${thumb(w, '-800')} 800w, ${thumb(w, '-1600')} 1600w`;
-    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261125b`;
+    const printImg = (slug, size, px) => `${ROOT}IMAGES/prints/${slug}-${size.toLowerCase()}-${px}.webp?v=20261125c`;
     const orderHref = (w, size) => `mailto:${SITE.email}?subject=` + encodeURIComponent(`Print order: ${plain(w)}, ${size}`);
     const roman   = s => s.replace(/\b(III|II|IV|V|I)\b/g, '<span class="rn">$1</span>');
     const nameOf  = w => roman((w.title.split('|')[1] || w.title).trim());
@@ -278,9 +278,23 @@ const siteBoot = () => {
             colList.querySelectorAll('[data-col]').forEach(el => el.classList.toggle('on', el.dataset.col === i));
             colList.querySelectorAll('.cl-about').forEach(el => el.classList.toggle('on', el.dataset.about === i));
         };
-        const at = e => { const m = e.target.closest && e.target.closest('[data-col]'); if (m) pick(m.dataset.col); };
+        // a mouse picks by pointing; a finger picks by tapping a name, and a second
+        // tap on that name (or a tap on its tile) opens the collection
+        let touchAt = -Infinity;
+        const touched = () => performance.now() - touchAt < 800;
+        colList.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') touchAt = performance.now(); }, true);
+        const at = e => {
+            if ((e.pointerType && e.pointerType !== 'mouse') || (e.type === 'focusin' && touched())) return;
+            const m = e.target.closest && e.target.closest('[data-col]'); if (m) pick(m.dataset.col);
+        };
         colList.addEventListener('pointerover', at);
         colList.addEventListener('focusin', at);
+        colList.addEventListener('click', e => {
+            const a = e.target.closest && e.target.closest('.cl-index a');
+            if (!a || !touched() || a.classList.contains('on')) return;
+            e.preventDefault();
+            pick(a.dataset.col);
+        });
     }
 
     // ── lightbox ─────────────────────────────────────────────

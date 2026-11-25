@@ -18,6 +18,9 @@ lives only in git history (`aeefb41`).
 - **Lightbox on a wide screen:** the works before and after show the same width at
   both edges (`--side-show` 8vw); the painting and its words stand between them, a
   little nearer the middle; thin chevrons on the works at the edges; no count.
+  `--lb-shift` 12vw and `--lb-gap` 4.5rem (his "a little more, both").
+- **Home collections on a phone:** one small tile (52%), the collection tapped in
+  the list; a second tap on the name, or a tap on the tile, opens it.
 
 **2026-11-22, phones (from his iPhone screenshots: "much worse than on the computer").**
 - **Footer:** the way on, the newsletter, then one line: instagram, privacy, the

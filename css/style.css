@@ -250,6 +250,7 @@ html:not(.js) .slide:first-child { opacity: 1; }   /* without scripts the first 
 .js img.fade.soft { opacity: 1; filter: blur(var(--row-blur)); }
 .js img.fade.in.late { animation: clear var(--row-t) var(--ease) backwards; }
 @keyframes clear { from { filter: blur(var(--row-blur)); } }
+@keyframes tile-in { from { opacity: 0; filter: blur(var(--arr-blur)); } }
 
 /* the first page of a visit comes into focus as one, from the white of the
    page (each page's head sets .first, site.js starts it when the first picture
@@ -664,7 +665,7 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
 @media (min-width: 801px) {
     /* --lb-shift moves the painting toward the middle, --lb-gap is the white between
        the painting and its words (his tuning, 2026-11-25) */
-    .lightbox { --side-show: 8vw; --lb-shift: 9vw; --lb-gap: 3rem; }
+    .lightbox { --side-show: 8vw; --lb-shift: 12vw; --lb-gap: 4.5rem; }
     .lightbox-content { padding-inline: calc(var(--side-show) + var(--lb-shift)) calc(var(--side-show) + 2.5rem); }
     .lightbox-info { grid-column: 5 / 8; margin-left: var(--lb-gap); }
     .lb-side-prev { right: calc(100% - var(--side-show)); }
@@ -746,7 +747,11 @@ html.lb-open body { position: fixed; width: 100%; overflow: hidden; }
     .hero-bar { bottom: 1.4rem; }
     .sel-grid { --fw: 0.82; grid-template-columns: repeat(2, calc((100% - (2 - 1) * var(--gut)) / 2 * var(--fw))); }
     /* on a phone the tiles are two by two */
-    .cl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* (2026-11-25) on a phone one small tile: the collection tapped in the list
+       (site.js). A second tap on the name, or a tap on the tile, opens it */
+    .cl-tiles { grid-template-columns: minmax(0, 1fr); width: 52%; }
+    .cl-tile:not(.on) { display: none; }
+    .cl-tile.on .cl-img { animation: tile-in var(--arr-t) var(--ease) backwards; }
     #collection { padding-top: var(--near); }
     .cg-grid { --fw: 0.82; grid-template-columns: repeat(2, calc((100% - (2 - 1) * var(--gut)) / 2 * var(--fw))); row-gap: 1.8rem; }
     .pr-pic { grid-column: 1 / -1; width: 78%; justify-self: center; }
